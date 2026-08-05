@@ -1,0 +1,19 @@
+[
+  {
+    "id": "wcg_taichung_demo",
+    "name": "萬春宮",
+    "aliases": ["台中媽祖", "藍興媽祖"],
+    "main_deity": "天上聖母",
+    "religion": "道教",
+    "registration_status": "正式登記",
+    "tax_id": "02987849",
+    "phone": "04-22245964",
+    "address": "臺中市中區成功路212號",
+    "city": "臺中市",
+    "district": "中區",
+    "latitude": 24.1420803070068,
+    "longitude": 120.681602478027,
+    "image_url": "https://travel.taichung.gov.tw/content/images/attractions/60331/640x480_attractions-image-reeo_rka6kg04vfs2xyzmw.jpg",
+    "source_note": "政府開放資料與觀光開放資料整理，非萬春宮官方系統。"
+  }
+]

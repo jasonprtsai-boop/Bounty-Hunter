@@ -1,0 +1,42 @@
+[
+  {
+    "user_id": "demo_u001",
+    "line_display_name": "小安",
+    "segment": "new_visitor",
+    "consent_status": "demo_consented",
+    "interests": ["第一次參拜", "交通", "活動提醒"],
+    "created_at": "2026-08-01T09:12:00+08:00"
+  },
+  {
+    "user_id": "demo_u002",
+    "line_display_name": "阿哲",
+    "segment": "regular_visitor",
+    "consent_status": "demo_consented",
+    "interests": ["祭典", "媽祖文化", "推播提醒"],
+    "created_at": "2026-08-01T13:35:00+08:00"
+  },
+  {
+    "user_id": "demo_u003",
+    "line_display_name": "Mei",
+    "segment": "culture_learner",
+    "consent_status": "demo_consented",
+    "interests": ["建築特色", "歷史", "導覽"],
+    "created_at": "2026-08-02T16:20:00+08:00"
+  },
+  {
+    "user_id": "demo_u004",
+    "line_display_name": "志工王",
+    "segment": "volunteer",
+    "consent_status": "demo_consented",
+    "interests": ["活動協助", "報到管理"],
+    "created_at": "2026-08-03T08:42:00+08:00"
+  },
+  {
+    "user_id": "demo_u005",
+    "line_display_name": "林小姐",
+    "segment": "parent",
+    "consent_status": "demo_consented",
+    "interests": ["親子活動", "書法", "繪畫"],
+    "created_at": "2026-08-04T11:18:00+08:00"
+  }
+]

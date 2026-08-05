@@ -1,0 +1,38 @@
+[
+  {
+    "registration_id": "reg_0001",
+    "event_id": "evt_20260827_zhongyuan",
+    "user_id": "demo_u002",
+    "status": "confirmed",
+    "party_size": 2,
+    "reminder_opt_in": true,
+    "created_at": "2026-08-05T10:05:00+08:00"
+  },
+  {
+    "registration_id": "reg_0002",
+    "event_id": "evt_demo_worship_intro",
+    "user_id": "demo_u001",
+    "status": "confirmed",
+    "party_size": 1,
+    "reminder_opt_in": true,
+    "created_at": "2026-08-05T10:12:00+08:00"
+  },
+  {
+    "registration_id": "reg_0003",
+    "event_id": "evt_demo_culture_talk",
+    "user_id": "demo_u003",
+    "status": "confirmed",
+    "party_size": 1,
+    "reminder_opt_in": true,
+    "created_at": "2026-08-05T10:24:00+08:00"
+  },
+  {
+    "registration_id": "reg_0004",
+    "event_id": "evt_demo_calligraphy",
+    "user_id": "demo_u005",
+    "status": "pending_review",
+    "party_size": 2,
+    "reminder_opt_in": true,
+    "created_at": "2026-08-05T11:02:00+08:00"
+  }
+]
