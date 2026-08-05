@@ -5,17 +5,21 @@
 
 # Dependency folders
 node_modules/
+.pnpm-store/
 .venv/
 venv/
 
 # Python caches
 __pycache__/
 *.py[cod]
+*.egg-info/
 
 # Build and cache output
 .cache/
 dist/
 build/
+logs/
+*.tsbuildinfo
 
 # OS/editor noise
 .DS_Store

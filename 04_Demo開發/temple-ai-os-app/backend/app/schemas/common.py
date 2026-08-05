@@ -1,0 +1,158 @@
+from datetime import UTC, datetime
+from typing import Any, Generic, TypeVar
+
+from pydantic import BaseModel, ConfigDict, Field
+
+T = TypeVar("T")
+
+
+class ApiError(BaseModel):
+    code: str
+    message: str
+
+
+class ApiResponse(BaseModel, Generic[T]):
+    data: T | None = None
+    error: ApiError | None = None
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+
+class TempleProfile(BaseModel):
+    temple_id: str
+    name: str
+    aliases: list[str] = Field(default_factory=list)
+    main_deity: str
+    address: str
+    phone: str
+    coordinates: dict[str, float] = Field(default_factory=dict)
+    image: dict[str, str] | None = None
+    demo_positioning: str
+    sources: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class Event(BaseModel):
+    event_id: str
+    title: str
+    category: str
+    source_type: str
+    date: str
+    start_time: str
+    end_time: str
+    location: str
+    address: str
+    summary: str
+    requires_registration: bool
+    capacity: int | None = None
+    registered_count: int = 0
+    status: str
+    registration_fields: list[str] = Field(default_factory=list)
+    payment_policy: str | None = None
+    demo_note: str
+
+
+class LineUser(BaseModel):
+    user_id: str
+    line_display_name: str
+    segment: str = "visitor"
+    consent_status: str = "demo_consented"
+    interests: list[str] = Field(default_factory=list)
+    created_at: str | None = None
+
+
+class Registration(BaseModel):
+    registration_id: str
+    event_id: str
+    user_id: str
+    status: str = "confirmed"
+    party_size: int = 1
+    reminder_opt_in: bool = True
+    created_at: str | None = None
+    contact_name: str | None = None
+    phone: str | None = None
+    note: str | None = None
+
+
+class RegistrationCreate(BaseModel):
+    user_id: str = "demo_u001"
+    contact_name: str
+    phone: str | None = None
+    party_size: int = Field(default=1, ge=1, le=10)
+    reminder_opt_in: bool = True
+    note: str | None = None
+
+
+class ChatRequest(BaseModel):
+    message: str
+    user_id: str = "demo_u001"
+    source: str = "liff"
+
+
+class ChatReply(BaseModel):
+    intent: str
+    reply: str
+    sources: list[dict[str, str]] = Field(default_factory=list)
+    events: list[Event] = Field(default_factory=list)
+    flex_message: dict[str, Any] | None = None
+    demo_notice: str
+
+
+class LiffVerifyRequest(BaseModel):
+    id_token: str
+
+
+class LiffSession(BaseModel):
+    user_id: str
+    display_name: str
+    picture_url: str | None = None
+    verified: bool
+    demo_mode: bool
+
+
+class SupportTicketCreate(BaseModel):
+    user_id: str = "demo_u001"
+    category: str = "general"
+    subject: str
+    message: str
+    contact_name: str | None = None
+    phone: str | None = None
+
+
+class SupportTicket(BaseModel):
+    ticket_id: str
+    user_id: str
+    category: str
+    subject: str
+    message: str
+    status: str
+    priority: str
+    created_at: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class FortuneSlip(BaseModel):
+    slip_id: str
+    title: str
+    poem: str
+    plain_language: str
+    cultural_note: str
+    reminder: str
+
+
+class TourSpot(BaseModel):
+    code: str
+    title: str
+    category: str
+    summary: str
+    cultural_note: str
+    image_url: str | None = None
+    source_type: str = "demo_sample"
+
+
+class DashboardSummary(BaseModel):
+    snapshot_date: str
+    notice: str
+    headline_metrics: dict[str, int]
+    event_metrics: list[dict[str, Any]]
+    top_ai_intents: list[dict[str, Any]]
+    knowledge_gaps: list[str]
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
