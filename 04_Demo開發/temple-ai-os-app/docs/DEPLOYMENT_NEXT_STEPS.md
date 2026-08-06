@@ -63,6 +63,27 @@ POST https://<render-api>.onrender.com/api/line/webhook
 
 The webhook POST must reject invalid signatures in production. Do not enable `LINE_SKIP_SIGNATURE_VALIDATION` for a public deployment.
 
+### 2.1 Supabase database setup
+
+Apply migrations in order before setting `DEMO_MODE=false`:
+
+```text
+database/migrations/001_init.sql
+database/migrations/002_rls_policies.sql
+database/migrations/003_line_webhook_events.sql
+```
+
+Seed demo content after migrations:
+
+```text
+cd 04_Demo開發/temple-ai-os-app
+python scripts/seed_demo_data.py
+```
+
+The backend now uses `SupabaseRepository` when `DEMO_MODE=false`; if Supabase secrets are missing, startup fails with `supabase_not_configured` instead of silently falling back to demo data.
+
+Current limitation: registration capacity updates are guarded by the API but are not yet an atomic database RPC. For public high-traffic use, replace the REST insert/update pair with a Supabase function that checks capacity and writes the registration in one transaction.
+
 ## 3. Redeploy frontend after backend exists
 
 Required frontend environment:

@@ -1,11 +1,11 @@
-from app.db.supabase import DemoRepository
+from app.db.supabase import Repository
 from app.schemas.common import Registration
 from app.services.flex_templates import registration_confirmation
 from app.services.line_client import LineClient, text_message
 
 
 class NotificationService:
-    def __init__(self, repository: DemoRepository) -> None:
+    def __init__(self, repository: Repository) -> None:
         self.repository = repository
         self.line = LineClient()
 
@@ -23,4 +23,3 @@ class NotificationService:
 
     async def send_test_notification(self, user_id: str, text: str) -> dict[str, object]:
         return await self.line.push_message(user_id, [text_message(text)])
-

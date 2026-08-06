@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from app.core.config import get_settings
-from app.db.supabase import DemoRepository
+from app.db.supabase import Repository
 from app.schemas.common import ChatReply
 from app.services.flex_templates import events_carousel
 from app.services.openai_client import OpenAIResponder
@@ -33,7 +33,7 @@ SAFETY_KEYWORDS = {
 
 
 class RAGService:
-    def __init__(self, repository: DemoRepository) -> None:
+    def __init__(self, repository: Repository) -> None:
         self.repository = repository
         self.settings = get_settings()
         self.openai = OpenAIResponder()
@@ -140,4 +140,3 @@ class RAGService:
             ],
             demo_notice=demo_notice,
         )
-
