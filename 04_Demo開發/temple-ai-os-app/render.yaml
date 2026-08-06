@@ -2,14 +2,24 @@ services:
   - type: web
     name: temple-ai-os-api
     runtime: python
-    rootDir: 04_Demo開發/temple-ai-os-app/backend
-    buildCommand: pip install -e .
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: cd "04_Demo開發/temple-ai-os-app/backend" && pip install -e .
+    startCommand: cd "04_Demo開發/temple-ai-os-app/backend" && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: APP_ENV
         value: production
       - key: DEMO_MODE
-        value: "false"
+        value: "true"
+      - key: API_BASE_URL
+        value: https://temple-ai-os-api.onrender.com
+      - key: FRONTEND_BASE_URL
+        value: https://temple-ai-os-demo.jasonprtsai.chatgpt.site
+      - key: ALLOWED_ORIGINS
+        value: https://temple-ai-os-demo.jasonprtsai.chatgpt.site
+      - key: LINE_CHANNEL_ID
+        value: "2010991408"
+      - key: LINE_LOGIN_CHANNEL_ID
+        value: "2010938588"
+      - key: LINE_LIFF_ID
+        value: 2010938588-VJXpaoyH
       - key: LINE_SKIP_SIGNATURE_VALIDATION
         value: "false"
-

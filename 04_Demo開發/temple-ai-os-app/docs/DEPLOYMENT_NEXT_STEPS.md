@@ -6,66 +6,79 @@ Last updated: 2026-08-06
 
 ```text
 FRONTEND_BASE_URL=https://temple-ai-os-demo.jasonprtsai.chatgpt.site
+API_BASE_URL=https://temple-ai-os-api.onrender.com
 PRIVACY_URL=https://temple-ai-os-demo.jasonprtsai.chatgpt.site/privacy
 TERMS_URL=https://temple-ai-os-demo.jasonprtsai.chatgpt.site/terms
 LINE_LIFF_ID=2010938588-VJXpaoyH
 LINE_LIFF_URL=https://liff.line.me/2010938588-VJXpaoyH
+LINE_OFFICIAL_ACCOUNT_BASIC_ID=@983zhzni
+LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 ```
 
 ## 1. Completed
 
 - Frontend deployed to public Sites URL.
+- Backend demo service deployed on Render Free: `https://temple-ai-os-api.onrender.com`.
+- Backend `/health`, `/api/events`, and `/api/temple/profile` verified from the public URL.
 - LINE Login privacy policy URL configured.
 - LINE Login terms URL configured.
 - LIFF app created.
-- LINE Official Account `Temple AI OS示範` created.
+- LINE Official Account created: `Temple AI OS Demo`, Basic ID `@983zhzni`.
 - Messaging API enabled for channel `2010991408`.
 
-## 2. Deploy backend
+## 2. Current backend mode
 
-Backend target:
+Current Render service:
 
 ```text
-https://<render-api>.onrender.com
+Service name=temple-ai-os-api
+Branch=codex/temple-ai-os-site
+Plan=Free
+Mode=DEMO_MODE=true
+Build=cd "04_Demo開發/temple-ai-os-app/backend" && pip install -e .
+Start=cd "04_Demo開發/temple-ai-os-app/backend" && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
-Required backend secrets:
+`DEMO_MODE=true` keeps the public API online without storing LINE, OpenAI, or Supabase secrets. Admin APIs are disabled in production unless `ADMIN_DEMO_TOKEN` is changed from the demo default.
+
+Free Render instances spin down after inactivity, so the first request can be delayed by roughly 50 seconds or more.
+
+## 3. Production secrets still required
+
+Set these in Render environment variables, not in repo files:
 
 ```text
-LINE_CHANNEL_ID=2010991408
 LINE_CHANNEL_SECRET=<from LINE Developers Console>
 LINE_CHANNEL_ACCESS_TOKEN=<long-lived token from LINE Developers Console>
-LINE_LOGIN_CHANNEL_ID=2010938588
-LINE_LIFF_ID=2010938588-VJXpaoyH
 OPENAI_API_KEY=<secret>
 SUPABASE_URL=<secret>
 SUPABASE_SERVICE_ROLE_KEY=<secret>
 SUPABASE_ANON_KEY=<secret>
+ADMIN_DEMO_TOKEN=<new private admin token>
 ```
 
-Required backend public environment:
+Then change:
+
+```text
+DEMO_MODE=false
+```
+
+Keep:
 
 ```text
 APP_ENV=production
-DEMO_MODE=false
-API_BASE_URL=https://<render-api>.onrender.com
+API_BASE_URL=https://temple-ai-os-api.onrender.com
 FRONTEND_BASE_URL=https://temple-ai-os-demo.jasonprtsai.chatgpt.site
 ALLOWED_ORIGINS=https://temple-ai-os-demo.jasonprtsai.chatgpt.site
+LINE_CHANNEL_ID=2010991408
+LINE_LOGIN_CHANNEL_ID=2010938588
+LINE_LIFF_ID=2010938588-VJXpaoyH
 LINE_SKIP_SIGNATURE_VALIDATION=false
 ```
 
-Validation before LINE webhook:
+## 4. Supabase database setup
 
-```text
-GET https://<render-api>.onrender.com/health
-POST https://<render-api>.onrender.com/api/line/webhook
-```
-
-The webhook POST must reject invalid signatures in production. Do not enable `LINE_SKIP_SIGNATURE_VALIDATION` for a public deployment.
-
-### 2.1 Supabase database setup
-
-Apply migrations in order before setting `DEMO_MODE=false`:
+Apply migrations in order before changing `DEMO_MODE=false`:
 
 ```text
 database/migrations/001_init.sql
@@ -80,16 +93,20 @@ cd 04_Demo開發/temple-ai-os-app
 python scripts/seed_demo_data.py
 ```
 
-The backend now uses `SupabaseRepository` when `DEMO_MODE=false`; if Supabase secrets are missing, startup fails with `supabase_not_configured` instead of silently falling back to demo data.
-
 Current limitation: registration capacity updates are guarded by the API but are not yet an atomic database RPC. For public high-traffic use, replace the REST insert/update pair with a Supabase function that checks capacity and writes the registration in one transaction.
 
-## 3. Redeploy frontend after backend exists
+## 5. Frontend API target
 
-Required frontend environment:
+The frontend fallback API target is now:
 
 ```text
-VITE_API_BASE_URL=https://<render-api>.onrender.com
+https://temple-ai-os-api.onrender.com
+```
+
+Required frontend environment for rebuilds:
+
+```text
+VITE_API_BASE_URL=https://temple-ai-os-api.onrender.com
 VITE_LIFF_ID=2010938588-VJXpaoyH
 VITE_LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 VITE_LINE_OPENCHAT_URL=
@@ -105,23 +122,26 @@ https://temple-ai-os-demo.jasonprtsai.chatgpt.site/terms
 https://liff.line.me/2010938588-VJXpaoyH
 ```
 
-## 4. Update Messaging API webhook
+## 6. Update Messaging API webhook
 
 Messaging API channel:
 
 ```text
-Temple AI OS示範 / 2010991408
+Channel ID=2010991408
+Official Account Basic ID=@983zhzni
 ```
 
-Set webhook:
+Set webhook after `LINE_CHANNEL_SECRET` is configured in Render:
 
 ```text
-Webhook URL=https://<render-api>.onrender.com/api/line/webhook
+Webhook URL=https://temple-ai-os-api.onrender.com/api/line/webhook
 Use webhook=Enabled
 Webhook redelivery=Enabled
 ```
 
-## 5. Publish rich menu
+The webhook POST must reject invalid signatures in production. Do not enable `LINE_SKIP_SIGNATURE_VALIDATION` for a public deployment.
+
+## 7. Publish rich menu
 
 Only after frontend URL, backend URL, and access token are configured:
 
@@ -133,10 +153,11 @@ python scripts/create_rich_menu.py
 
 Use `assets/rich-menu/main-2500x1686.png`.
 
-## 6. Acceptance checklist
+## 8. Acceptance checklist
 
-- Add friend URL opens `Temple AI OS示範`.
+- Add friend URL opens `@983zhzni`.
 - Public site opens without login.
+- Public backend `/health` returns `status=ok`.
 - LIFF URL opens in LINE.
 - Rich Menu appears after adding the official account.
 - Tapping LIFF buttons opens the deployed frontend in LINE.
