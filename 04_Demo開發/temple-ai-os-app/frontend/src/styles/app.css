@@ -101,6 +101,14 @@ select {
   padding: 20px 16px 30px;
 }
 
+.route-loading {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  color: #667680;
+  font-weight: 800;
+}
+
 h1 {
   margin: 0 0 18px;
   font-size: 26px;
@@ -246,6 +254,34 @@ p {
   color: white;
 }
 
+.button.light {
+  border-color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.button.muted {
+  cursor: not-allowed;
+  border-color: #d6ddd9;
+  background: #edf2ef;
+  color: #7b8b85;
+}
+
+.button.danger {
+  border-color: #f0c9c4;
+  color: #b42318;
+}
+
+.button svg {
+  flex: 0 0 auto;
+}
+
+.icon-button {
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 10px;
+}
+
 textarea,
 input,
 select {
@@ -260,6 +296,10 @@ select {
 textarea {
   min-height: 96px;
   resize: vertical;
+}
+
+.knowledge-body-input {
+  min-height: 260px;
 }
 
 label {
@@ -288,6 +328,12 @@ label {
 .notice {
   color: #8a6a12;
   font-size: 13px;
+}
+
+.error-text {
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .answer {
@@ -333,6 +379,81 @@ label {
   font-weight: 800;
 }
 
+.events-table .table-head,
+.events-table .table-row {
+  grid-template-columns: minmax(180px, 1.5fr) 0.7fr 0.55fr 0.55fr minmax(150px, 0.9fr);
+}
+
+.admin-event-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.admin-actions,
+.inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-actions {
+  justify-content: space-between;
+}
+
+.inline-actions {
+  flex-wrap: wrap;
+}
+
+.support-list {
+  display: grid;
+  gap: 12px;
+}
+
+.knowledge-list {
+  display: grid;
+  gap: 10px;
+}
+
+.support-ticket {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
+  gap: 12px;
+  align-items: start;
+  padding: 14px 0;
+  border-bottom: 1px solid #e3e9e6;
+}
+
+.support-ticket p {
+  margin: 8px 0;
+}
+
+.support-ticket small {
+  color: #667680;
+}
+
+.knowledge-doc-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e3e9e6;
+}
+
+.knowledge-doc-card small {
+  display: block;
+  margin-top: 6px;
+  color: #667680;
+}
+
 .two-column {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -370,6 +491,320 @@ label {
   font-weight: 800;
 }
 
+.public-shell {
+  min-height: 100vh;
+  background: #f6f7f3;
+  color: #112d24;
+}
+
+.public-nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px max(18px, calc((100vw - 1120px) / 2));
+  border-bottom: 1px solid rgba(17, 45, 36, 0.12);
+  background: rgba(246, 247, 243, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.public-nav nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: #43554f;
+  font-weight: 800;
+}
+
+.site-hero {
+  display: grid;
+  min-height: min(72vh, 660px);
+  align-items: end;
+  padding: 84px max(18px, calc((100vw - 1120px) / 2)) 56px;
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+}
+
+.site-hero-content {
+  max-width: 720px;
+}
+
+.site-hero h1,
+.community-hero h1 {
+  margin: 14px 0 16px;
+  font-size: clamp(38px, 7vw, 72px);
+  line-height: 1.02;
+}
+
+.site-hero p,
+.community-hero p {
+  max-width: 660px;
+  font-size: 18px;
+}
+
+.hero-actions,
+.band-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.public-section {
+  width: min(1120px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 54px 0;
+}
+
+.fact-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  padding: 0;
+  transform: translateY(-24px);
+  overflow: hidden;
+  border: 1px solid #d9e2dc;
+  border-radius: 8px;
+  background: #d9e2dc;
+  box-shadow: 0 16px 36px rgba(17, 45, 36, 0.12);
+}
+
+.fact-strip div {
+  min-height: 96px;
+  padding: 18px;
+  background: #fff;
+}
+
+.fact-strip span,
+.section-kicker {
+  display: block;
+  color: #b5402d;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.fact-strip strong {
+  display: block;
+  margin-top: 9px;
+}
+
+.public-section > h2,
+.public-band h2,
+.community-guardrails h2 {
+  margin: 8px 0 20px;
+  font-size: 32px;
+}
+
+.service-grid,
+.community-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.service-card,
+.flow-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-height: 210px;
+  padding: 18px;
+  border: 1px solid #d9e2dc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.service-card svg,
+.flow-card span,
+.community-phone svg {
+  color: #b5402d;
+}
+
+.service-card h3,
+.flow-card h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.service-card p,
+.flow-card p {
+  margin: 0;
+  color: #4f625b;
+}
+
+.public-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.6fr);
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 44px;
+  padding: 34px;
+  border-radius: 8px;
+  background: #172f26;
+  color: #fff;
+}
+
+.public-band p {
+  color: #dce8e1;
+}
+
+.band-actions {
+  justify-content: flex-end;
+}
+
+.community-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 36px;
+  align-items: center;
+  width: min(1120px, calc(100% - 36px));
+  min-height: min(68vh, 620px);
+  margin: 0 auto;
+  padding: 64px 0 38px;
+}
+
+.community-phone {
+  display: grid;
+  gap: 13px;
+  padding: 18px;
+  border: 1px solid #d9e2dc;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(17, 45, 36, 0.16);
+}
+
+.phone-bar {
+  width: 70px;
+  height: 6px;
+  margin: 0 auto 4px;
+  border-radius: 999px;
+  background: #d9e2dc;
+}
+
+.chat-bubble {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eff5f1;
+}
+
+.chat-bubble.user {
+  justify-self: end;
+  background: #06c755;
+  color: #fff;
+}
+
+.flow-card span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: #f8e7dc;
+  font-weight: 900;
+}
+
+.community-guardrails {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.guardrail-list {
+  display: grid;
+  gap: 10px;
+}
+
+.guardrail-list div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #d9e2dc;
+  border-radius: 8px;
+  background: #fff;
+  font-weight: 800;
+}
+
+.public-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(1120px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 24px 0 36px;
+  border-top: 1px solid #d9e2dc;
+  color: #4f625b;
+  font-size: 14px;
+}
+
+.public-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-weight: 800;
+}
+
+.legal-main {
+  width: min(920px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 54px 0;
+}
+
+.legal-hero {
+  margin-bottom: 24px;
+}
+
+.legal-hero h1 {
+  margin: 12px 0;
+  font-size: 44px;
+}
+
+.legal-hero p {
+  color: #4f625b;
+  font-size: 17px;
+}
+
+.legal-card {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #d9e2dc;
+  border-radius: 8px;
+  background: #d9e2dc;
+}
+
+.legal-card article {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+  padding: 20px;
+  background: #fff;
+}
+
+.legal-card svg {
+  margin-top: 3px;
+  color: #b5402d;
+}
+
+.legal-card h2 {
+  font-size: 20px;
+}
+
+.legal-card p {
+  margin: 8px 0 0;
+  color: #4f625b;
+}
+
 @media (max-width: 760px) {
   .hero-panel {
     grid-template-columns: 1fr;
@@ -377,13 +812,51 @@ label {
 
   .quick-grid,
   .metric-grid,
-  .two-column {
+  .two-column,
+  .admin-event-grid,
+  .form-grid {
     grid-template-columns: 1fr 1fr;
   }
 
   .table-head,
-  .table-row {
+  .table-row,
+  .events-table .table-head,
+  .events-table .table-row,
+  .support-ticket,
+  .knowledge-doc-card,
+  .fact-strip,
+  .service-grid,
+  .community-flow-grid,
+  .public-band,
+  .community-hero,
+  .community-guardrails {
     grid-template-columns: 1fr;
+  }
+
+  .site-hero {
+    min-height: 64vh;
+  }
+
+  .public-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .public-footer {
+    flex-direction: column;
+  }
+
+  .band-actions {
+    justify-content: flex-start;
   }
 }
 
+@media (max-width: 560px) {
+  .quick-grid,
+  .metric-grid,
+  .two-column,
+  .admin-event-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

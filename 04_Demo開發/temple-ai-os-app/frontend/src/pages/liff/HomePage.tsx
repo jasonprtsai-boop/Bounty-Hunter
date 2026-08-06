@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bot, CalendarDays, Map, MessageCircle, Sparkles } from "lucide-react";
+import { Bot, CalendarDays, Globe2, Map, MessageCircle, Sparkles, UsersRound } from "lucide-react";
 import { apiFetch, type ChatReply, type TempleProfile } from "../../lib/api";
+import { getLiffSession } from "../../lib/session";
 import { Shell } from "../../components/Shell";
 
 export function HomePage() {
@@ -10,13 +11,15 @@ export function HomePage() {
   const [reply, setReply] = useState<ChatReply | null>(null);
 
   useEffect(() => {
+    getLiffSession().catch(console.error);
     apiFetch<TempleProfile>("/api/temple/profile").then(setTemple).catch(console.error);
   }, []);
 
   async function ask() {
+    const session = await getLiffSession();
     const result = await apiFetch<ChatReply>("/api/chat", {
       method: "POST",
-      body: JSON.stringify({ message: question, user_id: "demo_u001", source: "liff" })
+      body: JSON.stringify({ message: question, user_id: session.user_id, source: "liff" })
     });
     setReply(result);
   }
@@ -35,6 +38,14 @@ export function HomePage() {
       ) : null}
 
       <section className="quick-grid">
+        <Link to="/site" className="quick-action">
+          <Globe2 />
+          <span>示範官網</span>
+        </Link>
+        <Link to="/community" className="quick-action">
+          <UsersRound />
+          <span>社群入口</span>
+        </Link>
         <Link to="/events" className="quick-action">
           <CalendarDays />
           <span>活動中心</span>
@@ -73,4 +84,3 @@ export function HomePage() {
     </Shell>
   );
 }
-

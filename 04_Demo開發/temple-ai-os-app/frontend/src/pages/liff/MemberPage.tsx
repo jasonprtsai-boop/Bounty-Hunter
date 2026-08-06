@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Shell } from "../../components/Shell";
 import { apiFetch, type Registration } from "../../lib/api";
+import { getLiffSession } from "../../lib/session";
 
 type MemberProfile = {
   user_id: string;
@@ -14,8 +15,16 @@ export function MemberPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
 
   useEffect(() => {
-    apiFetch<MemberProfile>("/api/member/profile").then(setProfile).catch(console.error);
-    apiFetch<Registration[]>("/api/member/registrations").then(setRegistrations).catch(console.error);
+    getLiffSession()
+      .then(async () => {
+        const [profileResult, registrationsResult] = await Promise.all([
+          apiFetch<MemberProfile>("/api/member/profile"),
+          apiFetch<Registration[]>("/api/member/registrations")
+        ]);
+        setProfile(profileResult);
+        setRegistrations(registrationsResult);
+      })
+      .catch(console.error);
   }, []);
 
   return (
@@ -43,4 +52,3 @@ export function MemberPage() {
     </Shell>
   );
 }
-

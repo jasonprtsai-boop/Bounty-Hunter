@@ -80,6 +80,10 @@ export async function apiFetch<T>(
       `Bearer ${localStorage.getItem("adminToken") || "temple-ai-os-admin-demo"}`
     );
   }
+  const liffIdToken = localStorage.getItem("liffIdToken");
+  if (liffIdToken) {
+    headers.set("X-LIFF-ID-Token", liffIdToken);
+  }
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
   const payload = (await response.json()) as ApiResponse<T>;
   if (!response.ok || payload.error) {
@@ -87,4 +91,3 @@ export async function apiFetch<T>(
   }
   return payload.data as T;
 }
-

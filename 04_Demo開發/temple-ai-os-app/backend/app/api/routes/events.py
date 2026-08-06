@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Header, HTTPException, status
 
 from app.db.supabase import get_repository
 from app.schemas.common import ApiResponse, Event, Registration, RegistrationCreate, TempleProfile
 from app.services.notification_service import NotificationService
+from app.services.liff_auth import resolve_liff_user_id
 
 router = APIRouter()
 
@@ -30,10 +31,17 @@ async def get_event(event_id: str) -> ApiResponse[Event]:
 
 @router.post("/events/{event_id}/registrations", response_model=ApiResponse[Registration])
 async def create_registration(
-    event_id: str, payload: RegistrationCreate
+    event_id: str,
+    payload: RegistrationCreate,
+    x_liff_id_token: str | None = Header(default=None, alias="X-LIFF-ID-Token"),
 ) -> ApiResponse[Registration]:
     repo = get_repository()
-    repo.get_or_create_line_user(payload.user_id)
+    try:
+        user_id = await resolve_liff_user_id(x_liff_id_token, payload.user_id)
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid_liff_token") from exc
+    payload = payload.model_copy(update={"user_id": user_id})
+    repo.get_or_create_line_user(user_id)
     try:
         registration = repo.create_registration(event_id, payload)
     except ValueError as exc:
@@ -49,4 +57,3 @@ async def create_registration(
             "demo_notice": "這是示範報名紀錄，不代表萬春宮官方報名資料。",
         },
     )
-

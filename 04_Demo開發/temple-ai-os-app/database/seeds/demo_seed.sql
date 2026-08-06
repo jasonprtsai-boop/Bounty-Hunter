@@ -47,6 +47,16 @@ insert into tour_spots (code, temple_id, title, category, summary, cultural_note
   ('history-wall','wcg_taichung_demo','宮廟文化故事牆','文化導覽','示範點位：用 LINE LIFF 呈現萬春宮歷史、城市信仰與文化脈絡摘要。','正式導入前，歷史文字與圖片應由廟方審核或採用明確授權素材。',null,'demo_sample')
 on conflict (code) do nothing;
 
+insert into support_tickets (ticket_id, user_id, category, subject, message, status, priority, created_at) values
+  ('ticket_demo_001','demo_u001','event_registration','想確認第一次參拜導覽是否可以帶家人','Demo 使用者詢問活動是否可增加同行人數。','open','general','2026-08-05T12:10:00+08:00'),
+  ('ticket_demo_002','demo_u003','content_feedback','建議補充無障礙動線說明','Demo 使用者回饋導覽頁需要更明確的無障礙資訊。','triaged','general','2026-08-05T14:35:00+08:00')
+on conflict (ticket_id) do nothing;
+
+insert into notification_jobs (job_id, job_type, target_user_id, event_id, status, scheduled_at, payload) values
+  ('job_demo_registration_confirmation','registration_confirmation','demo_u001','evt_demo_worship_intro','ready',null,'{"text":"Temple AI OS Demo：你的活動報名已建立。"}'),
+  ('job_demo_event_reminder','event_reminder','demo_u002','evt_20260827_zhongyuan','draft','2026-08-26T18:00:00+08:00','{"text":"提醒：你報名的 Demo 活動即將開始，正式資訊仍以廟方公告為準。"}')
+on conflict (job_id) do nothing;
+
 insert into dashboard_snapshots (
   snapshot_date, temple_id, notice, headline_metrics, event_metrics, top_ai_intents, knowledge_gaps
 ) values (
@@ -58,4 +68,3 @@ insert into dashboard_snapshots (
   '[{"intent":"temple_location","label":"地址與交通","count":88},{"intent":"worship_process","label":"第一次參拜流程","count":73},{"intent":"event_query","label":"近期活動查詢","count":69}]',
   '["停車場即時資訊","無障礙動線細節","現場祭典準確流程時間","官方報名規則細節","廟方授權圖片清單"]'
 ) on conflict (snapshot_date) do nothing;
-

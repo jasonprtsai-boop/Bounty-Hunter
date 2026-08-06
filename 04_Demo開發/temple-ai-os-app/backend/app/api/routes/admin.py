@@ -1,3 +1,6 @@
+import re
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import get_settings
@@ -7,12 +10,70 @@ from app.schemas.common import (
     ApiResponse,
     DashboardSummary,
     Event,
+    EventCreate,
+    EventUpdate,
+    KnowledgeDocument,
+    KnowledgeDocumentCreate,
+    KnowledgeDocumentUpdate,
+    NotificationJob,
+    NotificationJobCreate,
+    NotificationJobUpdate,
     SupportTicket,
+    SupportTicketUpdate,
 )
 from app.services.notification_service import NotificationService
 from app.services.rich_menu_service import RichMenuService
 
 router = APIRouter(dependencies=[Depends(require_admin_token)])
+SAFE_DOCUMENT_ID = re.compile(r"^[A-Za-z0-9_\-\u4e00-\u9fff]+$")
+
+
+def _knowledge_path(document_id: str) -> Path:
+    if not SAFE_DOCUMENT_ID.fullmatch(document_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid_document_id")
+    settings = get_settings()
+    path = (settings.knowledge_dir / f"{document_id}.md").resolve()
+    knowledge_root = settings.knowledge_dir.resolve()
+    if not path.is_relative_to(knowledge_root):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid_document_id")
+    return path
+
+
+def _document_id_from_title(title: str) -> str:
+    candidate = re.sub(r"\s+", "_", title.strip())
+    candidate = re.sub(r"[^A-Za-z0-9_\-\u4e00-\u9fff]", "", candidate)
+    return candidate[:80] or "admin_knowledge"
+
+
+def _read_knowledge_document(path: Path) -> KnowledgeDocument:
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    title = path.stem
+    if lines and lines[0].startswith("#"):
+        title = lines[0].lstrip("# ").strip() or path.stem
+    source_type = "demo_knowledge_base"
+    for line in lines:
+        if line.startswith("來源類型："):
+            source_type = line.replace("來源類型：", "").strip()
+            break
+    return KnowledgeDocument(
+        document_id=path.stem,
+        title=title,
+        body=text,
+        source_type=source_type,
+        status="published",
+    )
+
+
+def _write_knowledge_document(path: Path, title: str, body: str, source_type: str, status: str) -> None:
+    normalized_body = body.strip()
+    if not normalized_body.startswith("#"):
+        normalized_body = f"# {title.strip()}\n\n來源類型：{source_type.strip()}\n\n{normalized_body}"
+    if "來源類型：" not in normalized_body:
+        normalized_body = f"{normalized_body}\n\n來源類型：{source_type.strip()}"
+    if status != "published":
+        normalized_body = f"{normalized_body}\n\n狀態：{status}"
+    path.write_text(f"{normalized_body.rstrip()}\n", encoding="utf-8")
 
 
 @router.get("/dashboard/summary", response_model=ApiResponse[DashboardSummary])
@@ -25,42 +86,165 @@ async def admin_list_events() -> ApiResponse[list[Event]]:
     return ApiResponse(data=get_repository().list_events())
 
 
+@router.post("/events", response_model=ApiResponse[Event], status_code=status.HTTP_201_CREATED)
+async def admin_create_event(payload: EventCreate) -> ApiResponse[Event]:
+    try:
+        event = get_repository().create_event(payload)
+    except ValueError as exc:
+        detail = str(exc)
+        status_code = (
+            status.HTTP_409_CONFLICT
+            if detail == "event_already_exists"
+            else status.HTTP_422_UNPROCESSABLE_CONTENT
+        )
+        raise HTTPException(status_code=status_code, detail=detail) from exc
+    return ApiResponse(data=event)
+
+
+@router.put("/events/{event_id}", response_model=ApiResponse[Event])
+async def admin_update_event(event_id: str, payload: EventUpdate) -> ApiResponse[Event]:
+    try:
+        event = get_repository().update_event(event_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
+    if not event:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="event_not_found")
+    return ApiResponse(data=event)
+
+
+@router.delete("/events/{event_id}", response_model=ApiResponse[dict[str, bool]])
+async def admin_delete_event(event_id: str) -> ApiResponse[dict[str, bool]]:
+    deleted = get_repository().delete_event(event_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="event_not_found")
+    return ApiResponse(data={"deleted": True})
+
+
 @router.get("/support-tickets", response_model=ApiResponse[list[SupportTicket]])
 async def admin_support_tickets() -> ApiResponse[list[SupportTicket]]:
     return ApiResponse(data=get_repository().list_support_tickets())
 
 
-@router.get("/knowledge-documents", response_model=ApiResponse[list[dict[str, str]]])
-async def admin_knowledge_documents() -> ApiResponse[list[dict[str, str]]]:
+@router.patch("/support-tickets/{ticket_id}", response_model=ApiResponse[SupportTicket])
+async def admin_update_support_ticket(
+    ticket_id: str, payload: SupportTicketUpdate
+) -> ApiResponse[SupportTicket]:
+    ticket = get_repository().update_support_ticket(ticket_id, payload)
+    if not ticket:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="support_ticket_not_found")
+    return ApiResponse(data=ticket)
+
+
+@router.delete("/support-tickets/{ticket_id}", response_model=ApiResponse[dict[str, bool]])
+async def admin_delete_support_ticket(ticket_id: str) -> ApiResponse[dict[str, bool]]:
+    deleted = get_repository().delete_support_ticket(ticket_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="support_ticket_not_found")
+    return ApiResponse(data={"deleted": True})
+
+
+@router.get("/knowledge-documents", response_model=ApiResponse[list[KnowledgeDocument]])
+async def admin_knowledge_documents() -> ApiResponse[list[KnowledgeDocument]]:
     settings = get_settings()
-    knowledge = [
-        {
-            "document_id": path.stem,
-            "title": path.stem,
-            "status": "published",
-            "source_type": "demo_knowledge_base",
-        }
-        for path in settings.knowledge_dir.glob("*.md")
-    ]
+    knowledge = [_read_knowledge_document(path) for path in sorted(settings.knowledge_dir.glob("*.md"))]
     return ApiResponse(data=knowledge)
 
 
-@router.get("/notification-jobs", response_model=ApiResponse[list[dict[str, str]]])
-async def admin_notification_jobs() -> ApiResponse[list[dict[str, str]]]:
-    return ApiResponse(
-        data=[
-            {
-                "job_id": "demo_registration_confirmation",
-                "type": "registration_confirmation",
-                "status": "ready",
-            },
-            {
-                "job_id": "demo_event_reminder",
-                "type": "event_reminder",
-                "status": "draft",
-            },
-        ]
-    )
+@router.get("/knowledge-documents/{document_id}", response_model=ApiResponse[KnowledgeDocument])
+async def admin_get_knowledge_document(document_id: str) -> ApiResponse[KnowledgeDocument]:
+    path = _knowledge_path(document_id)
+    if not path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="knowledge_document_not_found")
+    return ApiResponse(data=_read_knowledge_document(path))
+
+
+@router.post(
+    "/knowledge-documents",
+    response_model=ApiResponse[KnowledgeDocument],
+    status_code=status.HTTP_201_CREATED,
+)
+async def admin_create_knowledge_document(
+    payload: KnowledgeDocumentCreate,
+) -> ApiResponse[KnowledgeDocument]:
+    document_id = payload.document_id or _document_id_from_title(payload.title)
+    path = _knowledge_path(document_id)
+    if path.exists():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="knowledge_document_exists")
+    _write_knowledge_document(path, payload.title, payload.body, payload.source_type, payload.status)
+    return ApiResponse(data=_read_knowledge_document(path))
+
+
+@router.put("/knowledge-documents/{document_id}", response_model=ApiResponse[KnowledgeDocument])
+async def admin_update_knowledge_document(
+    document_id: str, payload: KnowledgeDocumentUpdate
+) -> ApiResponse[KnowledgeDocument]:
+    path = _knowledge_path(document_id)
+    if not path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="knowledge_document_not_found")
+    current = _read_knowledge_document(path)
+    title = payload.title if payload.title is not None else current.title
+    body = payload.body if payload.body is not None else current.body
+    source_type = payload.source_type if payload.source_type is not None else current.source_type
+    status_value = payload.status if payload.status is not None else current.status
+    _write_knowledge_document(path, title, body, source_type, status_value)
+    return ApiResponse(data=_read_knowledge_document(path))
+
+
+@router.delete("/knowledge-documents/{document_id}", response_model=ApiResponse[dict[str, bool]])
+async def admin_delete_knowledge_document(document_id: str) -> ApiResponse[dict[str, bool]]:
+    path = _knowledge_path(document_id)
+    if not path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="knowledge_document_not_found")
+    path.unlink()
+    return ApiResponse(data={"deleted": True})
+
+
+@router.get("/notification-jobs", response_model=ApiResponse[list[NotificationJob]])
+async def admin_notification_jobs() -> ApiResponse[list[NotificationJob]]:
+    return ApiResponse(data=get_repository().list_notification_jobs())
+
+
+@router.post(
+    "/notification-jobs",
+    response_model=ApiResponse[NotificationJob],
+    status_code=status.HTTP_201_CREATED,
+)
+async def admin_create_notification_job(payload: NotificationJobCreate) -> ApiResponse[NotificationJob]:
+    try:
+        job = get_repository().create_notification_job(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    return ApiResponse(data=job)
+
+
+@router.put("/notification-jobs/{job_id}", response_model=ApiResponse[NotificationJob])
+async def admin_update_notification_job(
+    job_id: str, payload: NotificationJobUpdate
+) -> ApiResponse[NotificationJob]:
+    job = get_repository().update_notification_job(job_id, payload)
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="notification_job_not_found")
+    return ApiResponse(data=job)
+
+
+@router.delete("/notification-jobs/{job_id}", response_model=ApiResponse[dict[str, bool]])
+async def admin_delete_notification_job(job_id: str) -> ApiResponse[dict[str, bool]]:
+    deleted = get_repository().delete_notification_job(job_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="notification_job_not_found")
+    return ApiResponse(data={"deleted": True})
+
+
+@router.post("/notification-jobs/{job_id}/send-test", response_model=ApiResponse[dict[str, object]])
+async def admin_send_notification_job_test(job_id: str) -> ApiResponse[dict[str, object]]:
+    repo = get_repository()
+    job = repo.get_notification_job(job_id)
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="notification_job_not_found")
+    target_user_id = job.target_user_id or "demo_u001"
+    text = str(job.payload.get("text") or "Temple AI OS 測試推播：這是 Demo 訊息。")
+    result = await NotificationService(repo).send_test_notification(target_user_id, text)
+    return ApiResponse(data=result, meta={"job_id": job_id, "target_user_id": target_user_id})
 
 
 @router.post("/rich-menu/publish", response_model=ApiResponse[dict[str, object]])

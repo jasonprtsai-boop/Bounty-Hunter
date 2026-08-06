@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Shell } from "../../components/Shell";
 import { apiFetch, type EventItem, type Registration } from "../../lib/api";
+import { getLiffSession } from "../../lib/session";
 
 export function RegistrationPage() {
   const { eventId } = useParams();
@@ -16,6 +17,9 @@ export function RegistrationPage() {
   });
 
   useEffect(() => {
+    getLiffSession()
+      .then((session) => setForm((current) => ({ ...current, contact_name: session.display_name })))
+      .catch(console.error);
     if (eventId) {
       apiFetch<EventItem>(`/api/events/${eventId}`).then(setEvent).catch(console.error);
     }
@@ -24,9 +28,10 @@ export function RegistrationPage() {
   async function submit(eventSubmit: FormEvent) {
     eventSubmit.preventDefault();
     if (!eventId) return;
+    const session = await getLiffSession();
     const result = await apiFetch<Registration>(`/api/events/${eventId}/registrations`, {
       method: "POST",
-      body: JSON.stringify({ ...form, user_id: "demo_u001" })
+      body: JSON.stringify({ ...form, user_id: session.user_id })
     });
     setCreated(result);
   }
@@ -89,4 +94,3 @@ export function RegistrationPage() {
     </Shell>
   );
 }
-

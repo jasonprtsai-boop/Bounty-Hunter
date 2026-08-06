@@ -55,6 +55,8 @@ VITE_LIFF_ID=
 
 ## LINE Console 設定摘要
 
+完整欄位檢查請看 `docs/LINE_SETUP_CHECKLIST.md`。
+
 1. 在 LINE Official Account Manager 啟用 Messaging API。
 2. Provider 使用 `Temple AI OS`。
 3. Webhook URL 設為 `https://<render-api>.onrender.com/api/line/webhook`。
@@ -73,4 +75,3 @@ VITE_LIFF_ID=
 5. 點 Flex button 開 LIFF 活動頁。
 6. LIFF 報名成功後建立紀錄。
 7. Dashboard 顯示活動、報名、AI 問題與知識缺口。
-

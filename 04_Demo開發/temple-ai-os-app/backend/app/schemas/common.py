@@ -50,6 +50,45 @@ class Event(BaseModel):
     demo_note: str
 
 
+class EventCreate(BaseModel):
+    event_id: str | None = None
+    title: str
+    category: str
+    source_type: str = "team_demo_sample"
+    date: str
+    start_time: str
+    end_time: str
+    location: str
+    address: str
+    summary: str
+    requires_registration: bool = False
+    capacity: int | None = Field(default=None, ge=1)
+    registered_count: int = Field(default=0, ge=0)
+    status: str = "draft"
+    registration_fields: list[str] = Field(default_factory=list)
+    payment_policy: str | None = None
+    demo_note: str = "後台建立的 Demo 活動，不代表萬春宮官方活動。"
+
+
+class EventUpdate(BaseModel):
+    title: str | None = None
+    category: str | None = None
+    source_type: str | None = None
+    date: str | None = None
+    start_time: str | None = None
+    end_time: str | None = None
+    location: str | None = None
+    address: str | None = None
+    summary: str | None = None
+    requires_registration: bool | None = None
+    capacity: int | None = Field(default=None, ge=1)
+    registered_count: int | None = Field(default=None, ge=0)
+    status: str | None = None
+    registration_fields: list[str] | None = None
+    payment_policy: str | None = None
+    demo_note: str | None = None
+
+
 class LineUser(BaseModel):
     user_id: str
     line_display_name: str
@@ -129,6 +168,13 @@ class SupportTicket(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class SupportTicketUpdate(BaseModel):
+    status: str | None = None
+    priority: str | None = None
+    subject: str | None = None
+    message: str | None = None
+
+
 class FortuneSlip(BaseModel):
     slip_id: str
     title: str
@@ -156,3 +202,55 @@ class DashboardSummary(BaseModel):
     top_ai_intents: list[dict[str, Any]]
     knowledge_gaps: list[str]
     generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class KnowledgeDocument(BaseModel):
+    document_id: str
+    title: str
+    body: str
+    source_type: str = "demo_knowledge_base"
+    status: str = "published"
+
+
+class KnowledgeDocumentCreate(BaseModel):
+    document_id: str | None = None
+    title: str
+    body: str
+    source_type: str = "admin_demo_knowledge"
+    status: str = "published"
+
+
+class KnowledgeDocumentUpdate(BaseModel):
+    title: str | None = None
+    body: str | None = None
+    source_type: str | None = None
+    status: str | None = None
+
+
+class NotificationJob(BaseModel):
+    job_id: str
+    job_type: str
+    target_user_id: str | None = None
+    event_id: str | None = None
+    status: str = "draft"
+    scheduled_at: str | None = None
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class NotificationJobCreate(BaseModel):
+    job_id: str | None = None
+    job_type: str
+    target_user_id: str | None = None
+    event_id: str | None = None
+    status: str = "draft"
+    scheduled_at: str | None = None
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class NotificationJobUpdate(BaseModel):
+    job_type: str | None = None
+    target_user_id: str | None = None
+    event_id: str | None = None
+    status: str | None = None
+    scheduled_at: str | None = None
+    payload: dict[str, Any] | None = None

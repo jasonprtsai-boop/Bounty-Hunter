@@ -9,6 +9,8 @@
 - `demo_events.json`：活動中心、Flex Message、LIFF 報名頁可用。
 - `demo_users.json`：假使用者與會員分群。
 - `demo_registrations.json`：假報名資料。
+- `demo_support_tickets.json`：假客服工單資料。
+- `demo_notification_jobs.json`：假推播任務資料。
 - `demo_dashboard_snapshot.json`：Dashboard 首頁指標。
 - `demo_line_messages.json`：Rich Menu、Flex Message 與推播文案。
 

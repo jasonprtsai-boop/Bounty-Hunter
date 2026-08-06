@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Header, HTTPException, status
 
 from app.db.supabase import get_repository
 from app.schemas.common import (
@@ -10,7 +10,7 @@ from app.schemas.common import (
     SupportTicketCreate,
     TourSpot,
 )
-from app.services.liff_auth import verify_liff_id_token
+from app.services.liff_auth import resolve_liff_user_id, verify_liff_id_token
 
 router = APIRouter()
 
@@ -42,10 +42,16 @@ async def get_tour_spot(code: str) -> ApiResponse[TourSpot]:
 
 
 @router.post("/support/tickets", response_model=ApiResponse[SupportTicket])
-async def create_support_ticket(payload: SupportTicketCreate) -> ApiResponse[SupportTicket]:
-    ticket = get_repository().create_support_ticket(payload)
+async def create_support_ticket(
+    payload: SupportTicketCreate,
+    x_liff_id_token: str | None = Header(default=None, alias="X-LIFF-ID-Token"),
+) -> ApiResponse[SupportTicket]:
+    try:
+        user_id = await resolve_liff_user_id(x_liff_id_token, payload.user_id)
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid_liff_token") from exc
+    ticket = get_repository().create_support_ticket(payload.model_copy(update={"user_id": user_id}))
     return ApiResponse(
         data=ticket,
         meta={"demo_notice": "客服工單為 Demo 流程；正式案件仍需廟方人工確認。"},
     )
-

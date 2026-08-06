@@ -1,9 +1,12 @@
 import { FormEvent, useState } from "react";
 import { Shell } from "../../components/Shell";
 import { apiFetch } from "../../lib/api";
+import { getLiffSession } from "../../lib/session";
 
 export function SupportPage() {
   const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     category: "general",
     subject: "活動報名問題",
@@ -14,11 +17,20 @@ export function SupportPage() {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    await apiFetch("/api/support/tickets", {
-      method: "POST",
-      body: JSON.stringify({ ...form, user_id: "demo_u001" })
-    });
-    setDone(true);
+    setSaving(true);
+    setError("");
+    try {
+      const session = await getLiffSession();
+      await apiFetch("/api/support/tickets", {
+        method: "POST",
+        body: JSON.stringify({ ...form, user_id: session.user_id })
+      });
+      setDone(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "建立工單失敗");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -51,12 +63,16 @@ export function SupportPage() {
             聯絡人
             <input value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
           </label>
-          <button className="button primary" type="submit">
-            建立工單
+          <label>
+            電話
+            <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          </label>
+          {error && <p className="error-text">{error}</p>}
+          <button className="button primary" disabled={saving} type="submit">
+            {saving ? "建立中" : "建立工單"}
           </button>
         </form>
       )}
     </Shell>
   );
 }
-

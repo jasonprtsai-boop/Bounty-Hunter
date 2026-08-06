@@ -34,3 +34,9 @@ async def verify_liff_id_token(id_token: str) -> LiffSession:
         demo_mode=False,
     )
 
+
+async def resolve_liff_user_id(id_token: str | None, fallback_user_id: str) -> str:
+    if not id_token:
+        return fallback_user_id
+    session = await verify_liff_id_token(id_token)
+    return session.user_id

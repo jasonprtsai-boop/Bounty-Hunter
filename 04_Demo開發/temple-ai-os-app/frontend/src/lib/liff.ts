@@ -1,5 +1,3 @@
-import liff from "@line/liff";
-
 export type LiffState = {
   ready: boolean;
   inClient: boolean;
@@ -19,9 +17,11 @@ export async function initLiff(): Promise<LiffState> {
       idToken: "demo"
     };
   }
+  const { default: liff } = await import("@line/liff");
   await liff.init({ liffId });
   if (!liff.isLoggedIn()) {
     liff.login();
+    await new Promise<never>(() => undefined);
   }
   const profile = await liff.getProfile();
   return {
@@ -32,4 +32,3 @@ export async function initLiff(): Promise<LiffState> {
     idToken: liff.getIDToken() || ""
   };
 }
-
