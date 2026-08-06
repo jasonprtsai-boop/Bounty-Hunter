@@ -19,6 +19,7 @@ __pycache__/
 dist/
 build/
 logs/
+*.log
 *.tsbuildinfo
 
 # OS/editor noise

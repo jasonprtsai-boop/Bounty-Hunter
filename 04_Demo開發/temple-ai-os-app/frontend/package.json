@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "build:sites": "npm run build && node scripts/prepare-sites-build.mjs",
+    "preview": "vite preview --host 0.0.0.0",
+    "test:sites-worker": "node scripts/test-sites-worker.mjs"
   },
   "dependencies": {
     "@line/liff": "^2.27.1",
