@@ -11,8 +11,19 @@ This checklist is for Temple AI OS demo setup. Do not commit LINE secrets, passw
 - Messaging API Channel ID: `2010991408`
 - LINE Login Channel: `宮廟官網`
 - LINE Login Channel ID: `2010938588`
+- LIFF ID: `2010938588-VJXpaoyH`
+- LIFF URL: `https://liff.line.me/2010938588-VJXpaoyH`
+- Public frontend: `https://temple-ai-os-demo.jasonprtsai.chatgpt.site`
 
-## 2. Messaging API channel
+## 2. Completed
+
+- Frontend is public.
+- LINE Login privacy policy URL is set.
+- LINE Login terms URL is set.
+- LIFF app is created.
+- Add friend option is On (normal).
+
+## 3. Messaging API channel
 
 - Put Channel ID into `LINE_CHANNEL_ID`.
 - Put Channel secret into `LINE_CHANNEL_SECRET`.
@@ -22,35 +33,39 @@ This checklist is for Temple AI OS demo setup. Do not commit LINE secrets, passw
 - Set `Webhook redelivery` to Enabled.
 - Verify only after the backend is deployed and `/health` returns OK.
 
-## 3. LINE Login and LIFF
+## 4. Backend and frontend environment
 
-- Use the same Provider: `宮廟服務商`.
-- Put LINE Login Channel ID into `LINE_LOGIN_CHANNEL_ID`.
-- Set policy URLs after frontend deployment:
-  - Privacy policy URL: `https://<sites-host>/privacy`
-  - Terms URL: `https://<sites-host>/terms`
-- Create LIFF app:
-  - Name: `Temple AI OS`
-  - Size: `Full`
-  - Endpoint URL: `https://<sites-host>`
-  - Scopes: `openid`, `profile`
-  - Add friend option: `normal`
-- Put LIFF ID into frontend `VITE_LIFF_ID` and backend `LINE_LIFF_ID`.
+Backend:
 
-## 4. Rich menu
+```text
+LINE_LIFF_ID=2010938588-VJXpaoyH
+FRONTEND_BASE_URL=https://temple-ai-os-demo.jasonprtsai.chatgpt.site
+ALLOWED_ORIGINS=https://temple-ai-os-demo.jasonprtsai.chatgpt.site
+```
+
+Frontend after backend deployment:
+
+```text
+VITE_API_BASE_URL=https://<render-api>.onrender.com
+VITE_LIFF_ID=2010938588-VJXpaoyH
+VITE_LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
+```
+
+## 5. Rich menu
 
 - Use `assets/rich-menu/main-2500x1686.png`.
 - Publish with `scripts/create_rich_menu.py`.
 - Required environment:
 
 ```text
-FRONTEND_BASE_URL=https://<sites-host>
+FRONTEND_BASE_URL=https://temple-ai-os-demo.jasonprtsai.chatgpt.site
 LINE_CHANNEL_ACCESS_TOKEN=<secret>
 ```
 
-## 5. Validation
+## 6. Validation
 
 - The add friend URL opens `Temple AI OS示範`.
+- LIFF URL opens in LINE.
 - Rich Menu appears after adding the official account.
 - Tapping LIFF buttons opens the deployed frontend.
 - LIFF profile loads after login.
