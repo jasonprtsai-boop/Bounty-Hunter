@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const dist = resolve(root, "dist");
+const clientDist = resolve(dist, "client");
 const workerPath = resolve(dist, "server", "index.js");
 const { default: worker } = await import(`${pathToFileURL(workerPath).href}?t=${Date.now()}`);
 
@@ -18,8 +19,8 @@ const contentTypes = {
 
 function resolveAsset(pathname) {
   const relative = normalize(pathname === "/" ? "index.html" : pathname.replace(/^\/+/, ""));
-  const fullPath = resolve(dist, relative);
-  if (!fullPath.startsWith(`${dist}${sep}`) && fullPath !== dist) {
+  const fullPath = resolve(clientDist, relative);
+  if (!fullPath.startsWith(`${clientDist}${sep}`) && fullPath !== clientDist) {
     throw new Error(`Unsafe asset path: ${pathname}`);
   }
   return fullPath;
@@ -41,7 +42,18 @@ const env = {
   }
 };
 
-for (const pathname of ["/", "/site", "/community", "/privacy", "/terms"]) {
+for (const pathname of [
+  "/",
+  "/site",
+  "/community",
+  "/privacy",
+  "/terms",
+  "/events",
+  "/fortune",
+  "/member",
+  "/support",
+  "/admin"
+]) {
   const response = await worker.fetch(new Request(`https://example.test${pathname}`), env);
   if (response.status !== 200) {
     throw new Error(`${pathname} returned ${response.status}`);
