@@ -115,9 +115,9 @@ create table if not exists knowledge_chunks (
   unique (document_id, chunk_index)
 );
 
-create index if not exists knowledge_chunks_embedding_idx
-  on knowledge_chunks using ivfflat (embedding vector_cosine_ops)
-  with (lists = 100);
+-- The demo uses text-embedding-3-large (3072 dimensions). pgvector's ivfflat
+-- index is limited to 2000 dimensions on this Supabase project, so the small
+-- demo knowledge base uses exact scan through match_knowledge_chunks instead.
 
 create table if not exists support_tickets (
   ticket_id text primary key,
@@ -196,4 +196,3 @@ create table if not exists dashboard_snapshots (
   knowledge_gaps jsonb not null,
   created_at timestamptz not null default now()
 );
-
