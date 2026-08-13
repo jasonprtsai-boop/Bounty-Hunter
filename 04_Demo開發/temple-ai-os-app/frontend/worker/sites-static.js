@@ -33,7 +33,10 @@ function shouldFallbackToIndex(pathname) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    let response = await fetchAsset(request, env);
+    const assetRequest = shouldFallbackToIndex(url.pathname)
+      ? new Request(new URL("/index.html", request.url), request)
+      : request;
+    let response = await fetchAsset(assetRequest, env);
 
     if (response.status === 404 && shouldFallbackToIndex(url.pathname)) {
       response = await fetchAsset(new Request(new URL("/index.html", request.url), request), env);
