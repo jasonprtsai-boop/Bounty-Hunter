@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import get_settings
@@ -249,10 +250,25 @@ async def admin_send_notification_job_test(job_id: str) -> ApiResponse[dict[str,
 
 @router.post("/rich-menu/publish", response_model=ApiResponse[dict[str, object]])
 async def publish_rich_menu_payload() -> ApiResponse[dict[str, object]]:
-    return ApiResponse(
-        data=RichMenuService().main_menu_payload(),
-        meta={"next_step": "Use scripts/create_rich_menu.py to publish this payload to LINE."},
-    )
+    try:
+        result = await RichMenuService().publish_main_menu()
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={
+                "reason": "line_api_error",
+                "status_code": exc.response.status_code,
+                "message": exc.response.text[:500],
+            },
+        ) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={"reason": "line_api_error", "message": str(exc)[:500]},
+        ) from exc
+    if result.get("published") is False:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=result)
+    return ApiResponse(data=result)
 
 
 @router.post("/notifications/{user_id}/send-test", response_model=ApiResponse[dict[str, object]])

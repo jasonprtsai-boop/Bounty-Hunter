@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from app.db.supabase import get_repository
 from app.main import app
+from app.services.rich_menu_service import RichMenuService
 
 
 client = TestClient(app)
@@ -219,6 +220,16 @@ def test_admin_mutation_records_audit_log() -> None:
         and item["target_type"] == "/api/admin/events"
         for item in repo.audit_logs
     )
+
+
+def test_admin_rich_menu_publish(monkeypatch) -> None:
+    async def fake_publish(self) -> dict[str, object]:
+        return {"published": True, "rich_menu_id": "richmenu-test"}
+
+    monkeypatch.setattr(RichMenuService, "publish_main_menu", fake_publish)
+    response = client.post("/api/admin/rich-menu/publish", headers=ADMIN_HEADERS)
+    assert response.status_code == 200
+    assert response.json()["data"] == {"published": True, "rich_menu_id": "richmenu-test"}
 
 
 def test_support_ticket_admin_flow() -> None:
