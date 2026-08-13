@@ -24,6 +24,7 @@ class RuleMatch:
 
 
 DEMO_NOTICE = "Temple AI OS 目前為示範系統，Demo 活動、報名與 Dashboard 非萬春宮官方營運資料。"
+REQUIRED_RULE_INTENTS = {"safety_boundary", "event_query", "temple_location", "general"}
 
 
 class RAGService:
@@ -64,7 +65,7 @@ class RAGService:
         rules: list[FAQRule] = []
         if hasattr(self.repository, "list_faq_rules"):
             rules = self.repository.list_faq_rules()
-        if not rules:
+        if not self._rules_are_complete(rules):
             rules_path = self.settings.demo_data_dir / "demo_faq_rules.json"
             rules = [
                 FAQRule.model_validate(item)
@@ -81,6 +82,12 @@ class RAGService:
 
         data = json.loads(path.read_text(encoding="utf-8"))
         return data if isinstance(data, list) else []
+
+    @staticmethod
+    def _rules_are_complete(rules: list[FAQRule]) -> bool:
+        intents = {rule.intent for rule in rules if rule.enabled}
+        keyword_rule_count = sum(1 for rule in rules if rule.enabled and rule.keywords)
+        return REQUIRED_RULE_INTENTS.issubset(intents) and keyword_rule_count >= 3
 
     @staticmethod
     def _normalized(message: str) -> str:

@@ -31,7 +31,7 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - `/api/chat` now uses keyword FAQ rules plus fixed safe replies; OpenAI is no longer required for the public demo chat path.
 - Flex event and fortune messages now include public hero images.
 - Production Supabase path now has pgvector search RPC and atomic event registration RPC in migration `004_search_and_atomic_registration.sql`.
-- FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable.
+- FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable or missing required rules.
 
 ## 2. Current backend mode
 
@@ -46,7 +46,7 @@ Build=cd "04_Demo開發/temple-ai-os-app/backend" && pip install -e .
 Start=cd "04_Demo開發/temple-ai-os-app/backend" && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
-`DEMO_MODE=false` uses Supabase, LINE secrets, and the server-side admin tokens stored in Render. Chat replies still have a local FAQ fallback, so missing FAQ rows do not take the public chat endpoint down.
+`DEMO_MODE=false` uses Supabase, LINE secrets, and the server-side admin tokens stored in Render. Chat replies still have a local FAQ fallback, so missing or incomplete FAQ rows do not take the public chat endpoint down.
 
 Free Render instances spin down after inactivity, so the first request can be delayed by roughly 50 seconds or more.
 
