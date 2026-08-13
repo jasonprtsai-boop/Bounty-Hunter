@@ -32,7 +32,7 @@ TEMPLE_ID = "wcg_taichung_demo"
 
 def _read_json(path: Path, fallback: Any) -> Any:
     if not path.exists():
-        return fallback
+        raise RuntimeError(f"demo_data_missing: {path}")
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -66,6 +66,7 @@ class DemoRepository:
             for item in _read_json(data_dir / "demo_notification_jobs.json", [])
         ]
         self.processed_line_event_ids: set[str] = set()
+        self.audit_logs: list[dict[str, Any]] = []
         self.fortune_slips = self._build_fortune_slips()
         self.tour_spots = self._build_tour_spots()
 
@@ -309,6 +310,26 @@ class DemoRepository:
         summary.headline_metrics["registrations_total"] = baseline_total + session_delta
         return summary
 
+    def record_audit_log(
+        self,
+        *,
+        actor_id: str,
+        action: str,
+        target_type: str,
+        target_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        self.audit_logs.append(
+            {
+                "actor_id": actor_id,
+                "action": action,
+                "target_type": target_type,
+                "target_id": target_id,
+                "metadata": metadata or {},
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+
 
 class SupabaseRepository:
     """Supabase REST repository used when DEMO_MODE=false."""
@@ -389,6 +410,23 @@ class SupabaseRepository:
             prefer="return=representation",
         )
         return bool(rows)
+
+    def _rpc(self, function_name: str, json_body: dict[str, Any]) -> Any:
+        response = self.client.post(f"{self.rest_url}/rpc/{function_name}", json=json_body)
+        if response.status_code >= 400:
+            text = response.text[:500]
+            for detail in [
+                "event_not_found",
+                "registration_not_required",
+                "invalid_party_size",
+                "event_capacity_exceeded",
+            ]:
+                if detail in text:
+                    raise ValueError(detail)
+            raise RuntimeError(f"supabase_rpc_{function_name}_{response.status_code}: {text}")
+        if response.status_code == 204 or not response.content:
+            return []
+        return response.json()
 
     def _get_temple(self) -> TempleProfile:
         row = self._single("temples", "temple_id", TEMPLE_ID)
@@ -473,36 +511,21 @@ class SupabaseRepository:
         return [Registration.model_validate(row) for row in self._select("event_registrations", params)]
 
     def create_registration(self, event_id: str, payload: RegistrationCreate) -> Registration:
-        event = self.get_event(event_id)
-        if not event:
-            raise ValueError("event_not_found")
-        if not event.requires_registration:
-            raise ValueError("registration_not_required")
-        current_total = self._confirmed_party_total(event_id)
-        if event.capacity is not None and current_total + payload.party_size > event.capacity:
-            raise ValueError("event_capacity_exceeded")
-
-        row = {
-            "registration_id": f"reg_{uuid.uuid4().hex[:8]}",
-            "event_id": event_id,
-            "user_id": payload.user_id,
-            "status": "confirmed",
-            "party_size": payload.party_size,
-            "reminder_opt_in": payload.reminder_opt_in,
-            "contact_name": payload.contact_name,
-            "phone": payload.phone,
-            "note": payload.note,
-        }
-        registration = Registration.model_validate(
-            self._insert_returning("event_registrations", row)
+        rows = self._rpc(
+            "register_for_event",
+            {
+                "p_event_id": event_id,
+                "p_user_id": payload.user_id,
+                "p_contact_name": payload.contact_name,
+                "p_phone": payload.phone,
+                "p_party_size": payload.party_size,
+                "p_reminder_opt_in": payload.reminder_opt_in,
+                "p_note": payload.note,
+            },
         )
-        self._patch_returning(
-            "events",
-            "event_id",
-            event_id,
-            {"registered_count": current_total + payload.party_size},
-        )
-        return registration
+        if not rows:
+            raise RuntimeError("supabase_registration_empty_rpc")
+        return Registration.model_validate(rows[0] if isinstance(rows, list) else rows)
 
     def _confirmed_party_total(self, event_id: str) -> int:
         rows = self._select(
@@ -599,11 +622,42 @@ class SupabaseRepository:
             raise RuntimeError(f"supabase_line_webhook_events_{response.status_code}")
         return True
 
+    def search_knowledge_chunks(self, query_embedding: list[float], limit: int = 3) -> list[dict[str, Any]]:
+        rows = self._rpc(
+            "match_knowledge_chunks",
+            {
+                "query_embedding": query_embedding,
+                "match_threshold": 0.15,
+                "match_count": limit,
+            },
+        )
+        return rows if isinstance(rows, list) else []
+
     def dashboard_summary(self) -> DashboardSummary:
         rows = self._select("dashboard_snapshots", {"order": "snapshot_date.desc", "limit": "1"})
         if not rows:
             raise RuntimeError("supabase_dashboard_snapshot_missing")
         return DashboardSummary.model_validate(rows[0])
+
+    def record_audit_log(
+        self,
+        *,
+        actor_id: str,
+        action: str,
+        target_type: str,
+        target_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        self._insert_returning(
+            "audit_logs",
+            {
+                "actor_id": actor_id,
+                "action": action,
+                "target_type": target_type,
+                "target_id": target_id,
+                "metadata": metadata or {},
+            },
+        )
 
 
 Repository = DemoRepository | SupabaseRepository

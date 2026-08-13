@@ -1,0 +1,50 @@
+{
+  "temple_id": "wcg_taichung_demo",
+  "name": "萬春宮",
+  "aliases": ["台中媽祖", "藍興媽祖"],
+  "main_deity": "天上聖母",
+  "religion": "道教",
+  "registration_status": "正式登記",
+  "national_religion_system_id": "1748657",
+  "tax_id": "02987849",
+  "city": "臺中市",
+  "district": "中區",
+  "postal_code": "400",
+  "address": "臺中市中區成功路212號",
+  "phone": "04-22245964",
+  "coordinates": {
+    "longitude": 120.681602478027,
+    "latitude": 24.1420803070068
+  },
+  "tourism_coordinates": {
+    "longitude": 120.68165,
+    "latitude": 24.14214
+  },
+  "category": ["文化類", "宗教廟宇類"],
+  "image": {
+    "url": "https://travel.taichung.gov.tw/content/images/attractions/60331/640x480_attractions-image-reeo_rka6kg04vfs2xyzmw.jpg",
+    "source": "臺中市政府觀光旅遊局，觀光多媒體開放資料「萬春宮」",
+    "license": "Open Government Data License"
+  },
+  "demo_positioning": "以政府開放資料與觀光開放資料建立的萬春宮示範場景，非萬春宮官方系統。",
+  "sources": [
+    {
+      "name": "全國宗教資訊系統資料-寺廟",
+      "url": "https://data.gov.tw/dataset/8203",
+      "provider": "宗教及禮制司",
+      "license": "政府資料開放授權條款-第1版"
+    },
+    {
+      "name": "臺中市宗教名冊",
+      "url": "https://data.gov.tw/dataset/83784",
+      "provider": "臺中市政府民政局",
+      "license": "政府資料開放授權條款-第1版"
+    },
+    {
+      "name": "觀光多媒體開放資料：萬春宮",
+      "url": "https://media.taiwan.net.tw/en-us/portal/travel/details/attraction_387000000a_000165",
+      "provider": "臺中市政府觀光旅遊局",
+      "license": "Open Government Data License"
+    }
+  ]
+}

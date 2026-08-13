@@ -1,0 +1,22 @@
+[
+  {
+    "ticket_id": "ticket_demo_001",
+    "user_id": "demo_u001",
+    "category": "event_registration",
+    "subject": "想確認第一次參拜導覽是否可以帶家人",
+    "message": "Demo 使用者詢問活動是否可增加同行人數。",
+    "status": "open",
+    "priority": "general",
+    "created_at": "2026-08-05T12:10:00+08:00"
+  },
+  {
+    "ticket_id": "ticket_demo_002",
+    "user_id": "demo_u003",
+    "category": "content_feedback",
+    "subject": "建議補充無障礙動線說明",
+    "message": "Demo 使用者回饋導覽頁需要更明確的無障礙資訊。",
+    "status": "triaged",
+    "priority": "general",
+    "created_at": "2026-08-05T14:35:00+08:00"
+  }
+]

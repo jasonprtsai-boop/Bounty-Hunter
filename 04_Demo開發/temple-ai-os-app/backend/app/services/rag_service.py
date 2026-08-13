@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+import re
 
 from app.core.config import get_settings
 from app.db.supabase import Repository
@@ -14,6 +15,7 @@ class KnowledgeChunk:
     title: str
     text: str
     source_type: str
+    similarity: float | None = None
 
 
 SAFETY_KEYWORDS = {
@@ -40,6 +42,8 @@ class RAGService:
         self.chunks = self._load_knowledge_chunks(self.settings.knowledge_dir)
 
     def _load_knowledge_chunks(self, knowledge_dir: Path) -> list[KnowledgeChunk]:
+        if not knowledge_dir.exists():
+            raise RuntimeError(f"knowledge_dir_missing: {knowledge_dir}")
         chunks: list[KnowledgeChunk] = []
         for path in sorted(knowledge_dir.glob("*.md")):
             text = path.read_text(encoding="utf-8")
@@ -78,22 +82,49 @@ class RAGService:
             return "support"
         return "general"
 
-    def search(self, message: str, limit: int = 3) -> list[KnowledgeChunk]:
-        terms = {term for term in message.replace("？", " ").replace("?", " ").split() if term}
+    def _query_terms(self, message: str) -> set[str]:
+        terms = set(re.findall(r"[a-z0-9]+", message.lower()))
+        chinese = "".join(char for char in message if "\u4e00" <= char <= "\u9fff")
+        for size in (2, 3, 4):
+            terms.update(chinese[index : index + size] for index in range(len(chinese) - size + 1))
+        for phrase in ["萬春宮", "天上聖母", "媽祖", "參拜", "地址", "電話", "活動", "報名", "交通"]:
+            if phrase in message:
+                terms.add(phrase)
+        return {term for term in terms if term.strip()}
+
+    def _lexical_search(self, message: str, limit: int = 3) -> list[KnowledgeChunk]:
+        terms = self._query_terms(message)
         scored: list[tuple[int, KnowledgeChunk]] = []
         for chunk in self.chunks:
             score = 0
-            haystack = f"{chunk.title}\n{chunk.text}"
+            haystack = f"{chunk.title}\n{chunk.text}".lower()
             for term in terms:
                 if term in haystack:
-                    score += 3
-            for char in message:
-                if "\u4e00" <= char <= "\u9fff" and char in haystack:
-                    score += 1
-            if score:
+                    score += max(3, len(term) * 2)
+            if chunk.title and chunk.title in message:
+                score += 12
+            if score >= 4:
                 scored.append((score, chunk))
         scored.sort(key=lambda item: item[0], reverse=True)
         return [chunk for _, chunk in scored[:limit]]
+
+    async def search(self, message: str, limit: int = 3) -> list[KnowledgeChunk]:
+        if not self.settings.demo_mode and self.settings.openai_api_key:
+            embedding = await self.openai.embed_text(message)
+            if embedding and hasattr(self.repository, "search_knowledge_chunks"):
+                rows = self.repository.search_knowledge_chunks(embedding, limit=limit)
+                if rows:
+                    return [
+                        KnowledgeChunk(
+                            source=str(row["document_id"]),
+                            title=str(row["title"]),
+                            text=str(row["content"]),
+                            source_type=str(row["source_type"]),
+                            similarity=float(row.get("similarity") or 0),
+                        )
+                        for row in rows
+                    ]
+        return self._lexical_search(message, limit=limit)
 
     async def answer(self, message: str, user_id: str) -> ChatReply:
         intent = self.classify_intent(message)
@@ -128,7 +159,7 @@ class RAGService:
                 demo_notice=demo_notice,
             )
 
-        matches = self.search(message)
+        matches = await self.search(message)
         context = "\n\n".join(f"{chunk.title}\n{chunk.text}" for chunk in matches)
         reply = await self.openai.complete_reply(question=message, context=context)
         return ChatReply(

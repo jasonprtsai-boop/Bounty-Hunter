@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { AdminGate } from "./components/AdminGate";
 
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard").then((module) => ({ default: module.AdminDashboard })));
 const AdminEvents = lazy(() => import("./pages/admin/AdminEvents").then((module) => ({ default: module.AdminEvents })));
@@ -34,11 +35,11 @@ export default function App() {
         <Route path="/tour/:code" element={<TourSpotPage />} />
         <Route path="/member" element={<MemberPage />} />
         <Route path="/support" element={<SupportPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/events" element={<AdminEvents />} />
-        <Route path="/admin/knowledge" element={<AdminKnowledge />} />
-        <Route path="/admin/support" element={<AdminSupport />} />
-        <Route path="/admin/notifications" element={<AdminNotifications />} />
+        <Route path="/admin" element={<AdminGate><AdminDashboard /></AdminGate>} />
+        <Route path="/admin/events" element={<AdminGate><AdminEvents /></AdminGate>} />
+        <Route path="/admin/knowledge" element={<AdminGate><AdminKnowledge /></AdminGate>} />
+        <Route path="/admin/support" element={<AdminGate><AdminSupport /></AdminGate>} />
+        <Route path="/admin/notifications" element={<AdminGate><AdminNotifications /></AdminGate>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

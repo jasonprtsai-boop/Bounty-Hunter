@@ -84,19 +84,21 @@ export async function apiFetch<T>(
   const headers = new Headers(options.headers);
   headers.set("Content-Type", "application/json");
   if (admin) {
-    headers.set(
-      "Authorization",
-      `Bearer ${localStorage.getItem("adminToken") || "temple-ai-os-admin-demo"}`
-    );
+    const adminToken = localStorage.getItem("adminToken");
+    if (!adminToken) {
+      throw new Error("請先輸入後台管理 Token");
+    }
+    headers.set("Authorization", `Bearer ${adminToken}`);
+    headers.set("X-Admin-Actor", localStorage.getItem("adminActor") || "admin");
   }
   const liffIdToken = localStorage.getItem("liffIdToken");
   if (liffIdToken) {
     headers.set("X-LIFF-ID-Token", liffIdToken);
   }
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
-  const payload = (await response.json()) as ApiResponse<T>;
+  const payload = (await response.json()) as ApiResponse<T> & { detail?: string };
   if (!response.ok || payload.error) {
-    throw new Error(payload.error?.message || response.statusText);
+    throw new Error(payload.error?.message || payload.detail || response.statusText);
   }
   return payload.data as T;
 }

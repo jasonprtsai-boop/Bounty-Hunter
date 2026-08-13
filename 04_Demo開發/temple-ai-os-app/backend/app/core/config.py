@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     supabase_anon_key: str | None = None
 
     admin_demo_token: str = "temple-ai-os-admin-demo"
+    admin_tokens: str = ""
     project_root: Path = Field(default_factory=lambda: Path(__file__).resolve().parents[3])
 
     model_config = SettingsConfigDict(
@@ -42,16 +43,29 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
 
     @property
+    def admin_token_map(self) -> dict[str, str]:
+        tokens: dict[str, str] = {}
+        for item in self.admin_tokens.split(","):
+            actor, separator, token = item.partition(":")
+            if separator and actor.strip() and token.strip():
+                tokens[actor.strip()[:80]] = token.strip()
+        return tokens
+
+    @property
     def demo_data_dir(self) -> Path:
-        return self.project_root.parent / "data" / "temple-ai-os-demo"
+        return self.app_data_dir / "demo"
+
+    @property
+    def app_data_dir(self) -> Path:
+        return Path(__file__).resolve().parents[1] / "data"
 
     @property
     def temple_profile_path(self) -> Path:
-        return self.project_root.parents[1] / "00_資料來源" / "宮廟資料" / "萬春宮資料包" / "temple_profile.json"
+        return self.app_data_dir / "temple_profile.json"
 
     @property
     def knowledge_dir(self) -> Path:
-        return self.project_root.parents[1] / "05_資料庫與RAG" / "knowledge-base" / "萬春宮"
+        return self.app_data_dir / "knowledge-base"
 
 
 @lru_cache

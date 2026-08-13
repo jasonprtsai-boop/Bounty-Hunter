@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { Bot, CalendarDays, Headphones, Home, LayoutDashboard, ScrollText, User } from "lucide-react";
+import { Bot, CalendarDays, Headphones, Home, LayoutDashboard, LogOut, ScrollText, User } from "lucide-react";
 
 type ShellProps = {
   title: string;
@@ -34,13 +34,29 @@ export function Shell({ title, children, mode = "liff" }: ShellProps) {
             <small>{mode === "admin" ? "管理後台" : "萬春宮示範"}</small>
           </span>
         </Link>
-        <span className="demo-pill">Demo</span>
+        <div className="topbar-actions">
+          <span className="demo-pill">Demo</span>
+          {mode === "admin" && (
+            <button
+              className="button icon-button"
+              type="button"
+              onClick={() => {
+                localStorage.removeItem("adminToken");
+                localStorage.removeItem("adminActor");
+                window.location.assign("/admin");
+              }}
+            >
+              <LogOut size={17} />
+              <span>登出</span>
+            </button>
+          )}
+        </div>
       </header>
       <main className="main">
         <h1>{title}</h1>
         {children}
       </main>
-      <nav className="bottom-nav" aria-label="主要導覽">
+      <nav className={mode === "admin" ? "side-nav" : "bottom-nav"} aria-label="主要導覽">
         {links.map(([path, Icon, label]) => (
           <NavLink key={path as string} to={path as string}>
             <Icon size={19} />
@@ -51,4 +67,3 @@ export function Shell({ title, children, mode = "liff" }: ShellProps) {
     </div>
   );
 }
-

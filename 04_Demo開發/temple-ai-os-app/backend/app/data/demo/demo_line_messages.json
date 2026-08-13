@@ -1,0 +1,46 @@
+{
+  "rich_menu": {
+    "title": "Temple AI OS Demo Rich Menu",
+    "areas": [
+      { "label": "AI導覽", "action": "message", "text": "我第一次來萬春宮，怎麼參拜？" },
+      { "label": "活動中心", "action": "uri", "uri": "https://demo.example.com/liff/events" },
+      { "label": "宮廟資訊", "action": "message", "text": "介紹萬春宮" },
+      { "label": "報名紀錄", "action": "uri", "uri": "https://demo.example.com/liff/member/registrations" },
+      { "label": "交通位置", "action": "message", "text": "萬春宮在哪裡？" },
+      { "label": "客服協助", "action": "message", "text": "我要聯絡廟方或詢問服務" }
+    ]
+  },
+  "flex_event_card_example": {
+    "title": "中元普度法會示範報名",
+    "subtitle": "2026/08/27 14:00-17:00｜萬春宮",
+    "body": "Demo 展示登記需求、提醒通知與後台統計；正式服務需由廟方確認。",
+    "buttons": [
+      { "label": "查看詳情", "action": "uri", "uri": "https://demo.example.com/liff/events/evt_20260827_zhongyuan" },
+      { "label": "示範報名", "action": "uri", "uri": "https://demo.example.com/liff/register/evt_20260827_zhongyuan" }
+    ]
+  },
+  "reply_examples": [
+    {
+      "user": "萬春宮在哪裡？",
+      "bot": "萬春宮位於臺中市中區成功路212號，主祀天上聖母。這是依政府開放資料整理的資訊。"
+    },
+    {
+      "user": "最近有什麼活動？",
+      "bot": "我可以幫你查看近期公開活動與 Demo 活動中心。目前可展示的活動包含關聖帝君聖誕佳辰、開基媽祖來台305週年宮慶，以及中元普度法會示範報名。"
+    },
+    {
+      "user": "幫我報名中元普度",
+      "bot": "可以，我會開啟 LIFF 示範報名頁。提醒你：這是 Temple AI OS Demo 流程，不代表萬春宮正式報名系統。"
+    }
+  ],
+  "push_message_examples": [
+    {
+      "type": "event_reminder",
+      "text": "提醒：你報名的「第一次參拜導覽」將於明天 10:00 開始，地點為萬春宮。"
+    },
+    {
+      "type": "knowledge_gap_followup",
+      "text": "你上次詢問的停車資訊目前尚未接入官方資料，建議出發前再向廟方確認。"
+    }
+  ]
+}

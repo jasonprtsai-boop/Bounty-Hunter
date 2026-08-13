@@ -1,10 +1,14 @@
 from fastapi.testclient import TestClient
 
+from app.db.supabase import get_repository
 from app.main import app
 
 
 client = TestClient(app)
-ADMIN_HEADERS = {"Authorization": "Bearer temple-ai-os-admin-demo"}
+ADMIN_HEADERS = {
+    "Authorization": "Bearer temple-ai-os-admin-demo",
+    "X-Admin-Actor": "pytest-admin",
+}
 
 
 def test_health() -> None:
@@ -59,6 +63,60 @@ def test_chat_safety_boundary() -> None:
     )
     assert response.status_code == 200
     assert response.json()["data"]["intent"] == "safety_boundary"
+
+
+def test_event_query_returns_flex_with_hero_image() -> None:
+    response = client.post(
+        "/api/chat",
+        json={"message": "近期有什麼活動？", "user_id": "demo_flex_user", "source": "test"},
+    )
+    assert response.status_code == 200
+    flex = response.json()["data"]["flex_message"]
+    first_bubble = flex["contents"]["contents"][0]
+    assert first_bubble["hero"]["type"] == "image"
+    assert first_bubble["hero"]["url"].endswith("/assets/flex/event-card.png")
+
+
+def test_chat_retrieves_relevant_knowledge_for_location() -> None:
+    response = client.post(
+        "/api/chat",
+        json={"message": "萬春宮在哪裡？", "user_id": "demo_location_user", "source": "test"},
+    )
+    assert response.status_code == 200
+    payload = response.json()["data"]
+    assert payload["intent"] == "temple_location"
+    assert "成功路212號" in payload["reply"]
+    assert any(source["source"] == "01_基本問答.md" for source in payload["sources"])
+
+
+def test_chat_rejects_overlong_message() -> None:
+    response = client.post(
+        "/api/chat",
+        json={"message": "廟" * 501, "user_id": "demo_u001", "source": "test"},
+    )
+    assert response.status_code == 422
+
+
+def test_chat_rate_limit() -> None:
+    from app.api.routes.chat import chat_rate_limiter
+
+    chat_rate_limiter.reset()
+    try:
+        for _ in range(12):
+            response = client.post(
+                "/api/chat",
+                json={"message": "地址在哪裡？", "user_id": "demo_rate_limit", "source": "test"},
+            )
+            assert response.status_code == 200
+
+        blocked = client.post(
+            "/api/chat",
+            json={"message": "地址在哪裡？", "user_id": "demo_rate_limit", "source": "test"},
+        )
+        assert blocked.status_code == 429
+        assert blocked.json()["detail"] == "chat_rate_limited"
+    finally:
+        chat_rate_limiter.reset()
 
 
 def test_liff_token_overrides_client_user_id_for_support_ticket() -> None:
@@ -126,6 +184,41 @@ def test_admin_event_capacity_cannot_drop_below_registrations() -> None:
     )
     assert response.status_code == 422
     assert response.json()["detail"] == "event_capacity_below_registrations"
+
+
+def test_admin_mutation_records_audit_log() -> None:
+    repo = get_repository()
+    before_count = len(repo.audit_logs) if hasattr(repo, "audit_logs") else 0
+    event_id = "evt_test_audit_log"
+    create_response = client.post(
+        "/api/admin/events",
+        headers={**ADMIN_HEADERS, "X-Admin-Actor": "audit-admin"},
+        json={
+            "event_id": event_id,
+            "title": "稽核測試活動",
+            "category": "測試",
+            "date": "2026-10-02",
+            "start_time": "10:00",
+            "end_time": "11:00",
+            "location": "萬春宮",
+            "address": "臺中市中區成功路212號",
+            "summary": "用於驗證後台操作紀錄。",
+            "requires_registration": False,
+            "registration_fields": [],
+        },
+    )
+    assert create_response.status_code == 201
+
+    delete_response = client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
+    assert delete_response.status_code == 200
+    assert hasattr(repo, "audit_logs")
+    assert len(repo.audit_logs) >= before_count + 2
+    assert any(
+        item["actor_id"] == "audit-admin"
+        and item["action"] == "POST"
+        and item["target_type"] == "/api/admin/events"
+        for item in repo.audit_logs
+    )
 
 
 def test_support_ticket_admin_flow() -> None:

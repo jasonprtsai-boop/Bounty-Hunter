@@ -9,6 +9,11 @@ def _liff_url(path: str) -> str:
     return f"{settings.frontend_base_url.rstrip('/')}{path}"
 
 
+def _asset_url(path: str) -> str:
+    settings = get_settings()
+    return f"{settings.frontend_base_url.rstrip('/')}{path}"
+
+
 def event_bubble(event: Event) -> dict[str, Any]:
     status_label = "可報名" if event.requires_registration and event.status == "open" else "查看資訊"
     detail_uri = _liff_url(f"/events/{event.event_id}")
@@ -36,6 +41,14 @@ def event_bubble(event: Event) -> dict[str, Any]:
     return {
         "type": "bubble",
         "size": "mega",
+        "hero": {
+            "type": "image",
+            "url": _asset_url("/assets/flex/event-card.png"),
+            "size": "full",
+            "aspectRatio": "1:1",
+            "aspectMode": "cover",
+            "action": {"type": "uri", "label": status_label, "uri": detail_uri},
+        },
         "body": {
             "type": "box",
             "layout": "vertical",
@@ -69,6 +82,13 @@ def registration_confirmation(event: Event, registration: Registration) -> dict[
         "altText": "報名成功確認",
         "contents": {
             "type": "bubble",
+            "hero": {
+                "type": "image",
+                "url": _asset_url("/assets/flex/event-card.png"),
+                "size": "full",
+                "aspectRatio": "1:1",
+                "aspectMode": "cover",
+            },
             "body": {
                 "type": "box",
                 "layout": "vertical",
@@ -96,6 +116,13 @@ def fortune_message(slip: FortuneSlip) -> dict[str, Any]:
         "altText": slip.title,
         "contents": {
             "type": "bubble",
+            "hero": {
+                "type": "image",
+                "url": _asset_url("/assets/flex/fortune-card.png"),
+                "size": "full",
+                "aspectRatio": "1:1",
+                "aspectMode": "cover",
+            },
             "body": {
                 "type": "box",
                 "layout": "vertical",
@@ -110,4 +137,3 @@ def fortune_message(slip: FortuneSlip) -> dict[str, Any]:
             },
         },
     }
-

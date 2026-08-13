@@ -6,10 +6,11 @@ Temple AI OS 是以萬春宮公開資料為示範場景的 LINE + AI 宮廟服�
 
 ## 系統組成
 
-- `backend/`：FastAPI API、LINE Webhook、LIFF token verify、RAG、Flex Message、管理後台 API。
-- `frontend/`：React + Vite，包含 LIFF 使用者端與 Admin 管理後台。
-- `database/`：Supabase PostgreSQL / pgvector migration 與 demo seed。
-- `assets/`：Rich Menu、LIFF banner、Flex placeholder 圖像。
+- `backend/`：FastAPI API、LINE Webhook、LIFF token verify、RAG、Flex Message、管理後台 API。後端執行所需 demo data、temple profile、knowledge-base 已收在 `backend/app/data/`。
+- `frontend/`：React + Vite，包含 LIFF 使用者端與 Admin 管理後台。Admin 頁需要輸入部署環境的管理 Token。
+- `database/`：Supabase PostgreSQL / pgvector migration、atomic registration RPC 與 demo seed。
+- `assets/`：Rich Menu、LIFF banner、Flex 圖像與可選字型資料夾。
+- `frontend/public/assets/`：Flex Message hero image 與前端可公開存取素材。
 - `scripts/`：資料匯入、Rich Menu 建立、Flex JSON 驗證、圖片產生。
 
 ## 快速啟動
@@ -40,7 +41,7 @@ npm run dev
 
 ## 必填環境變數
 
-先複製 `.env.example` 到部署平台或本機 `.env`。沒有 LINE/OpenAI/Supabase key 時，系統會用本機 Demo 資料跑核心流程。
+先複製 `.env.example` 到部署平台或本機 `.env`。沒有 LINE/OpenAI/Supabase key 時，系統會用本機 Demo 資料跑核心流程。正式 Supabase 模式會透過 OpenAI embedding + pgvector RPC 做知識檢索；Demo 模式使用本機詞組檢索 fallback。
 
 ```text
 LINE_CHANNEL_SECRET=
@@ -49,9 +50,14 @@ LINE_LOGIN_CHANNEL_ID=
 OPENAI_API_KEY=
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_ANON_KEY=
+ADMIN_DEMO_TOKEN=
+ADMIN_TOKENS=temple-staff:<token>,reviewer:<token>
 VITE_API_BASE_URL=
 VITE_LIFF_ID=
 ```
+
+正式環境建議使用 `ADMIN_TOKENS` 的 `管理者:token` 格式；成功的後台新增、修改、刪除會寫入 `audit_logs`，並以後端驗證出的管理者名稱作為操作人。
 
 ## LINE Console 設定摘要
 
@@ -65,6 +71,26 @@ VITE_LIFF_ID=
 6. 建立 LINE Login Channel，再新增 LIFF App。
 7. LIFF Endpoint 設為 `https://<vercel-app>.vercel.app`，Scopes 使用 `openid`、`profile`。
 8. 使用 `scripts/create_rich_menu.py` 建立 Rich Menu。
+
+## Supabase 正式模式
+
+切到 `DEMO_MODE=false` 前，先依序套用：
+
+```text
+database/migrations/001_init.sql
+database/migrations/002_rls_policies.sql
+database/migrations/003_line_webhook_events.sql
+database/migrations/004_search_and_atomic_registration.sql
+```
+
+再執行：
+
+```powershell
+python scripts/seed_demo_data.py
+python scripts/import_knowledge.py
+```
+
+`import_knowledge.py` 需要 `OPENAI_API_KEY` 才會寫入 pgvector embedding。
 
 ## 驗收主流程
 

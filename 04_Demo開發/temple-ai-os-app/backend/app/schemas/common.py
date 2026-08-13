@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 T = TypeVar("T")
 
@@ -121,9 +121,17 @@ class RegistrationCreate(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    message: str
-    user_id: str = "demo_u001"
-    source: str = "liff"
+    message: str = Field(min_length=1, max_length=500)
+    user_id: str = Field(default="demo_u001", max_length=128)
+    source: str = Field(default="liff", max_length=32)
+
+    @field_validator("message")
+    @classmethod
+    def normalize_message(cls, value: str) -> str:
+        message = value.strip()
+        if not message:
+            raise ValueError("message_empty")
+        return message
 
 
 class ChatReply(BaseModel):

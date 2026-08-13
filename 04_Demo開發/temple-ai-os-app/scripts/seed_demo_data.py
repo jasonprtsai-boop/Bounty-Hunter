@@ -8,8 +8,8 @@ import httpx
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_DATA = ROOT.parent / "data" / "temple-ai-os-demo"
-TEMPLE_PROFILE = ROOT.parents[1] / "00_資料來源" / "宮廟資料" / "萬春宮資料包" / "temple_profile.json"
+SOURCE_DATA = ROOT / "backend" / "app" / "data" / "demo"
+TEMPLE_PROFILE = ROOT / "backend" / "app" / "data" / "temple_profile.json"
 TEMPLE_ID = "wcg_taichung_demo"
 
 

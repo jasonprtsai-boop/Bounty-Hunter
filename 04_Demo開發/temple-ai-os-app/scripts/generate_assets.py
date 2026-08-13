@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -7,118 +8,176 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "assets"
+PUBLIC_ASSETS = ROOT / "frontend" / "public" / "assets"
+FONT_DIR = ASSETS / "fonts"
+
+INK = "#2B1B12"
+RED = "#B42318"
+DEEP_RED = "#7A1E17"
+GOLD = "#D6A33A"
+PALE_GOLD = "#FFF4D6"
+JADE = "#1F7A5B"
+PAPER = "#FFFCF4"
 
 
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    env_key = "TEMPLE_AI_OS_FONT_BOLD" if bold else "TEMPLE_AI_OS_FONT_REGULAR"
     candidates = [
+        os.getenv(env_key),
+        FONT_DIR / ("NotoSansTC-Bold.otf" if bold else "NotoSansTC-Regular.otf"),
+        FONT_DIR / ("NotoSansCJKtc-Bold.otf" if bold else "NotoSansCJKtc-Regular.otf"),
         "C:/Windows/Fonts/msjhbd.ttc" if bold else "C:/Windows/Fonts/msjh.ttc",
-        "C:/Windows/Fonts/NotoSansCJK-Regular.ttc",
-        "C:/Windows/Fonts/arial.ttf",
+        "C:/Windows/Fonts/mingliub.ttc" if bold else "C:/Windows/Fonts/mingliu.ttc",
+        "/System/Library/Fonts/PingFang.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
+        if bold
+        else "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc"
+        if bold
+        else "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+        if bold
+        else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
     for candidate in candidates:
+        if not candidate:
+            continue
         path = Path(candidate)
         if path.exists():
             return ImageFont.truetype(str(path), size=size)
     return ImageFont.load_default()
 
 
-def draw_centered(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], text: str, fill: str, size: int) -> None:
-    fnt = font(size, bold=True)
-    bbox = draw.multiline_textbbox((0, 0), text, font=fnt, spacing=12, align="center")
-    text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
-    x = box[0] + (box[2] - box[0] - text_w) / 2
-    y = box[1] + (box[3] - box[1] - text_h) / 2
-    draw.multiline_text((x, y), text, fill=fill, font=fnt, spacing=12, align="center")
+def ensure_dirs() -> None:
+    for path in [
+        ASSETS / "rich-menu",
+        ASSETS / "banners",
+        ASSETS / "flex",
+        PUBLIC_ASSETS / "banners",
+        PUBLIC_ASSETS / "flex",
+    ]:
+        path.mkdir(parents=True, exist_ok=True)
+
+
+def text_center(
+    draw: ImageDraw.ImageDraw,
+    box: tuple[int, int, int, int],
+    text: str,
+    fill: str,
+    size: int,
+    *,
+    bold: bool = False,
+    spacing: int = 8,
+) -> None:
+    fnt = font(size, bold=bold)
+    bbox = draw.multiline_textbbox((0, 0), text, font=fnt, spacing=spacing, align="center")
+    width = bbox[2] - bbox[0]
+    height = bbox[3] - bbox[1]
+    x = box[0] + (box[2] - box[0] - width) / 2
+    y = box[1] + (box[3] - box[1] - height) / 2
+    draw.multiline_text((x, y), text, fill=fill, font=fnt, spacing=spacing, align="center")
+
+
+def draw_roof(draw: ImageDraw.ImageDraw, cx: int, y: int, scale: int, color: str = RED) -> None:
+    draw.polygon(
+        [
+            (cx - 160 * scale, y + 78 * scale),
+            (cx, y),
+            (cx + 160 * scale, y + 78 * scale),
+            (cx + 125 * scale, y + 100 * scale),
+            (cx, y + 42 * scale),
+            (cx - 125 * scale, y + 100 * scale),
+        ],
+        fill=color,
+    )
+    draw.rectangle((cx - 118 * scale, y + 98 * scale, cx + 118 * scale, y + 138 * scale), fill=GOLD)
+    draw.rectangle((cx - 86 * scale, y + 138 * scale, cx + 86 * scale, y + 216 * scale), fill=PALE_GOLD)
+    draw.rectangle((cx - 96 * scale, y + 216 * scale, cx + 96 * scale, y + 236 * scale), fill=color)
 
 
 def rich_menu() -> None:
-    out = ASSETS / "rich-menu" / "main-2500x1686.png"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    image = Image.new("RGB", (2500, 1686), "#F6FBF8")
+    image = Image.new("RGB", (2500, 1686), PAPER)
     draw = ImageDraw.Draw(image)
-    title_font = font(64, bold=True)
-    subtitle_font = font(32)
-    draw.rectangle((0, 0, 2500, 170), fill="#102536")
-    draw.text((80, 45), "Temple AI OS", fill="#FFFFFF", font=title_font)
-    draw.text((540, 68), "萬春宮示範服務入口", fill="#BDEFD1", font=subtitle_font)
+    draw.rectangle((0, 0, 2500, 260), fill=DEEP_RED)
+    draw.rectangle((0, 236, 2500, 260), fill=GOLD)
+    draw_roof(draw, 2140, 36, 1, RED)
+    draw.text((90, 54), "Temple AI OS", fill="#FFFFFF", font=font(78, bold=True))
+    draw.text((94, 148), "萬春宮示範服務入口", fill=PALE_GOLD, font=font(42, bold=True))
 
     labels = [
-        ("AI\n助手", "AI", "#06C755"),
-        ("活動\n中心", "曆", "#B42318"),
-        ("文化\n抽籤", "籤", "#8A6A12"),
-        ("宮廟\n導覽", "廟", "#0F6B8A"),
-        ("會員\n中心", "人", "#334155"),
-        ("客服\n中心", "話", "#7A3E9D"),
+        ("AI 助手", "問", "參拜與文化問答", JADE),
+        ("活動中心", "曆", "法會與講座 Demo", RED),
+        ("文化抽籤", "籤", "正向提醒", "#8A5A12"),
+        ("宮廟導覽", "廟", "QR/NFC 動線", "#245B8A"),
+        ("會員中心", "人", "報名與提醒", "#334155"),
+        ("客服中心", "話", "人工確認入口", "#6B3A8F"),
     ]
     cells = [
-        (0, 170, 833, 928),
-        (833, 170, 1667, 928),
-        (1667, 170, 2500, 928),
-        (0, 928, 833, 1686),
-        (833, 928, 1667, 1686),
-        (1667, 928, 2500, 1686),
+        (0, 260, 833, 973),
+        (833, 260, 1667, 973),
+        (1667, 260, 2500, 973),
+        (0, 973, 833, 1686),
+        (833, 973, 1667, 1686),
+        (1667, 973, 2500, 1686),
     ]
-    icon_font = font(74, bold=True)
-    for box, (label, icon, color) in zip(cells, labels):
-        draw.rectangle(box, fill="#FFFFFF", outline="#DCE4E0", width=4)
-        icon_box = (box[0] + 310, box[1] + 120, box[0] + 523, box[1] + 333)
-        draw.rounded_rectangle(icon_box, radius=34, outline=color, width=12, fill="#F6FBF8")
-        icon_bbox = draw.textbbox((0, 0), icon, font=icon_font)
-        draw.text(
-            (
-                icon_box[0] + (icon_box[2] - icon_box[0] - (icon_bbox[2] - icon_bbox[0])) / 2,
-                icon_box[1] + (icon_box[3] - icon_box[1] - (icon_bbox[3] - icon_bbox[1])) / 2 - 4,
-            ),
-            icon,
-            fill=color,
-            font=icon_font,
-        )
-        draw_centered(draw, (box[0] + 60, box[1] + 360, box[2] - 60, box[3] - 80), label, "#102536", 88)
+    for box, (title, icon, subtitle, accent) in zip(cells, labels):
+        draw.rectangle(box, fill="#FFFFFF", outline="#E4D5B0", width=4)
+        draw.rectangle((box[0], box[1], box[2], box[1] + 16), fill=accent)
+        icon_box = (box[0] + 322, box[1] + 92, box[0] + 511, box[1] + 281)
+        draw.ellipse(icon_box, fill=PALE_GOLD, outline=accent, width=10)
+        text_center(draw, icon_box, icon, accent, 82, bold=True)
+        text_center(draw, (box[0] + 80, box[1] + 326, box[2] - 80, box[1] + 458), title, INK, 82, bold=True)
+        text_center(draw, (box[0] + 80, box[1] + 486, box[2] - 80, box[1] + 582), subtitle, "#5C4635", 36)
+
+    out = ASSETS / "rich-menu" / "main-2500x1686.png"
     image.save(out, optimize=True)
 
 
-def banner(name: str, title: str, accent: str) -> None:
-    out = ASSETS / "banners" / f"{name}.png"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    image = Image.new("RGB", (1200, 520), "#FFFFFF")
+def banner(name: str, title: str, subtitle: str, accent: str) -> None:
+    image = Image.new("RGB", (1200, 520), PAPER)
     draw = ImageDraw.Draw(image)
-    draw.rectangle((0, 0, 1200, 520), fill="#F6FBF8")
-    draw.rectangle((0, 0, 90, 520), fill=accent)
-    draw.rounded_rectangle((780, 70, 1110, 400), radius=36, outline="#102536", width=8, fill="#FFFFFF")
-    draw.line((860, 245, 1030, 245), fill=accent, width=16)
-    draw.line((945, 160, 945, 330), fill=accent, width=16)
-    draw.text((150, 130), title, fill="#102536", font=font(62, bold=True))
-    draw.text((154, 225), "Temple AI OS｜萬春宮示範", fill="#536471", font=font(34))
-    draw.text((154, 300), "政府開放資料 + 自製 Demo 素材", fill="#8A6A12", font=font(28))
-    image.save(out, optimize=True)
+    draw.rectangle((0, 0, 1200, 520), fill=PAPER)
+    draw.rectangle((0, 0, 1200, 82), fill=DEEP_RED)
+    draw.rectangle((0, 82, 1200, 96), fill=GOLD)
+    draw_roof(draw, 916, 150, 1, RED)
+    draw.text((86, 148), title, fill=INK, font=font(66, bold=True))
+    draw.text((90, 238), subtitle, fill="#5C4635", font=font(36))
+    draw.rounded_rectangle((88, 320, 576, 388), radius=8, fill=accent)
+    draw.text((120, 337), "LINE + AI + LIFF", fill="#FFFFFF", font=font(32, bold=True))
+    draw.text((92, 430), "Demo 資料不代表萬春宮官方營運", fill="#8A6A12", font=font(27))
+    for out in [ASSETS / "banners" / f"{name}.png", PUBLIC_ASSETS / "banners" / f"{name}.png"]:
+        image.save(out, optimize=True)
 
 
-def flex_placeholder(name: str, title: str, accent: str) -> None:
-    out = ASSETS / "flex" / f"{name}.png"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    image = Image.new("RGB", (1040, 1040), "#FFFFFF")
+def flex_card(name: str, title: str, subtitle: str, accent: str) -> None:
+    image = Image.new("RGB", (1024, 1024), PAPER)
     draw = ImageDraw.Draw(image)
-    draw.rectangle((0, 0, 1040, 1040), fill="#F6FBF8")
-    draw.rounded_rectangle((110, 120, 930, 790), radius=42, outline=accent, width=14, fill="#FFFFFF")
-    draw.text((160, 220), title, fill="#102536", font=font(72, bold=True))
-    draw.text((160, 340), "Temple AI OS", fill=accent, font=font(54, bold=True))
-    draw.text((160, 450), "合法素材：自製圖像 / 開放資料來源", fill="#536471", font=font(34))
-    draw.rectangle((160, 640, 880, 660), fill=accent)
-    image.save(out, optimize=True)
+    draw.rectangle((0, 0, 1024, 1024), fill=PAPER)
+    draw.rectangle((0, 0, 1024, 140), fill=DEEP_RED)
+    draw.rectangle((0, 140, 1024, 162), fill=GOLD)
+    draw_roof(draw, 512, 252, 1, accent)
+    text_center(draw, (80, 532, 944, 646), title, INK, 74, bold=True)
+    text_center(draw, (120, 660, 904, 742), subtitle, "#5C4635", 34)
+    draw.rounded_rectangle((210, 804, 814, 872), radius=8, fill=accent)
+    text_center(draw, (210, 804, 814, 872), "Temple AI OS 示範卡片", "#FFFFFF", 32, bold=True)
+    draw.text((80, 938), "自製示意圖｜開放資料示範情境", fill="#8A6A12", font=font(26))
+    for out in [ASSETS / "flex" / f"{name}.png", PUBLIC_ASSETS / "flex" / f"{name}.png"]:
+        image.save(out, optimize=True)
 
 
 def main() -> None:
+    ensure_dirs()
     rich_menu()
-    banner("home", "智慧宮廟服務入口", "#06C755")
-    banner("events", "活動中心", "#B42318")
-    banner("fortune", "文化抽籤", "#8A6A12")
-    banner("support", "客服中心", "#0F6B8A")
-    banner("tour", "宮廟導覽", "#7A3E9D")
-    flex_placeholder("event-card", "活動卡片", "#B42318")
-    flex_placeholder("fortune-card", "文化抽籤", "#8A6A12")
-    flex_placeholder("support-card", "客服工單", "#0F6B8A")
-    print(f"Generated assets in {ASSETS}")
+    banner("home", "智慧宮廟服務入口", "把參拜、活動、客服收進 LINE", JADE)
+    banner("events", "活動中心", "法會、講座、報名與提醒", RED)
+    banner("fortune", "文化抽籤", "以籤詩語感做正向提醒", "#8A5A12")
+    banner("support", "客服中心", "複雜問題轉人工確認", "#245B8A")
+    banner("tour", "宮廟導覽", "QR/NFC 開啟文化點位", "#6B3A8F")
+    flex_card("event-card", "活動卡片", "活動資訊、報名入口、Demo 註記", RED)
+    flex_card("fortune-card", "文化抽籤", "不做命運斷言，只做文化解說", "#8A5A12")
+    flex_card("support-card", "客服工單", "需要人工確認時建立紀錄", "#245B8A")
+    print(f"Generated assets in {ASSETS} and {PUBLIC_ASSETS}")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 :root {
-  color: #102536;
-  background: #f5f7f6;
+  color: #2b1b12;
+  background: #fbf7ec;
   font-family: Inter, "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
   letter-spacing: 0;
 }
@@ -31,7 +31,11 @@ select {
 }
 
 .admin-app {
-  background: #eef2f1;
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  padding-bottom: 0;
+  background: #f7f1e4;
 }
 
 .topbar {
@@ -44,8 +48,14 @@ select {
   gap: 16px;
   padding: 14px 18px;
   background: rgba(255, 255, 255, 0.94);
-  border-bottom: 1px solid #dce4e0;
+  border-bottom: 1px solid #e6d7b8;
   backdrop-filter: blur(12px);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .brand {
@@ -59,9 +69,10 @@ select {
   width: 38px;
   height: 38px;
   place-items: center;
-  border: 2px solid #06c755;
+  border: 2px solid #b42318;
   border-radius: 8px;
-  color: #06c755;
+  background: #fff4d6;
+  color: #b42318;
   font-weight: 800;
 }
 
@@ -80,7 +91,7 @@ select {
   padding: 3px 9px;
   border-radius: 999px;
   background: #e6f8ee;
-  color: #067a39;
+  color: #8a4a08;
   font-size: 12px;
   font-weight: 700;
 }
@@ -91,8 +102,8 @@ select {
 }
 
 .status.open {
-  background: #e6f8ee;
-  color: #067a39;
+  background: #fff4d6;
+  color: #8a4a08;
 }
 
 .main {
@@ -101,12 +112,61 @@ select {
   padding: 20px 16px 30px;
 }
 
+.admin-app .topbar {
+  grid-column: 1 / -1;
+}
+
+.admin-app .main {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px;
+}
+
 .route-loading {
   display: grid;
   min-height: 100vh;
   place-items: center;
   color: #667680;
   font-weight: 800;
+}
+
+.admin-login-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background: #f7f1e4;
+}
+
+.admin-login-card {
+  display: grid;
+  width: min(420px, 100%);
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid #dce4e0;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 46px rgba(16, 37, 54, 0.12);
+}
+
+.admin-login-card h1,
+.admin-login-card p {
+  margin: 0;
+}
+
+.admin-login-card p {
+  color: #667680;
+}
+
+.admin-login-mark {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 8px;
+  background: #7a1e17;
+  color: #fff;
 }
 
 h1 {
@@ -176,7 +236,7 @@ p {
 }
 
 .quick-action svg {
-  color: #06c755;
+  color: #b42318;
 }
 
 .metric strong {
@@ -231,7 +291,7 @@ p {
 .capacity span {
   display: block;
   height: 100%;
-  background: #06c755;
+  background: #d6a33a;
 }
 
 .button {
@@ -243,14 +303,14 @@ p {
   border: 1px solid #cbd5d1;
   border-radius: 8px;
   background: #fff;
-  color: #102536;
+  color: #2b1b12;
   font-weight: 800;
   cursor: pointer;
 }
 
 .button.primary {
-  border-color: #06c755;
-  background: #06c755;
+  border-color: #b42318;
+  background: #b42318;
   color: white;
 }
 
@@ -339,8 +399,8 @@ label {
 .answer {
   margin-top: 12px;
   padding: 14px;
-  border-left: 4px solid #06c755;
-  background: #f6fbf8;
+  border-left: 4px solid #d6a33a;
+  background: #fffaf0;
 }
 
 .fortune-stage {
@@ -487,8 +547,36 @@ label {
 }
 
 .bottom-nav a.active {
-  color: #06c755;
+  color: #b42318;
   font-weight: 800;
+}
+
+.side-nav {
+  position: sticky;
+  top: 67px;
+  align-self: start;
+  display: grid;
+  gap: 6px;
+  min-height: calc(100vh - 67px);
+  padding: 18px 12px;
+  border-right: 1px solid #e6d7b8;
+  background: #fffaf0;
+}
+
+.side-nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: #5c4635;
+  font-weight: 800;
+}
+
+.side-nav a.active {
+  background: #b42318;
+  color: #fff;
 }
 
 .public-shell {
@@ -806,6 +894,33 @@ label {
 }
 
 @media (max-width: 760px) {
+  .admin-app {
+    display: block;
+    padding-bottom: 0;
+  }
+
+  .admin-app .main {
+    padding: 20px 16px 30px;
+  }
+
+  .side-nav {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    min-height: 0;
+    padding: 8px;
+    border-right: 0;
+    border-bottom: 1px solid #e6d7b8;
+  }
+
+  .side-nav a {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 7px 4px;
+    font-size: 12px;
+  }
+
   .hero-panel {
     grid-template-columns: 1fr;
   }

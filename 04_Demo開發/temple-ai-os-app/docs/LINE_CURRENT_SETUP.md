@@ -1,6 +1,6 @@
 # LINE current setup
 
-Last updated: 2026-08-06
+Last updated: 2026-08-13
 
 ## Public frontend
 
@@ -48,11 +48,16 @@ Sensitive values are intentionally not recorded here:
 
 ## Pending
 
-- Deploy backend to public HTTPS URL before setting and verifying Messaging API webhook URL.
-- After backend deployment, set:
-  - `API_BASE_URL`
-  - `FRONTEND_BASE_URL`
-  - `ALLOWED_ORIGINS`
-  - `LINE_LIFF_ID`
-- Rebuild frontend with production `VITE_API_BASE_URL` and `VITE_LIFF_ID`.
+- Backend is already deployed at `https://temple-ai-os-api.onrender.com`; keep using this URL unless the Render service is replaced.
+- Configure Render secrets before verifying the Messaging API webhook:
+  - `LINE_CHANNEL_SECRET`
+  - `LINE_CHANNEL_ACCESS_TOKEN`
+  - `OPENAI_API_KEY`
+  - `SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+  - `SUPABASE_ANON_KEY`
+  - `ADMIN_DEMO_TOKEN`
+- Apply Supabase migrations through `004_search_and_atomic_registration.sql`, then run `scripts/seed_demo_data.py` and `scripts/import_knowledge.py`.
+- Set Messaging API webhook URL to `https://temple-ai-os-api.onrender.com/api/line/webhook`, enable webhook and redelivery, then verify.
+- Publish the redesigned Rich Menu with `scripts/create_rich_menu.py`.
 - Store secrets only in local `.env` or deployment secret storage, not in repo files.

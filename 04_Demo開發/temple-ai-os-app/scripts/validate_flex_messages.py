@@ -18,13 +18,24 @@ def assert_message_shape(message: dict) -> None:
     assert "contents" in message
 
 
+def assert_bubble_hero_image(bubble: dict) -> None:
+    hero = bubble["hero"]
+    assert hero["type"] == "image"
+    assert hero["url"].startswith(("https://", "http://localhost"))
+    assert hero["aspectRatio"] == "1:1"
+    assert hero["aspectMode"] == "cover"
+
+
 def main() -> None:
     repo = get_repository()
-    assert_message_shape(events_carousel(repo.list_events()))
-    assert_message_shape(fortune_message(repo.draw_fortune()))
+    event_message = events_carousel(repo.list_events())
+    fortune = fortune_message(repo.draw_fortune())
+    assert_message_shape(event_message)
+    assert_message_shape(fortune)
+    assert_bubble_hero_image(event_message["contents"]["contents"][0])
+    assert_bubble_hero_image(fortune["contents"])
     print("Flex messages are structurally valid for demo use.")
 
 
 if __name__ == "__main__":
     main()
-

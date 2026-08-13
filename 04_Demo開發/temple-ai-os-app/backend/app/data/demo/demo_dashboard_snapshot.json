@@ -1,0 +1,53 @@
+{
+  "snapshot_date": "2026-08-05",
+  "temple_id": "wcg_taichung_demo",
+  "notice": "All metrics are demo sample data, not official Wan Chun Gong operating data.",
+  "headline_metrics": {
+    "line_friends": 1268,
+    "active_users_7d": 342,
+    "event_views_7d": 918,
+    "registrations_total": 172,
+    "ai_questions_7d": 486,
+    "knowledge_gap_count": 11
+  },
+  "event_metrics": [
+    {
+      "event_id": "evt_20260827_zhongyuan",
+      "title": "中元普度法會示範報名",
+      "views": 328,
+      "registrations": 78,
+      "reminder_opt_ins": 65,
+      "conversion_rate": 0.238
+    },
+    {
+      "event_id": "evt_demo_worship_intro",
+      "title": "第一次參拜導覽",
+      "views": 146,
+      "registrations": 18,
+      "reminder_opt_ins": 17,
+      "conversion_rate": 0.123
+    },
+    {
+      "event_id": "evt_demo_culture_talk",
+      "title": "媽祖文化小講堂",
+      "views": 192,
+      "registrations": 34,
+      "reminder_opt_ins": 28,
+      "conversion_rate": 0.177
+    }
+  ],
+  "top_ai_intents": [
+    { "intent": "temple_location", "label": "地址與交通", "count": 88 },
+    { "intent": "worship_process", "label": "第一次參拜流程", "count": 73 },
+    { "intent": "event_query", "label": "近期活動查詢", "count": 69 },
+    { "intent": "history_culture", "label": "萬春宮歷史文化", "count": 44 },
+    { "intent": "registration_help", "label": "活動報名協助", "count": 39 }
+  ],
+  "knowledge_gaps": [
+    "停車場即時資訊",
+    "無障礙動線細節",
+    "現場祭典準確流程時間",
+    "官方報名規則細節",
+    "廟方授權圖片清單"
+  ]
+}

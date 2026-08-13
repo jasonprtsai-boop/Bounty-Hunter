@@ -24,6 +24,19 @@ class OpenAIResponder:
         )
         return response.output_text.strip()
 
+    async def embed_text(self, text: str) -> list[float] | None:
+        if not self.settings.openai_api_key:
+            return None
+
+        from openai import AsyncOpenAI
+
+        client = AsyncOpenAI(api_key=self.settings.openai_api_key)
+        response = await client.embeddings.create(
+            model=self.settings.openai_embedding_model,
+            input=text,
+        )
+        return response.data[0].embedding
+
     def _fallback_reply(self, *, question: str, context: str) -> str:
         if context:
             return (
@@ -35,4 +48,3 @@ class OpenAIResponder:
             "我目前沒有找到可確認的公開資料，因此不直接回答細節。"
             "你可以查看萬春宮官網或致電 04-22245964 確認；我也可以先幫你整理要詢問廟方的問題。"
         )
-

@@ -1,0 +1,24 @@
+[
+  {
+    "job_id": "job_demo_registration_confirmation",
+    "job_type": "registration_confirmation",
+    "target_user_id": "demo_u001",
+    "event_id": "evt_demo_worship_intro",
+    "status": "ready",
+    "scheduled_at": null,
+    "payload": {
+      "text": "Temple AI OS Demo：你的活動報名已建立。"
+    }
+  },
+  {
+    "job_id": "job_demo_event_reminder",
+    "job_type": "event_reminder",
+    "target_user_id": "demo_u002",
+    "event_id": "evt_20260827_zhongyuan",
+    "status": "draft",
+    "scheduled_at": "2026-08-26T18:00:00+08:00",
+    "payload": {
+      "text": "提醒：你報名的 Demo 活動即將開始，正式資訊仍以廟方公告為準。"
+    }
+  }
+]

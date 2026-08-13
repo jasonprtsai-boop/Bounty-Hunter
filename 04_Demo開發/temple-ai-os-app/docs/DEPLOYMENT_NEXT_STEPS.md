@@ -1,6 +1,6 @@
 # Deployment next steps
 
-Last updated: 2026-08-06
+Last updated: 2026-08-13
 
 ## Current public URLs
 
@@ -25,6 +25,11 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - LIFF app created.
 - LINE Official Account created: `Temple AI OS Demo`, Basic ID `@983zhzni`.
 - Messaging API enabled for channel `2010991408`.
+- Admin frontend now requires an entered management token; the demo token is no longer bundled in public frontend code.
+- Admin APIs support named `ADMIN_TOKENS` so audit logs can record the server-verified operator.
+- `/api/chat` has message length bounds and a simple per-user/IP rate limit.
+- Flex event and fortune messages now include public hero images.
+- Production Supabase path now has pgvector search RPC and atomic event registration RPC in migration `004_search_and_atomic_registration.sql`.
 
 ## 2. Current backend mode
 
@@ -39,7 +44,7 @@ Build=cd "04_Demo開發/temple-ai-os-app/backend" && pip install -e .
 Start=cd "04_Demo開發/temple-ai-os-app/backend" && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
-`DEMO_MODE=true` keeps the public API online without storing LINE, OpenAI, or Supabase secrets. Admin APIs are disabled in production unless `ADMIN_DEMO_TOKEN` is changed from the demo default.
+`DEMO_MODE=true` keeps the public API online without storing LINE, OpenAI, or Supabase secrets. Admin APIs are disabled in production unless `ADMIN_DEMO_TOKEN` is changed from the demo default or `ADMIN_TOKENS` is configured.
 
 Free Render instances spin down after inactivity, so the first request can be delayed by roughly 50 seconds or more.
 
@@ -54,7 +59,8 @@ OPENAI_API_KEY=<secret>
 SUPABASE_URL=<secret>
 SUPABASE_SERVICE_ROLE_KEY=<secret>
 SUPABASE_ANON_KEY=<secret>
-ADMIN_DEMO_TOKEN=<new private admin token>
+ADMIN_DEMO_TOKEN=<new private admin token, or leave unused when ADMIN_TOKENS is set>
+ADMIN_TOKENS=temple-staff:<token>,reviewer:<token>
 ```
 
 Then change:
@@ -84,6 +90,7 @@ Apply migrations in order before changing `DEMO_MODE=false`:
 database/migrations/001_init.sql
 database/migrations/002_rls_policies.sql
 database/migrations/003_line_webhook_events.sql
+database/migrations/004_search_and_atomic_registration.sql
 ```
 
 Seed demo content after migrations:
@@ -93,7 +100,16 @@ cd 04_Demo開發/temple-ai-os-app
 python scripts/seed_demo_data.py
 ```
 
-Current limitation: registration capacity updates are guarded by the API but are not yet an atomic database RPC. For public high-traffic use, replace the REST insert/update pair with a Supabase function that checks capacity and writes the registration in one transaction.
+Import knowledge chunks and embeddings after migrations:
+
+```text
+cd 04_Demo開發/temple-ai-os-app
+python scripts/import_knowledge.py
+```
+
+`scripts/import_knowledge.py` does a dry run without secrets. To write pgvector embeddings, set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `OPENAI_API_KEY`.
+
+Registration capacity is now handled by the `register_for_event` database function in migration `004`; do not switch production traffic to `DEMO_MODE=false` until that migration is applied.
 
 ## 5. Frontend API target
 
@@ -164,5 +180,9 @@ Use `assets/rich-menu/main-2500x1686.png`.
 - LINE webhook Verify succeeds.
 - Text message to the official account reaches `/api/line/webhook`.
 - AI reply is sent through Messaging API.
+- Event Flex Message includes a reachable HTTPS hero image under `/assets/flex/event-card.png`.
+- Admin login requires a private token. Prefer `ADMIN_TOKENS`; successful admin mutations are recorded in `audit_logs` with the server-verified actor.
+- Supabase knowledge search returns results from `match_knowledge_chunks`.
+- Event registration uses `register_for_event` and rejects over-capacity concurrent attempts.
 - Duplicate webhook event is processed only once.
 - Demo pages clearly state this is not Wan Chun Gong official operation.
