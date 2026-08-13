@@ -57,6 +57,127 @@ insert into notification_jobs (job_id, job_type, target_user_id, event_id, statu
   ('job_demo_event_reminder','event_reminder','demo_u002','evt_20260827_zhongyuan','draft','2026-08-26T18:00:00+08:00','{"text":"提醒：你報名的 Demo 活動即將開始，正式資訊仍以廟方公告為準。"}')
 on conflict (job_id) do nothing;
 
+insert into faq_rules (
+  rule_id, temple_id, intent, title, keywords, negative_keywords, reply,
+  priority, enabled, source_type, source_refs
+) values
+  (
+    'rule_safety_boundary',
+    'wcg_taichung_demo',
+    'safety_boundary',
+    '重大決策與宗教斷言安全邊界',
+    array['投資','股票','借錢','法律','提告','告人','被告','疾病','生病','藥','考試會不會上','感情會不會','財運','命運','神明告訴','神明指示'],
+    '{}',
+    '這類問題可能涉及命運、醫療、法律或財務等重大判斷，我不能斷言結果。我可以提供公開資料、文化背景與一般參拜資訊，但不能代表神明或廟方作出指示。',
+    1000,
+    true,
+    'fixed_safety_reply',
+    '[{"source":"04_AI安全回覆規則.md","source_type":"demo_policy"}]'::jsonb
+  ),
+  (
+    'rule_support',
+    'wcg_taichung_demo',
+    'support',
+    '需要人工確認的客服問題',
+    array['客服','真人','聯絡','工單','付款','收據','退款','失物','申訴','報名狀態','取消報名'],
+    '{}',
+    '若問題涉及報名狀態、付款、失物、申訴或廟方決策，建議建立客服工單由人工確認。Demo 系統只示範流程，不會直接代表廟方處理正式案件。',
+    880,
+    true,
+    'fixed_support_reply',
+    '[{"source":"客服工單示範規則","source_type":"demo_policy"}]'::jsonb
+  ),
+  (
+    'rule_event_query',
+    'wcg_taichung_demo',
+    'event_query',
+    '近期活動與報名查詢',
+    array['活動','近期','報名','法會','講堂','中元','宮慶','導覽活動','書法','繪畫'],
+    '{}',
+    '目前可展示的近期活動如下；其中活動、報名與統計為 Demo 示範資料，正式資訊仍以廟方公告為準。',
+    800,
+    true,
+    'fixed_event_reply',
+    '[{"source":"demo_events.json","source_type":"team_demo_sample"}]'::jsonb
+  ),
+  (
+    'rule_temple_location',
+    'wcg_taichung_demo',
+    'temple_location',
+    '地址、電話與交通',
+    array['地址','在哪','在哪裡','交通','怎麼去','電話','停車','成功路212號'],
+    '{}',
+    '萬春宮地址是臺中市中區成功路212號，電話是 04-22245964。交通、開放時間、停車與現場動線仍建議以廟方公告或現場指示為準。',
+    700,
+    true,
+    'fixed_knowledge_reply',
+    '[{"source":"01_基本問答.md","title":"Q1：萬春宮在哪裡？","source_type":"open_data_plus_demo_summary"}]'::jsonb
+  ),
+  (
+    'rule_worship_process',
+    'wcg_taichung_demo',
+    'worship_process',
+    '第一次參拜流程',
+    array['第一次','參拜','怎麼拜','拜拜','流程','正殿','香','主殿'],
+    '{}',
+    '第一次到訪可先保持安靜與尊重，依現場動線進入正殿，再依廟方公告、服務人員或現場指示參拜。Demo 只能提供一般文化導覽，不替代廟方正式流程說明。',
+    700,
+    true,
+    'fixed_knowledge_reply',
+    '[{"source":"02_參拜與服務流程.md","title":"第一次參拜流程","source_type":"demo_summary"}]'::jsonb
+  ),
+  (
+    'rule_history_culture',
+    'wcg_taichung_demo',
+    'history_culture',
+    '歷史文化與主祀介紹',
+    array['歷史','文化','媽祖','主祀','天上聖母','藍興','藍廷珍','故事','沿革'],
+    '{}',
+    '萬春宮示範知識庫以公開資料與人工摘要整理媽祖信仰、主祀天上聖母與地方文化脈絡。若涉及年份、沿革細節或正式說法，仍應以廟方與文化主管機關資料為準。',
+    650,
+    true,
+    'fixed_knowledge_reply',
+    '[{"source":"03_歷史文化建築摘要.md","title":"歷史文化建築摘要","source_type":"knowledge_base"}]'::jsonb
+  ),
+  (
+    'rule_fortune',
+    'wcg_taichung_demo',
+    'fortune',
+    '文化抽籤與籤詩邊界',
+    array['抽籤','籤詩','求籤','文化抽籤','解籤'],
+    '{}',
+    '文化抽籤是 Demo 體驗，用來協助整理心情與閱讀民俗語感，不代表神諭、吉凶保證或人生重大決策建議。涉及醫療、法律、財務或安全時，請尋求專業協助。',
+    620,
+    true,
+    'fixed_safety_reply',
+    '[{"source":"文化抽籤安全規則","source_type":"demo_policy"}]'::jsonb
+  ),
+  (
+    'rule_general_fallback',
+    'wcg_taichung_demo',
+    'general',
+    '未命中時的固定安全回覆',
+    '{}',
+    '{}',
+    '目前我只能回答萬春宮公開資料、活動、參拜流程、文化導覽與 Demo 操作問題。若問題涉及現場規則、付款或廟方決策，請以萬春宮公告或電話確認。',
+    0,
+    true,
+    'fixed_fallback_reply',
+    '[{"source":"固定安全回覆規則","source_type":"demo_policy"}]'::jsonb
+  )
+on conflict (rule_id) do update set
+  temple_id = excluded.temple_id,
+  intent = excluded.intent,
+  title = excluded.title,
+  keywords = excluded.keywords,
+  negative_keywords = excluded.negative_keywords,
+  reply = excluded.reply,
+  priority = excluded.priority,
+  enabled = excluded.enabled,
+  source_type = excluded.source_type,
+  source_refs = excluded.source_refs,
+  updated_at = now();
+
 insert into dashboard_snapshots (
   snapshot_date, temple_id, notice, headline_metrics, event_metrics, top_ai_intents, knowledge_gaps
 ) values (

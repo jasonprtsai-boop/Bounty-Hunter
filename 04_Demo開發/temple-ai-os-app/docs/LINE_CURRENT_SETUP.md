@@ -1,6 +1,6 @@
 # LINE current setup
 
-Last updated: 2026-08-13
+Last updated: 2026-08-14
 
 ## Public frontend
 
@@ -46,18 +46,12 @@ Sensitive values are intentionally not recorded here:
 - Scopes: `openid`, `profile`
 - Add friend option: On (normal)
 
-## Pending
+## Current operational notes
 
-- Backend is already deployed at `https://temple-ai-os-api.onrender.com`; keep using this URL unless the Render service is replaced.
-- Configure Render secrets before verifying the Messaging API webhook:
-  - `LINE_CHANNEL_SECRET`
-  - `LINE_CHANNEL_ACCESS_TOKEN`
-  - `OPENAI_API_KEY`
-  - `SUPABASE_URL`
-  - `SUPABASE_SERVICE_ROLE_KEY`
-  - `SUPABASE_ANON_KEY`
-  - `ADMIN_DEMO_TOKEN`
-- Apply Supabase migrations through `004_search_and_atomic_registration.sql`, then run `scripts/seed_demo_data.py` and `scripts/import_knowledge.py`.
-- Set Messaging API webhook URL to `https://temple-ai-os-api.onrender.com/api/line/webhook`, enable webhook and redelivery, then verify.
-- Publish the redesigned Rich Menu with `scripts/create_rich_menu.py`.
+- Backend is deployed at `https://temple-ai-os-api.onrender.com`; keep using this URL unless the Render service is replaced.
+- Render is configured for `DEMO_MODE=false` with LINE, Supabase, and admin secrets stored in Render.
+- Messaging API webhook URL is `https://temple-ai-os-api.onrender.com/api/line/webhook`; webhook, redelivery, and verification are enabled.
+- Rich Menu has been published through the admin API.
+- Apply Supabase migrations through `005_faq_rules.sql`, then run `scripts/seed_demo_data.py` whenever the database needs to be rebuilt or refreshed.
+- `scripts/import_knowledge.py` is optional future vector-search work; the current public chat path uses keyword FAQ rules plus fixed safe replies.
 - Store secrets only in local `.env` or deployment secret storage, not in repo files.

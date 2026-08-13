@@ -70,6 +70,26 @@ class FakeSupabaseClient:
                     }
                 ],
             )
+        if method == "GET" and url.endswith("/faq_rules"):
+            return FakeResponse(
+                200,
+                [
+                    {
+                        "rule_id": "rule_supabase_location",
+                        "intent": "temple_location",
+                        "title": "地址查詢",
+                        "keywords": ["地址", "在哪"],
+                        "negative_keywords": [],
+                        "reply": "固定地址回覆",
+                        "priority": 700,
+                        "enabled": True,
+                        "source_type": "fixed_knowledge_reply",
+                        "source_refs": [
+                            {"source": "01_基本問答.md", "source_type": "open_data"}
+                        ],
+                    }
+                ],
+            )
         raise AssertionError(f"Unhandled request: {method} {url} {params} {json} {headers}")
 
     def post(
@@ -200,3 +220,13 @@ def test_supabase_vector_search_uses_rpc(monkeypatch: pytest.MonkeyPatch) -> Non
 
     assert matches[0]["document_id"] == "01_基本問答"
     assert matches[0]["similarity"] == 0.91
+
+
+def test_supabase_repository_lists_faq_rules(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(supabase.httpx, "Client", FakeSupabaseClient)
+
+    repository = supabase.SupabaseRepository("https://example.supabase.co", "service-role")
+    rules = repository.list_faq_rules()
+
+    assert rules[0].rule_id == "rule_supabase_location"
+    assert rules[0].reply == "固定地址回覆"

@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     line_skip_signature_validation: bool = False
 
     openai_api_key: str | None = None
-    openai_line_model: str = "gpt-5.6-luna"
-    openai_quality_model: str = "gpt-5.6-terra"
+    openai_line_model: str = "gpt-5-mini"
+    openai_quality_model: str = "gpt-5"
     openai_embedding_model: str = "text-embedding-3-large"
 
     supabase_url: str | None = None

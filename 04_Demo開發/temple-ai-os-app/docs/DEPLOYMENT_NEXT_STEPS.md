@@ -1,6 +1,6 @@
 # Deployment next steps
 
-Last updated: 2026-08-13
+Last updated: 2026-08-14
 
 ## Current public URLs
 
@@ -28,8 +28,10 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Admin frontend now requires an entered management token; the demo token is no longer bundled in public frontend code.
 - Admin APIs support named `ADMIN_TOKENS` so audit logs can record the server-verified operator.
 - `/api/chat` has message length bounds and a simple per-user/IP rate limit.
+- `/api/chat` now uses keyword FAQ rules plus fixed safe replies; OpenAI is no longer required for the public demo chat path.
 - Flex event and fortune messages now include public hero images.
 - Production Supabase path now has pgvector search RPC and atomic event registration RPC in migration `004_search_and_atomic_registration.sql`.
+- FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable.
 
 ## 2. Current backend mode
 
@@ -39,12 +41,12 @@ Current Render service:
 Service name=temple-ai-os-api
 Branch=codex/temple-ai-os-site
 Plan=Free
-Mode=DEMO_MODE=true
+Mode=DEMO_MODE=false
 Build=cd "04_Demo開發/temple-ai-os-app/backend" && pip install -e .
 Start=cd "04_Demo開發/temple-ai-os-app/backend" && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
-`DEMO_MODE=true` keeps the public API online without storing LINE, OpenAI, or Supabase secrets. Admin APIs are disabled in production unless `ADMIN_DEMO_TOKEN` is changed from the demo default or `ADMIN_TOKENS` is configured.
+`DEMO_MODE=false` uses Supabase, LINE secrets, and the server-side admin tokens stored in Render. Chat replies still have a local FAQ fallback, so missing FAQ rows do not take the public chat endpoint down.
 
 Free Render instances spin down after inactivity, so the first request can be delayed by roughly 50 seconds or more.
 
@@ -55,7 +57,6 @@ Set these in Render environment variables, not in repo files:
 ```text
 LINE_CHANNEL_SECRET=<from LINE Developers Console>
 LINE_CHANNEL_ACCESS_TOKEN=<long-lived token from LINE Developers Console>
-OPENAI_API_KEY=<secret>
 SUPABASE_URL=<secret>
 SUPABASE_SERVICE_ROLE_KEY=<secret>
 SUPABASE_ANON_KEY=<secret>
@@ -91,6 +92,7 @@ database/migrations/001_init.sql
 database/migrations/002_rls_policies.sql
 database/migrations/003_line_webhook_events.sql
 database/migrations/004_search_and_atomic_registration.sql
+database/migrations/005_faq_rules.sql
 ```
 
 Seed demo content after migrations:
@@ -100,14 +102,14 @@ cd 04_Demo開發/temple-ai-os-app
 python scripts/seed_demo_data.py
 ```
 
-Import knowledge chunks and embeddings after migrations:
+Optional future vector-search import after migrations:
 
 ```text
 cd 04_Demo開發/temple-ai-os-app
 python scripts/import_knowledge.py
 ```
 
-`scripts/import_knowledge.py` does a dry run without secrets. To write pgvector embeddings, set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `OPENAI_API_KEY`.
+`scripts/import_knowledge.py` does a dry run without secrets. It is not required for the current fixed FAQ reply flow.
 
 Registration capacity is now handled by the `register_for_event` database function in migration `004`; do not switch production traffic to `DEMO_MODE=false` until that migration is applied.
 

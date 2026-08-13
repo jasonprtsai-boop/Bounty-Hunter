@@ -12,6 +12,7 @@ from app.schemas.common import (
     Event,
     EventCreate,
     EventUpdate,
+    FAQRule,
     FortuneSlip,
     LineUser,
     NotificationJob,
@@ -64,6 +65,9 @@ class DemoRepository:
         self.notification_jobs = [
             NotificationJob.model_validate(item)
             for item in _read_json(data_dir / "demo_notification_jobs.json", [])
+        ]
+        self.faq_rules = [
+            FAQRule.model_validate(item) for item in _read_json(data_dir / "demo_faq_rules.json", [])
         ]
         self.processed_line_event_ids: set[str] = set()
         self.audit_logs: list[dict[str, Any]] = []
@@ -294,6 +298,12 @@ class DemoRepository:
 
     def get_tour_spot(self, code: str) -> TourSpot | None:
         return next((spot for spot in self.tour_spots if spot.code == code), None)
+
+    def list_faq_rules(self) -> list[FAQRule]:
+        return sorted(
+            [rule for rule in self.faq_rules if rule.enabled],
+            key=lambda rule: (-rule.priority, rule.rule_id),
+        )
 
     def mark_line_event_processed(self, event_id: str | None) -> bool:
         if not event_id:
@@ -607,6 +617,18 @@ class SupabaseRepository:
     def get_tour_spot(self, code: str) -> TourSpot | None:
         row = self._single("tour_spots", "code", code)
         return TourSpot.model_validate(row) if row else None
+
+    def list_faq_rules(self) -> list[FAQRule]:
+        try:
+            rows = self._select(
+                "faq_rules",
+                {"enabled": "eq.true", "order": "priority.desc,rule_id.asc"},
+            )
+        except RuntimeError as exc:
+            if "supabase_faq_rules_404" in str(exc) or "does not exist" in str(exc):
+                return []
+            raise
+        return [FAQRule.model_validate(row) for row in rows]
 
     def mark_line_event_processed(self, event_id: str | None) -> bool:
         if not event_id:

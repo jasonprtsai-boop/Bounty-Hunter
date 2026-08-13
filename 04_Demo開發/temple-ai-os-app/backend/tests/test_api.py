@@ -90,6 +90,18 @@ def test_chat_retrieves_relevant_knowledge_for_location() -> None:
     assert any(source["source"] == "01_基本問答.md" for source in payload["sources"])
 
 
+def test_chat_unknown_question_uses_fixed_safe_fallback() -> None:
+    response = client.post(
+        "/api/chat",
+        json={"message": "請問今天附近晚餐推薦？", "user_id": "demo_unknown_user", "source": "test"},
+    )
+    assert response.status_code == 200
+    payload = response.json()["data"]
+    assert payload["intent"] == "general"
+    assert "目前我只能回答萬春宮公開資料" in payload["reply"]
+    assert payload["sources"][0]["source"] == "固定安全回覆規則"
+
+
 def test_chat_rejects_overlong_message() -> None:
     response = client.post(
         "/api/chat",

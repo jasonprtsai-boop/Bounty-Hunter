@@ -4,9 +4,8 @@ import re
 
 from app.core.config import get_settings
 from app.db.supabase import Repository
-from app.schemas.common import ChatReply
+from app.schemas.common import ChatReply, FAQRule
 from app.services.flex_templates import events_carousel
-from app.services.openai_client import OpenAIResponder
 
 
 @dataclass
@@ -18,28 +17,23 @@ class KnowledgeChunk:
     similarity: float | None = None
 
 
-SAFETY_KEYWORDS = {
-    "投資",
-    "股票",
-    "借錢",
-    "法律",
-    "告",
-    "疾病",
-    "藥",
-    "考試會不會上",
-    "感情會不會",
-    "財運",
-    "命運",
-    "神明告訴",
-}
+@dataclass
+class RuleMatch:
+    rule: FAQRule
+    score: int
+
+
+DEMO_NOTICE = "Temple AI OS 目前為示範系統，Demo 活動、報名與 Dashboard 非萬春宮官方營運資料。"
 
 
 class RAGService:
+    """Keyword-based FAQ service with fixed, reviewable replies."""
+
     def __init__(self, repository: Repository) -> None:
         self.repository = repository
         self.settings = get_settings()
-        self.openai = OpenAIResponder()
         self.chunks = self._load_knowledge_chunks(self.settings.knowledge_dir)
+        self.rules = self._load_rules()
 
     def _load_knowledge_chunks(self, knowledge_dir: Path) -> list[KnowledgeChunk]:
         if not knowledge_dir.exists():
@@ -66,21 +60,56 @@ class RAGService:
                     )
         return chunks
 
+    def _load_rules(self) -> list[FAQRule]:
+        rules: list[FAQRule] = []
+        if hasattr(self.repository, "list_faq_rules"):
+            rules = self.repository.list_faq_rules()
+        if not rules:
+            rules_path = self.settings.demo_data_dir / "demo_faq_rules.json"
+            rules = [
+                FAQRule.model_validate(item)
+                for item in self._read_local_rules(rules_path)
+                if item.get("enabled", True)
+            ]
+        return sorted(rules, key=lambda rule: (-rule.priority, rule.rule_id))
+
+    @staticmethod
+    def _read_local_rules(path: Path) -> list[dict[str, object]]:
+        if not path.exists():
+            raise RuntimeError(f"faq_rules_missing: {path}")
+        import json
+
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
+
+    @staticmethod
+    def _normalized(message: str) -> str:
+        return re.sub(r"\s+", "", message.lower())
+
+    def _keyword_score(self, rule: FAQRule, message: str) -> int:
+        text = self._normalized(message)
+        if any(self._normalized(keyword) in text for keyword in rule.negative_keywords):
+            return 0
+        score = 0
+        for keyword in rule.keywords:
+            normalized_keyword = self._normalized(keyword)
+            if normalized_keyword and normalized_keyword in text:
+                score += max(10, len(normalized_keyword) * 3)
+        return rule.priority + score if score > 0 else 0
+
+    def match_rule(self, message: str) -> RuleMatch:
+        matches = [
+            RuleMatch(rule=rule, score=score)
+            for rule in self.rules
+            if (score := self._keyword_score(rule, message)) > 0
+        ]
+        if matches:
+            return max(matches, key=lambda match: (match.score, match.rule.priority, match.rule.rule_id))
+        fallback = next((rule for rule in self.rules if rule.intent == "general"), self.rules[-1])
+        return RuleMatch(rule=fallback, score=fallback.priority)
+
     def classify_intent(self, message: str) -> str:
-        text = message.lower()
-        if any(keyword in message for keyword in SAFETY_KEYWORDS):
-            return "safety_boundary"
-        if any(keyword in message for keyword in ["活動", "報名", "法會", "講堂", "近期"]):
-            return "event_query"
-        if any(keyword in message for keyword in ["地址", "在哪", "交通", "電話", "停車"]):
-            return "temple_location"
-        if any(keyword in message for keyword in ["拜", "參拜", "第一次", "流程"]):
-            return "worship_process"
-        if any(keyword in message for keyword in ["歷史", "文化", "媽祖", "主祀", "故事"]):
-            return "history_culture"
-        if "客服" in message or "真人" in message or "聯絡" in message:
-            return "support"
-        return "general"
+        return self.match_rule(message).rule.intent
 
     def _query_terms(self, message: str) -> set[str]:
         terms = set(re.findall(r"[a-z0-9]+", message.lower()))
@@ -109,65 +138,37 @@ class RAGService:
         return [chunk for _, chunk in scored[:limit]]
 
     async def search(self, message: str, limit: int = 3) -> list[KnowledgeChunk]:
-        if not self.settings.demo_mode and self.settings.openai_api_key:
-            embedding = await self.openai.embed_text(message)
-            if embedding and hasattr(self.repository, "search_knowledge_chunks"):
-                rows = self.repository.search_knowledge_chunks(embedding, limit=limit)
-                if rows:
-                    return [
-                        KnowledgeChunk(
-                            source=str(row["document_id"]),
-                            title=str(row["title"]),
-                            text=str(row["content"]),
-                            source_type=str(row["source_type"]),
-                            similarity=float(row.get("similarity") or 0),
-                        )
-                        for row in rows
-                    ]
         return self._lexical_search(message, limit=limit)
 
+    def _sources_for_rule(self, rule: FAQRule, message: str) -> list[dict[str, str]]:
+        if rule.source_refs:
+            return [
+                {key: str(value) for key, value in source.items()}
+                for source in rule.source_refs
+            ]
+        return [
+            {"source": chunk.source, "title": chunk.title, "source_type": chunk.source_type}
+            for chunk in self._lexical_search(message)
+        ]
+
     async def answer(self, message: str, user_id: str) -> ChatReply:
-        intent = self.classify_intent(message)
-        demo_notice = "Temple AI OS 目前為示範系統，Demo 活動、報名與 Dashboard 非萬春宮官方營運資料。"
+        match = self.match_rule(message)
+        rule = match.rule
 
-        if intent == "safety_boundary":
-            return ChatReply(
-                intent=intent,
-                reply=(
-                    "這類問題可能涉及命運、醫療、法律或財務等重大判斷，我不能斷言結果。"
-                    "我可以提供公開資料、文化背景與一般參拜資訊，但不能代表神明或廟方作出指示。"
-                ),
-                sources=[{"source": "04_AI安全回覆規則.md", "source_type": "demo_policy"}],
-                demo_notice=demo_notice,
-            )
-
-        if intent == "event_query":
+        if rule.intent == "event_query":
             events = self.repository.list_events()
-            reply = "目前可展示的近期活動如下；其中報名與統計為 Demo 示範資料。"
             return ChatReply(
-                intent=intent,
-                reply=reply,
+                intent=rule.intent,
+                reply=rule.reply,
+                sources=self._sources_for_rule(rule, message),
                 events=events,
                 flex_message=events_carousel(events),
-                demo_notice=demo_notice,
+                demo_notice=DEMO_NOTICE,
             )
 
-        if intent == "support":
-            return ChatReply(
-                intent=intent,
-                reply="若問題涉及報名狀態、付款、失物或廟方決策，建議建立客服工單由人工確認。",
-                demo_notice=demo_notice,
-            )
-
-        matches = await self.search(message)
-        context = "\n\n".join(f"{chunk.title}\n{chunk.text}" for chunk in matches)
-        reply = await self.openai.complete_reply(question=message, context=context)
         return ChatReply(
-            intent=intent,
-            reply=reply,
-            sources=[
-                {"source": chunk.source, "title": chunk.title, "source_type": chunk.source_type}
-                for chunk in matches
-            ],
-            demo_notice=demo_notice,
+            intent=rule.intent,
+            reply=rule.reply,
+            sources=self._sources_for_rule(rule, message),
+            demo_notice=DEMO_NOTICE,
         )

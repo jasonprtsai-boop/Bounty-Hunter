@@ -134,6 +134,19 @@ class ChatRequest(BaseModel):
         return message
 
 
+class FAQRule(BaseModel):
+    rule_id: str
+    intent: str
+    title: str
+    keywords: list[str] = Field(default_factory=list)
+    negative_keywords: list[str] = Field(default_factory=list)
+    reply: str
+    priority: int = 100
+    enabled: bool = True
+    source_type: str = "fixed_reply"
+    source_refs: list[dict[str, str]] = Field(default_factory=list)
+
+
 class ChatReply(BaseModel):
     intent: str
     reply: str

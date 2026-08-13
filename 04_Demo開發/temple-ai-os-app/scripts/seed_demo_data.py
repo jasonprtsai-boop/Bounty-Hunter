@@ -146,6 +146,10 @@ def fortune_slip_rows() -> list[dict]:
     ]
 
 
+def faq_rule_row(item: dict) -> dict:
+    return {**item, "temple_id": TEMPLE_ID}
+
+
 def upsert(client: httpx.Client, supabase_url: str, table: str, rows: list[dict], conflict: str) -> None:
     if not rows:
         return
@@ -170,6 +174,7 @@ def main() -> None:
     dashboard = dashboard_row(load_json("demo_dashboard_snapshot.json"))
     tour_spots = tour_spot_rows(temple)
     fortune_slips = fortune_slip_rows()
+    faq_rules = [faq_rule_row(item) for item in load_json("demo_faq_rules.json")]
 
     print(
         " ".join(
@@ -183,6 +188,7 @@ def main() -> None:
                 f"notification_jobs={len(notification_jobs)}",
                 f"tour_spots={len(tour_spots)}",
                 f"fortune_slips={len(fortune_slips)}",
+                f"faq_rules={len(faq_rules)}",
             ]
         )
     )
@@ -206,6 +212,7 @@ def main() -> None:
         upsert(client, supabase_url, "notification_jobs", notification_jobs, "job_id")
         upsert(client, supabase_url, "tour_spots", tour_spots, "code")
         upsert(client, supabase_url, "fortune_slips", fortune_slips, "slip_id")
+        upsert(client, supabase_url, "faq_rules", faq_rules, "rule_id")
         upsert(client, supabase_url, "dashboard_snapshots", [dashboard], "snapshot_date")
     print("Seed complete.")
 
