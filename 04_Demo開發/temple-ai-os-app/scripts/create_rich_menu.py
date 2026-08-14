@@ -23,7 +23,7 @@ def rich_menu_payload(frontend_base_url: str) -> dict:
             {"bounds": {"x": 833, "y": 260, "width": 834, "height": 713}, "action": {"type": "uri", "label": "活動中心", "uri": f"{base}/events"}},
             {"bounds": {"x": 1667, "y": 260, "width": 833, "height": 713}, "action": {"type": "uri", "label": "文化抽籤", "uri": f"{base}/fortune"}},
             {"bounds": {"x": 0, "y": 973, "width": 833, "height": 713}, "action": {"type": "uri", "label": "宮廟導覽", "uri": f"{base}/tour/main-hall"}},
-            {"bounds": {"x": 833, "y": 973, "width": 834, "height": 713}, "action": {"type": "uri", "label": "會員中心", "uri": f"{base}/member"}},
+            {"bounds": {"x": 833, "y": 973, "width": 834, "height": 713}, "action": {"type": "uri", "label": "貼圖小舖", "uri": f"{base}/stickers"}},
             {"bounds": {"x": 1667, "y": 973, "width": 833, "height": 713}, "action": {"type": "uri", "label": "客服中心", "uri": f"{base}/support"}},
         ],
     }

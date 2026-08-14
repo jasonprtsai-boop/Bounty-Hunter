@@ -418,6 +418,83 @@ label {
   font-weight: 800;
 }
 
+.sticker-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid #dce4e0;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(16, 37, 54, 0.07);
+}
+
+.sticker-hero img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.sticker-status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sticker-status-grid div {
+  display: grid;
+  min-height: 82px;
+  align-content: center;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid #e6d7b8;
+  border-radius: 8px;
+  background: #fffaf0;
+}
+
+.sticker-status-grid strong {
+  color: #b42318;
+  font-size: 20px;
+}
+
+.sticker-status-grid span {
+  color: #667680;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.sticker-card {
+  display: grid;
+  min-height: 176px;
+  place-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #dce4e0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.sticker-card img {
+  width: 100%;
+  max-width: 156px;
+  aspect-ratio: 37 / 32;
+  object-fit: contain;
+}
+
+.sticker-card span {
+  color: #5c4635;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .list-row,
 .table-head,
 .table-row {
@@ -925,11 +1002,17 @@ label {
     grid-template-columns: 1fr;
   }
 
+  .sticker-hero {
+    grid-template-columns: 1fr;
+  }
+
   .quick-grid,
   .metric-grid,
   .two-column,
   .admin-event-grid,
-  .form-grid {
+  .form-grid,
+  .sticker-status-grid,
+  .sticker-grid {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -971,7 +1054,9 @@ label {
   .metric-grid,
   .two-column,
   .admin-event-grid,
-  .form-grid {
+  .form-grid,
+  .sticker-status-grid,
+  .sticker-grid {
     grid-template-columns: 1fr;
   }
 }

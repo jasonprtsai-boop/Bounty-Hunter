@@ -52,6 +52,9 @@ Sensitive values are intentionally not recorded here:
 - Render is configured for `DEMO_MODE=false` with LINE, Supabase, and admin secrets stored in Render.
 - Messaging API webhook URL is `https://temple-ai-os-api.onrender.com/api/line/webhook`; webhook, redelivery, and verification are enabled.
 - Rich Menu has been published through the admin API.
+- New Rich Menu source now includes a `貼圖小舖` entry that opens `/stickers`; republish after the frontend deployment.
+- New LINE OA profile image is prepared at `assets/brand/line-oa-profile-v1.png`; upload it in LINE Official Account Manager.
+- First sticker pack assets are prepared at `assets/stickers/spring-fortune-messenger/`; submit them through LINE Creators Market before enabling purchase.
 - Apply Supabase migrations through `005_faq_rules.sql`, then run `scripts/seed_demo_data.py` whenever the database needs to be rebuilt or refreshed.
 - `scripts/import_knowledge.py` is optional future vector-search work; the current public chat path uses keyword FAQ rules plus fixed safe replies.
 - Store secrets only in local `.env` or deployment secret storage, not in repo files.

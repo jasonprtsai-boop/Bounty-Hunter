@@ -32,6 +32,8 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Flex event and fortune messages now include public hero images.
 - Production Supabase path now has pgvector search RPC and atomic event registration RPC in migration `004_search_and_atomic_registration.sql`.
 - FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable or missing required rules.
+- `/stickers` page and first 8-image sticker pack assets are prepared for LINE Creators Market submission.
+- LINE OA profile image asset is prepared at `assets/brand/line-oa-profile-v1.png`.
 
 ## 2. Current backend mode
 
@@ -128,6 +130,7 @@ VITE_API_BASE_URL=https://temple-ai-os-api.onrender.com
 VITE_LIFF_ID=2010938588-VJXpaoyH
 VITE_LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 VITE_LINE_OPENCHAT_URL=
+VITE_LINE_STICKER_STORE_URL=<set after LINE Creators Market approval>
 ```
 
 Routes that must work:
@@ -135,12 +138,25 @@ Routes that must work:
 ```text
 https://temple-ai-os-demo.jasonprtsai.chatgpt.site/site
 https://temple-ai-os-demo.jasonprtsai.chatgpt.site/community
+https://temple-ai-os-demo.jasonprtsai.chatgpt.site/stickers
 https://temple-ai-os-demo.jasonprtsai.chatgpt.site/privacy
 https://temple-ai-os-demo.jasonprtsai.chatgpt.site/terms
 https://liff.line.me/2010938588-VJXpaoyH
 ```
 
-## 6. Update Messaging API webhook
+## 6. Sticker release
+
+Submit the files in `assets/stickers/spring-fortune-messenger/` through LINE Creators Market and wait for approval. After approval, set `VITE_LINE_STICKER_STORE_URL` to the sales page URL and redeploy the frontend. The `/stickers` CTA will then open the purchase page.
+
+Change the LINE OA profile image manually in LINE Official Account Manager using:
+
+```text
+assets/brand/line-oa-profile-v1.png
+```
+
+Do not describe the pack as an official Wan Chun Gong sticker set unless written authorization exists.
+
+## 7. Update Messaging API webhook
 
 Messaging API channel:
 
@@ -159,7 +175,7 @@ Webhook redelivery=Enabled
 
 The webhook POST must reject invalid signatures in production. Do not enable `LINE_SKIP_SIGNATURE_VALIDATION` for a public deployment.
 
-## 7. Publish rich menu
+## 8. Publish rich menu
 
 Only after frontend URL, backend URL, and access token are configured:
 
@@ -171,7 +187,7 @@ python scripts/create_rich_menu.py
 
 Use `assets/rich-menu/main-2500x1686.png`.
 
-## 8. Acceptance checklist
+## 9. Acceptance checklist
 
 - Add friend URL opens `@983zhzni`.
 - Public site opens without login.
@@ -183,6 +199,7 @@ Use `assets/rich-menu/main-2500x1686.png`.
 - Text message to the official account reaches `/api/line/webhook`.
 - AI reply is sent through Messaging API.
 - Event Flex Message includes a reachable HTTPS hero image under `/assets/flex/event-card.png`.
+- `/stickers` opens and shows the 8-image sticker pack preview.
 - Admin login requires a private token. Prefer `ADMIN_TOKENS`; successful admin mutations are recorded in `audit_logs` with the server-verified actor.
 - Supabase knowledge search returns results from `match_knowledge_chunks`.
 - Event registration uses `register_for_event` and rejects over-capacity concurrent attempts.

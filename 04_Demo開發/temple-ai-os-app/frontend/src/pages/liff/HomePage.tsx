@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bot, CalendarDays, Globe2, Map, MessageCircle, Sparkles, UsersRound } from "lucide-react";
+import { Bot, CalendarDays, Gift, Globe2, Map, MessageCircle, Sparkles, UsersRound } from "lucide-react";
 import { apiFetch, type ChatReply, type TempleProfile } from "../../lib/api";
 import { getLiffSession } from "../../lib/session";
 import { Shell } from "../../components/Shell";
@@ -53,6 +53,10 @@ export function HomePage() {
         <Link to="/fortune" className="quick-action">
           <Sparkles />
           <span>文化抽籤</span>
+        </Link>
+        <Link to="/stickers" className="quick-action">
+          <Gift />
+          <span>貼圖小舖</span>
         </Link>
         <Link to="/tour/main-hall" className="quick-action">
           <Map />

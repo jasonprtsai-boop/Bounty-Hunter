@@ -1,0 +1,50 @@
+{
+  "pack_id": "spring-fortune-messenger-01",
+  "title_zh_tw": "春福小使日常貼圖",
+  "creator": "Temple AI OS Demo",
+  "copyright": "TempleAIOSDemo",
+  "sticker_count": 8,
+  "store_url_env": "VITE_LINE_STICKER_STORE_URL",
+  "review_note": "Original mascot artwork for a temple-culture demo. Not an official Wan Chun Gong logo, not a deity likeness, and not a direct advertisement.",
+  "source": "Generated with built-in image generation, then composed with deterministic text overlays.",
+  "line_requirements": {
+    "main_image": "240x240 PNG",
+    "sticker_images": "8 PNG files, each 370x320 or smaller, transparent background",
+    "chat_thumbnail_icon": "96x74 PNG",
+    "profile_image": "640x640 PNG for LINE Official Account"
+  },
+  "stickers": [
+    {
+      "file": "sticker_01_good_morning.png",
+      "text": "早安 平安"
+    },
+    {
+      "file": "sticker_02_received.png",
+      "text": "收到！"
+    },
+    {
+      "file": "sticker_03_thanks.png",
+      "text": "謝謝你"
+    },
+    {
+      "file": "sticker_04_hard_work.png",
+      "text": "辛苦了"
+    },
+    {
+      "file": "sticker_05_blessings.png",
+      "text": "祝福 滿滿"
+    },
+    {
+      "file": "sticker_06_wait.png",
+      "text": "等我 一下"
+    },
+    {
+      "file": "sticker_07_registered.png",
+      "text": "已報名"
+    },
+    {
+      "file": "sticker_08_safe.png",
+      "text": "保持 平安"
+    }
+  ]
+}

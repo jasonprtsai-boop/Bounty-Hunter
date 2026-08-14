@@ -10,7 +10,8 @@ Temple AI OS 是以萬春宮公開資料為示範場景的 LINE + AI 宮廟服�
 - `frontend/`：React + Vite，包含 LIFF 使用者端與 Admin 管理後台。Admin 頁需要輸入部署環境的管理 Token。
 - `database/`：Supabase PostgreSQL migration、FAQ 規則表、atomic registration RPC、可選 pgvector 知識匯入與 demo seed。
 - `assets/`：Rich Menu、LIFF banner、Flex 圖像與可選字型資料夾。
-- `frontend/public/assets/`：Flex Message hero image 與前端可公開存取素材。
+- `assets/stickers/`：可送 LINE Creators Market 的貼圖素材與送審 metadata。
+- `frontend/public/assets/`：Flex Message hero image、貼圖預覽與前端可公開存取素材。
 - `scripts/`：資料匯入、Rich Menu 建立、Flex JSON 驗證、圖片產生。
 
 ## 快速啟動
@@ -99,4 +100,9 @@ python scripts/seed_demo_data.py
 4. 問近期活動時回傳 Flex Message。
 5. 點 Flex button 開 LIFF 活動頁。
 6. LIFF 報名成功後建立紀錄。
-7. Dashboard 顯示活動、報名、AI 問題與知識缺口。
+7. `/stickers` 顯示春福小使貼圖包；LINE 審核通過後以 `VITE_LINE_STICKER_STORE_URL` 開啟購買。
+8. Dashboard 顯示活動、報名、AI 問題與知識缺口。
+
+## 貼圖與大頭貼發布
+
+第一套貼圖素材在 `assets/stickers/spring-fortune-messenger/`，LINE OA 大頭貼在 `assets/brand/line-oa-profile-v1.png`。正式送審與上架步驟請看 `docs/STICKER_RELEASE_CHECKLIST.md`。

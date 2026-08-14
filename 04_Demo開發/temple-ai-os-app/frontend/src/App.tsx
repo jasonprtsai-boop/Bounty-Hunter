@@ -16,6 +16,7 @@ const LegalPage = lazy(() => import("./pages/public/LegalPage").then((module) =>
 const MemberPage = lazy(() => import("./pages/liff/MemberPage").then((module) => ({ default: module.MemberPage })));
 const PublicSitePage = lazy(() => import("./pages/public/PublicSitePage").then((module) => ({ default: module.PublicSitePage })));
 const RegistrationPage = lazy(() => import("./pages/liff/RegistrationPage").then((module) => ({ default: module.RegistrationPage })));
+const StickerShopPage = lazy(() => import("./pages/liff/StickerShopPage").then((module) => ({ default: module.StickerShopPage })));
 const SupportPage = lazy(() => import("./pages/liff/SupportPage").then((module) => ({ default: module.SupportPage })));
 const TourSpotPage = lazy(() => import("./pages/liff/TourSpotPage").then((module) => ({ default: module.TourSpotPage })));
 
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/fortune" element={<FortunePage />} />
         <Route path="/tour/:code" element={<TourSpotPage />} />
         <Route path="/member" element={<MemberPage />} />
+        <Route path="/stickers" element={<StickerShopPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/admin" element={<AdminGate><AdminDashboard /></AdminGate>} />
         <Route path="/admin/events" element={<AdminGate><AdminEvents /></AdminGate>} />
