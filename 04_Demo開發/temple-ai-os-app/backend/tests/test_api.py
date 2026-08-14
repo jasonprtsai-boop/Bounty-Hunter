@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from app.core.config import get_settings
 from app.db.supabase import get_repository
 from app.main import app
 from app.services.rich_menu_service import RichMenuService
@@ -150,6 +151,31 @@ def test_liff_token_overrides_client_user_id_for_support_ticket() -> None:
 def test_admin_events_require_token() -> None:
     response = client.get("/api/admin/events")
     assert response.status_code == 401
+
+
+def test_admin_login_returns_session_for_named_credentials(monkeypatch) -> None:
+    get_settings.cache_clear()
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("ADMIN_DEMO_TOKEN", "temple-ai-os-admin-demo")
+    monkeypatch.setenv("ADMIN_TOKENS", "temple-staff:prod-secret")
+
+    response = client.post(
+        "/api/admin/auth/login",
+        json={"username": "temple-staff", "password": "prod-secret"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()["data"]
+    assert data["actor"] == "temple-staff"
+    assert data["access_token"].startswith("taos_admin_session.")
+
+    protected = client.get(
+        "/api/admin/dashboard/summary",
+        headers={"Authorization": f"Bearer {data['access_token']}"},
+    )
+    assert protected.status_code == 200
+
+    get_settings.cache_clear()
 
 
 def test_admin_event_crud() -> None:

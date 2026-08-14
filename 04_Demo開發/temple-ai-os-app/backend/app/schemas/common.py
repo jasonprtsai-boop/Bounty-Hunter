@@ -275,3 +275,24 @@ class NotificationJobUpdate(BaseModel):
     status: str | None = None
     scheduled_at: str | None = None
     payload: dict[str, Any] | None = None
+
+
+class AdminLoginRequest(BaseModel):
+    username: str = Field(min_length=1, max_length=80)
+    password: str = Field(min_length=1, max_length=256)
+
+    @field_validator("username", "password")
+    @classmethod
+    def normalize_login_field(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("field_empty")
+        return normalized
+
+
+class AdminLoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    actor: str
+    expires_at: str
+    expires_in_seconds: int

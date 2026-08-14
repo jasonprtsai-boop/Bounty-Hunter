@@ -25,8 +25,8 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - LIFF app created.
 - LINE Official Account created: `Temple AI OS Demo`, Basic ID `@983zhzni`.
 - Messaging API enabled for channel `2010991408`.
-- Admin frontend now requires an entered management token; the demo token is no longer bundled in public frontend code.
-- Admin APIs support named `ADMIN_TOKENS` so audit logs can record the server-verified operator.
+- Admin frontend now requires username/password login; the demo token is no longer bundled in public frontend code.
+- Admin APIs support named `ADMIN_TOKENS` / `ADMIN_ACCOUNTS` so audit logs can record the server-verified operator.
 - `/api/chat` has message length bounds and a simple per-user/IP rate limit.
 - `/api/chat` now uses keyword FAQ rules plus fixed safe replies; OpenAI is no longer required for the public demo chat path.
 - Flex event and fortune messages now include public hero images.
@@ -65,8 +65,13 @@ LINE_CHANNEL_ACCESS_TOKEN=<long-lived token from LINE Developers Console>
 SUPABASE_URL=<secret>
 SUPABASE_SERVICE_ROLE_KEY=<secret>
 SUPABASE_ANON_KEY=<secret>
-ADMIN_DEMO_TOKEN=<new private admin token, or leave unused when ADMIN_TOKENS is set>
-ADMIN_TOKENS=temple-staff:<token>,reviewer:<token>
+ADMIN_DEMO_TOKEN=<leave unused in production when named credentials are set>
+ADMIN_TOKENS=temple-staff:<password>,reviewer:<password>
+ADMIN_ACCOUNTS=<optional: admin:<password>,staff:<password>>
+ADMIN_USERNAME=<optional single admin username>
+ADMIN_PASSWORD=<optional single admin password>
+ADMIN_SESSION_SECRET=<random long secret for signed admin sessions>
+ADMIN_SESSION_TTL_SECONDS=43200
 ```
 
 Then change:
@@ -220,7 +225,7 @@ Use `assets/rich-menu/main-2500x1686.png`.
 - AI reply is sent through Messaging API.
 - Event Flex Message includes a reachable HTTPS hero image under `/assets/flex/event-card.png`.
 - `/stickers` opens and shows the 8-image sticker pack preview.
-- Admin login requires a private token. Prefer `ADMIN_TOKENS`; successful admin mutations are recorded in `audit_logs` with the server-verified actor.
+- Admin login requires a server-verified username and password. If Render uses `ADMIN_TOKENS=temple-staff:xxxx`, the login username is `temple-staff` and the password is `xxxx`; successful admin mutations are recorded in `audit_logs` with the server-verified actor.
 - Supabase knowledge search returns results from `match_knowledge_chunks`.
 - Event registration uses `register_for_event` and rejects over-capacity concurrent attempts.
 - Duplicate webhook event is processed only once.

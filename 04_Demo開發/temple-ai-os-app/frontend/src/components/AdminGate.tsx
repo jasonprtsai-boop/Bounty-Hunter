@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { LockKeyhole } from "lucide-react";
-import { apiFetch, type DashboardSummary } from "../lib/api";
+import { adminLogin, apiFetch, type DashboardSummary } from "../lib/api";
 
 type AdminGateProps = {
   children: React.ReactNode;
@@ -8,10 +8,11 @@ type AdminGateProps = {
 
 export function AdminGate({ children }: AdminGateProps) {
   const [token, setToken] = useState(() => localStorage.getItem("adminToken") || "");
-  const [draftToken, setDraftToken] = useState("");
-  const [draftActor, setDraftActor] = useState(() => localStorage.getItem("adminActor") || "");
+  const [draftUsername, setDraftUsername] = useState(() => localStorage.getItem("adminActor") || "");
+  const [draftPassword, setDraftPassword] = useState("");
   const [verified, setVerified] = useState(false);
   const [checking, setChecking] = useState(Boolean(token));
+  const [loggingIn, setLoggingIn] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export function AdminGate({ children }: AdminGateProps) {
           localStorage.removeItem("adminToken");
           setToken("");
           setVerified(false);
-          setError(err instanceof Error ? err.message : "Token 驗證失敗");
+          setError(err instanceof Error ? err.message : "登入狀態已失效，請重新登入");
         }
       })
       .finally(() => {
@@ -49,40 +50,53 @@ export function AdminGate({ children }: AdminGateProps) {
     };
   }, [token]);
 
-  function normalizeAdminTokenInput(value: string) {
-    let normalized = value.trim();
-    normalized = normalized.replace(/^Bearer\s+/i, "");
-    normalized = normalized.replace(/^ADMIN_TOKENS\s*=\s*/i, "");
-    normalized = normalized.replace(/^ADMIN_DEMO_TOKEN\s*=\s*/i, "");
+  function normalizeAdminLoginInput(username: string, password: string) {
+    let normalizedPassword = password.trim();
+    normalizedPassword = normalizedPassword.replace(/^Bearer\s+/i, "");
+    normalizedPassword = normalizedPassword.replace(/^ADMIN_TOKENS\s*=\s*/i, "");
+    normalizedPassword = normalizedPassword.replace(/^ADMIN_DEMO_TOKEN\s*=\s*/i, "");
 
-    const firstEntry = normalized.split(",")[0]?.trim() || normalized;
-    const [actor, tokenValue] = firstEntry.split(":", 2);
-    if (actor && tokenValue) {
+    const firstEntry = normalizedPassword.split(",")[0]?.trim() || normalizedPassword;
+    const separatorIndex = firstEntry.indexOf(":");
+    if (separatorIndex > 0) {
+      const actor = firstEntry.slice(0, separatorIndex).trim();
+      const passwordValue = firstEntry.slice(separatorIndex + 1).trim();
       return {
-        token: tokenValue.trim(),
-        actor: actor.trim()
+        username: username.trim() || actor,
+        password: passwordValue
       };
     }
 
     return {
-      token: normalized,
-      actor: ""
+      username: username.trim(),
+      password: normalizedPassword
     };
   }
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const normalized = normalizeAdminTokenInput(draftToken);
-    const nextToken = normalized.token;
-    const nextActor = draftActor.trim() || normalized.actor || "admin";
-    if (!nextToken) {
-      setError("請輸入後台管理 Token");
+    const normalized = normalizeAdminLoginInput(draftUsername, draftPassword);
+    if (!normalized.username || !normalized.password) {
+      setError("請輸入後台帳號與密碼");
       return;
     }
-    localStorage.setItem("adminToken", nextToken);
-    localStorage.setItem("adminActor", nextActor);
-    setToken(nextToken);
-    setDraftToken("");
+    setLoggingIn(true);
+    setError("");
+    try {
+      const result = await adminLogin(normalized.username, normalized.password);
+      localStorage.setItem("adminToken", result.access_token);
+      localStorage.setItem("adminActor", result.actor);
+      setToken(result.access_token);
+      setDraftUsername(result.actor);
+      setDraftPassword("");
+    } catch (err) {
+      localStorage.removeItem("adminToken");
+      setToken("");
+      setVerified(false);
+      setError(err instanceof Error ? err.message : "登入失敗，請確認帳號與密碼");
+    } finally {
+      setLoggingIn(false);
+    }
   }
 
   if (verified) {
@@ -97,32 +111,32 @@ export function AdminGate({ children }: AdminGateProps) {
         </div>
         <div>
           <h1>後台管理登入</h1>
-          <p>輸入部署環境設定的管理 Token 後，才能進入活動、知識庫、客服與推播管理。</p>
+          <p>輸入 Render 後端設定的後台帳號與密碼後，才能進入活動、知識庫、客服與推播管理。</p>
         </div>
         <label>
-          管理 Token
+          帳號
           <input
-            autoComplete="off"
+            autoComplete="username"
             autoFocus
-            type="password"
-            value={draftToken}
-            onChange={(event) => setDraftToken(event.target.value)}
-            placeholder="可貼 ADMIN_TOKENS 或冒號後的 token"
+            value={draftUsername}
+            onChange={(event) => setDraftUsername(event.target.value)}
+            placeholder="例如：temple-staff"
           />
-          <small>Render 裡的黑點不是密碼；請按複製或眼睛查看實際值。若是 `temple-staff:xxxx`，系統會自動使用 `xxxx`。</small>
         </label>
         <label>
-          管理者名稱
+          密碼
           <input
-            autoComplete="name"
-            value={draftActor}
-            onChange={(event) => setDraftActor(event.target.value)}
-            placeholder="例如：專案管理員"
+            autoComplete="current-password"
+            type="password"
+            value={draftPassword}
+            onChange={(event) => setDraftPassword(event.target.value)}
+            placeholder="輸入 Render 裡設定的密碼"
           />
+          <small>如果 Render 是 `ADMIN_TOKENS=temple-staff:xxxx`，帳號填 `temple-staff`，密碼填 `xxxx`。</small>
         </label>
-        <button className="button primary" disabled={checking} type="submit">
+        <button className="button primary" disabled={checking || loggingIn} type="submit">
           <LockKeyhole size={18} />
-          {checking ? "驗證中" : "進入後台"}
+          {checking || loggingIn ? "驗證中" : "登入後台"}
         </button>
         {error && <p className="error-text">{error}</p>}
       </form>

@@ -1,13 +1,20 @@
 import re
+from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import get_settings
-from app.core.security import require_admin_token
+from app.core.security import (
+    authenticate_admin_credentials,
+    create_admin_session,
+    require_admin_token,
+)
 from app.db.supabase import get_repository
 from app.schemas.common import (
+    AdminLoginRequest,
+    AdminLoginResponse,
     ApiResponse,
     DashboardSummary,
     Event,
@@ -25,6 +32,7 @@ from app.schemas.common import (
 from app.services.notification_service import NotificationService
 from app.services.rich_menu_service import RichMenuService
 
+auth_router = APIRouter()
 router = APIRouter(dependencies=[Depends(require_admin_token)])
 SAFE_DOCUMENT_ID = re.compile(r"^[A-Za-z0-9_\-\u4e00-\u9fff]+$")
 
@@ -75,6 +83,21 @@ def _write_knowledge_document(path: Path, title: str, body: str, source_type: st
     if status != "published":
         normalized_body = f"{normalized_body}\n\n狀態：{status}"
     path.write_text(f"{normalized_body.rstrip()}\n", encoding="utf-8")
+
+
+@auth_router.post("/auth/login", response_model=ApiResponse[AdminLoginResponse])
+async def admin_login(payload: AdminLoginRequest) -> ApiResponse[AdminLoginResponse]:
+    settings = get_settings()
+    principal = authenticate_admin_credentials(payload.username, payload.password, settings)
+    token, expires_at = create_admin_session(principal.actor, settings)
+    return ApiResponse(
+        data=AdminLoginResponse(
+            access_token=token,
+            actor=principal.actor,
+            expires_at=datetime.fromtimestamp(expires_at, UTC).isoformat(),
+            expires_in_seconds=settings.admin_session_ttl_seconds,
+        )
+    )
 
 
 @router.get("/dashboard/summary", response_model=ApiResponse[DashboardSummary])

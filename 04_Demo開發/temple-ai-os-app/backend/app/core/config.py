@@ -30,6 +30,11 @@ class Settings(BaseSettings):
 
     admin_demo_token: str = "temple-ai-os-admin-demo"
     admin_tokens: str = ""
+    admin_accounts: str = ""
+    admin_username: str = "admin"
+    admin_password: str = ""
+    admin_session_secret: str = ""
+    admin_session_ttl_seconds: int = 12 * 60 * 60
     project_root: Path = Field(default_factory=lambda: Path(__file__).resolve().parents[3])
 
     model_config = SettingsConfigDict(
@@ -50,6 +55,17 @@ class Settings(BaseSettings):
             if separator and actor.strip() and token.strip():
                 tokens[actor.strip()[:80]] = token.strip()
         return tokens
+
+    @property
+    def admin_account_map(self) -> dict[str, str]:
+        accounts: dict[str, str] = {}
+        for item in self.admin_accounts.split(","):
+            username, separator, password = item.partition(":")
+            if separator and username.strip() and password.strip():
+                accounts[username.strip()[:80]] = password.strip()
+        if self.admin_username.strip() and self.admin_password.strip():
+            accounts[self.admin_username.strip()[:80]] = self.admin_password.strip()
+        return accounts
 
     @property
     def demo_data_dir(self) -> Path:

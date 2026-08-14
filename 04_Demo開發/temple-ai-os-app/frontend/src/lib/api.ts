@@ -76,6 +76,60 @@ export type DashboardSummary = {
   knowledge_gaps: string[];
 };
 
+export type AdminLoginResult = {
+  access_token: string;
+  token_type: string;
+  actor: string;
+  expires_at: string;
+  expires_in_seconds: number;
+  legacy_token_fallback?: boolean;
+};
+
+function errorMessageFromPayload(payload: unknown, fallback: string) {
+  if (!payload || typeof payload !== "object") {
+    return fallback;
+  }
+  const data = payload as ApiResponse<unknown> & { detail?: unknown };
+  if (data.error?.message) {
+    return data.error.message;
+  }
+  if (typeof data.detail === "string") {
+    return data.detail;
+  }
+  if (data.detail) {
+    return JSON.stringify(data.detail);
+  }
+  return fallback;
+}
+
+export async function adminLogin(username: string, password: string): Promise<AdminLoginResult> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  const payload = (await response.json().catch(() => null)) as
+    | (ApiResponse<AdminLoginResult> & { detail?: unknown })
+    | null;
+  if (response.status === 404 || response.status === 405) {
+    return {
+      access_token: password,
+      token_type: "bearer",
+      actor: username || "admin",
+      expires_at: "",
+      expires_in_seconds: 0,
+      legacy_token_fallback: true
+    };
+  }
+  if (!response.ok || payload?.error) {
+    throw new Error(errorMessageFromPayload(payload, response.statusText || "登入失敗"));
+  }
+  if (!payload?.data?.access_token) {
+    throw new Error("登入回應格式不正確");
+  }
+  return payload.data;
+}
+
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -86,7 +140,7 @@ export async function apiFetch<T>(
   if (admin) {
     const adminToken = localStorage.getItem("adminToken");
     if (!adminToken) {
-      throw new Error("請先輸入後台管理 Token");
+      throw new Error("請先登入後台");
     }
     headers.set("Authorization", `Bearer ${adminToken}`);
     headers.set("X-Admin-Actor", localStorage.getItem("adminActor") || "admin");

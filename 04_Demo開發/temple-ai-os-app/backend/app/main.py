@@ -30,6 +30,7 @@ async def audit_admin_mutations(request, call_next):
     response = await call_next(request)
     if (
         request.url.path.startswith("/api/admin")
+        and not request.url.path.startswith("/api/admin/auth/")
         and request.method in {"POST", "PUT", "PATCH", "DELETE"}
         and response.status_code < 400
     ):
@@ -55,6 +56,7 @@ app.include_router(liff.router, prefix="/api", tags=["LIFF"])
 app.include_router(chat.router, prefix="/api", tags=["Chat"])
 app.include_router(events.router, prefix="/api", tags=["Events"])
 app.include_router(member.router, prefix="/api", tags=["Member"])
+app.include_router(admin.auth_router, prefix="/api/admin", tags=["Admin"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 
 

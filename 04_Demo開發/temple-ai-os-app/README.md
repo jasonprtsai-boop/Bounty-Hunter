@@ -7,7 +7,7 @@ Temple AI OS 是以萬春宮公開資料為示範場景的 LINE + AI 宮廟服�
 ## 系統組成
 
 - `backend/`：FastAPI API、LINE Webhook、LIFF token verify、關鍵詞 FAQ 固定回覆、Flex Message、管理後台 API。後端執行所需 demo data、temple profile、knowledge-base 已收在 `backend/app/data/`。
-- `frontend/`：React + Vite，包含 LIFF 使用者端與 Admin 管理後台。Admin 頁需要輸入部署環境的管理 Token。
+- `frontend/`：React + Vite，包含 LIFF 使用者端與 Admin 管理後台。Admin 頁需要使用部署環境設定的帳號與密碼登入。
 - `database/`：Supabase PostgreSQL migration、FAQ 規則表、atomic registration RPC、可選 pgvector 知識匯入與 demo seed。
 - `assets/`：Rich Menu、LIFF banner、Flex 圖像與可選字型資料夾。
 - `assets/stickers/`：可送 LINE Creators Market 的貼圖素材與送審 metadata。
@@ -52,12 +52,14 @@ SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_ANON_KEY=
 ADMIN_DEMO_TOKEN=
-ADMIN_TOKENS=temple-staff:<token>,reviewer:<token>
+ADMIN_TOKENS=temple-staff:<password>,reviewer:<password>
+ADMIN_ACCOUNTS=
+ADMIN_SESSION_SECRET=
 VITE_API_BASE_URL=
 VITE_LIFF_ID=
 ```
 
-正式環境建議使用 `ADMIN_TOKENS` 的 `管理者:token` 格式；成功的後台新增、修改、刪除會寫入 `audit_logs`，並以後端驗證出的管理者名稱作為操作人。
+正式環境後台登入建議使用 `ADMIN_TOKENS` 的 `管理者:密碼` 格式，或改用 `ADMIN_ACCOUNTS`。例如 Render 設為 `ADMIN_TOKENS=temple-staff:xxxx` 時，後台帳號填 `temple-staff`，密碼填 `xxxx`。成功的後台新增、修改、刪除會寫入 `audit_logs`，並以後端驗證出的管理者名稱作為操作人。
 
 ## LINE Console 設定摘要
 
