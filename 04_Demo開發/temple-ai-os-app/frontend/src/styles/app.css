@@ -613,6 +613,10 @@ label {
   gap: 14px;
 }
 
+.release-wide-card {
+  grid-column: 1 / -1;
+}
+
 .release-card p {
   margin: 0;
   color: #4f625b;
@@ -634,6 +638,52 @@ label {
   border-radius: 8px;
   object-fit: cover;
   background: #fff4d6;
+}
+
+.profile-copy-list,
+.setting-steps {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-copy-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid #e6d7b8;
+  border-radius: 8px;
+  background: #fffaf0;
+}
+
+.profile-copy-row strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #7a1e17;
+}
+
+.profile-copy-row p {
+  overflow-wrap: anywhere;
+}
+
+.setting-steps div {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.setting-steps span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: #b42318;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .bottom-nav {
@@ -1092,6 +1142,7 @@ label {
   .admin-event-grid,
   .form-grid,
   .release-grid,
+  .profile-copy-row,
   .sticker-status-grid,
   .sticker-grid {
     grid-template-columns: 1fr;

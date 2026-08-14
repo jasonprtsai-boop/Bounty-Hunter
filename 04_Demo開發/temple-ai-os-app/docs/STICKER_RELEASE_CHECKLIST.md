@@ -50,6 +50,9 @@ Last updated: 2026-08-14
    In LINE Official Account Manager, upload `assets/brand/line-oa-profile-v2.png` as the profile image.
    Upload `assets/brand/line-oa-profile-background-v1.png` as the profile page background image.
 
+9. Edit LINE business profile.
+   Use `docs/LINE_BUSINESS_PROFILE_SETUP.md` or `/admin/release` for the exact business profile copy. Keep the Demo disclaimer visible unless the temple has provided written authorization for official use.
+
 ## Official spec notes
 
 - Static sticker packs can contain 8, 16, 24, 32, or 40 stickers.
