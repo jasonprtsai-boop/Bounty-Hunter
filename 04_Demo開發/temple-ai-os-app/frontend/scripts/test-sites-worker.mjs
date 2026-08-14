@@ -4,7 +4,6 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const dist = resolve(root, "dist");
-const clientDist = resolve(dist, "client");
 const workerPath = resolve(dist, "server", "index.js");
 const { default: worker } = await import(`${pathToFileURL(workerPath).href}?t=${Date.now()}`);
 
@@ -19,8 +18,8 @@ const contentTypes = {
 
 function resolveAsset(pathname) {
   const relative = normalize(pathname === "/" ? "index.html" : pathname.replace(/^\/+/, ""));
-  const fullPath = resolve(clientDist, relative);
-  if (!fullPath.startsWith(`${clientDist}${sep}`) && fullPath !== clientDist) {
+  const fullPath = resolve(dist, relative);
+  if (!fullPath.startsWith(`${dist}${sep}`) && fullPath !== dist) {
     throw new Error(`Unsafe asset path: ${pathname}`);
   }
   return fullPath;
@@ -62,6 +61,20 @@ for (const pathname of [
   const html = await response.text();
   if (!html.includes("Temple AI OS")) {
     throw new Error(`${pathname} did not return the app shell`);
+  }
+}
+
+for (const pathname of [
+  "/assets/stickers/spring-fortune-messenger/main.png",
+  "/assets/brand/line-oa-profile-v1.png"
+]) {
+  const response = await worker.fetch(new Request(`https://example.test${pathname}`), env);
+  if (response.status !== 200) {
+    throw new Error(`${pathname} returned ${response.status}`);
+  }
+  const bytes = await response.arrayBuffer();
+  if (bytes.byteLength < 1024) {
+    throw new Error(`${pathname} returned an unexpectedly small file`);
   }
 }
 
