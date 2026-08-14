@@ -52,7 +52,8 @@ for (const pathname of [
   "/member",
   "/stickers",
   "/support",
-  "/admin"
+  "/admin",
+  "/admin/release"
 ]) {
   const response = await worker.fetch(new Request(`https://example.test${pathname}`), env);
   if (response.status !== 200) {

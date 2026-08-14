@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { Bot, CalendarDays, Headphones, Home, LayoutDashboard, LogOut, ScrollText, User } from "lucide-react";
+import { Bot, CalendarDays, Headphones, Home, LayoutDashboard, LogOut, Rocket, ScrollText, User } from "lucide-react";
 
 type ShellProps = {
   title: string;
@@ -15,7 +15,8 @@ export function Shell({ title, children, mode = "liff" }: ShellProps) {
           ["/admin/events", CalendarDays, "活動"],
           ["/admin/knowledge", ScrollText, "知識庫"],
           ["/admin/support", Headphones, "客服"],
-          ["/admin/notifications", Bot, "推播"]
+          ["/admin/notifications", Bot, "推播"],
+          ["/admin/release", Rocket, "發布"]
         ]
       : [
           ["/", Home, "首頁"],

@@ -601,6 +601,32 @@ label {
   min-height: 300px;
 }
 
+.release-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 1.1fr) minmax(240px, 0.9fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.release-card {
+  display: grid;
+  gap: 14px;
+}
+
+.release-card p {
+  margin: 0;
+  color: #4f625b;
+}
+
+.release-avatar {
+  width: min(220px, 100%);
+  aspect-ratio: 1;
+  border: 1px solid #e6d7b8;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #fff4d6;
+}
+
 .bottom-nav {
   position: fixed;
   right: 0;
@@ -983,7 +1009,7 @@ label {
   .side-nav {
     position: static;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     min-height: 0;
     padding: 8px;
     border-right: 0;
@@ -1011,6 +1037,7 @@ label {
   .two-column,
   .admin-event-grid,
   .form-grid,
+  .release-grid,
   .sticker-status-grid,
   .sticker-grid {
     grid-template-columns: 1fr 1fr;
@@ -1055,6 +1082,7 @@ label {
   .two-column,
   .admin-event-grid,
   .form-grid,
+  .release-grid,
   .sticker-status-grid,
   .sticker-grid {
     grid-template-columns: 1fr;

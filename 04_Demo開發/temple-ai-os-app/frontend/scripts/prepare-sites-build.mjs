@@ -24,6 +24,7 @@ const appRoutes = [
   "admin/knowledge",
   "admin/support",
   "admin/notifications",
+  "admin/release",
   "tour/main-hall"
 ];
 
