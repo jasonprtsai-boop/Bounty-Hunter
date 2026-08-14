@@ -51,6 +51,7 @@ for (const pathname of [
   "/events",
   "/fortune",
   "/member",
+  "/stickers",
   "/support",
   "/admin"
 ]) {

@@ -16,6 +16,7 @@ const appRoutes = [
   "events",
   "fortune",
   "member",
+  "stickers",
   "support",
   "admin",
   "admin/events",
