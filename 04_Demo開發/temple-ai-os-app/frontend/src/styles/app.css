@@ -622,6 +622,43 @@ label {
   color: #4f625b;
 }
 
+.release-status-card {
+  background: #172f26;
+  color: #fff;
+}
+
+.release-status-card p,
+.release-status-card .notice {
+  color: #dce8e1;
+}
+
+.release-status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.release-status-grid div {
+  display: grid;
+  gap: 5px;
+  min-height: 84px;
+  align-content: center;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.release-status-grid strong {
+  font-size: 24px;
+}
+
+.release-status-grid span {
+  color: #f6e3a4;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .release-avatar {
   width: min(220px, 100%);
   aspect-ratio: 1;
@@ -684,6 +721,26 @@ label {
   color: #fff;
   font-size: 13px;
   font-weight: 900;
+}
+
+.release-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.release-check-row {
+  display: flex;
+  min-height: 52px;
+  padding: 12px;
+  border: 1px solid #e6d7b8;
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #2b1b12;
+}
+
+.release-check-row span {
+  font-weight: 800;
 }
 
 .bottom-nav {
@@ -1097,6 +1154,8 @@ label {
   .admin-event-grid,
   .form-grid,
   .release-grid,
+  .release-status-grid,
+  .release-checklist,
   .sticker-status-grid,
   .sticker-grid {
     grid-template-columns: 1fr 1fr;
@@ -1143,6 +1202,8 @@ label {
   .form-grid,
   .release-grid,
   .profile-copy-row,
+  .release-status-grid,
+  .release-checklist,
   .sticker-status-grid,
   .sticker-grid {
     grid-template-columns: 1fr;

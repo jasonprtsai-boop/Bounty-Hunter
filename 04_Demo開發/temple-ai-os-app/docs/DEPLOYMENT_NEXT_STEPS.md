@@ -36,6 +36,7 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - `/stickers` page and first 8-image sticker pack assets are prepared for LINE Creators Market submission.
 - LINE OA profile image asset is prepared at `assets/brand/line-oa-profile-v2.png`.
 - LINE OA profile background asset is prepared at `assets/brand/line-oa-profile-background-v1.png`.
+- `/admin/release` now includes copy buttons for LINE business profile fields, public links, and a local release checklist.
 
 ## 2. Current backend mode
 
@@ -170,6 +171,8 @@ Change the LINE OA profile image manually in LINE Official Account Manager using
 assets/brand/line-oa-profile-v2.png
 assets/brand/line-oa-profile-background-v1.png
 ```
+
+Use `/admin/release` or `docs/LINE_BUSINESS_PROFILE_SETUP.md` to edit the LINE business profile. Keep the Demo disclaimer visible unless written authorization exists.
 
 Do not describe the pack as an official Wan Chun Gong sticker set unless written authorization exists.
 

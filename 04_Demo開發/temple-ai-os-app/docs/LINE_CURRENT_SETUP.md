@@ -55,8 +55,8 @@ Sensitive values are intentionally not recorded here:
 - New Rich Menu source now includes a `貼圖小舖` entry that opens `/stickers`; republish after the frontend deployment.
 - New LINE OA profile image is prepared at `assets/brand/line-oa-profile-v2.png`; upload it in LINE Official Account Manager.
 - New LINE OA profile background is prepared at `assets/brand/line-oa-profile-background-v1.png`; upload it in LINE Official Account Manager.
-- LINE business profile copy is prepared in `docs/LINE_BUSINESS_PROFILE_SETUP.md` and mirrored on `/admin/release`.
+- LINE business profile copy, public links, and the release checklist are prepared in `docs/LINE_BUSINESS_PROFILE_SETUP.md` and mirrored on `/admin/release`.
 - First sticker pack assets are prepared at `assets/stickers/spring-fortune-messenger/`; submit them through LINE Creators Market before enabling purchase.
-- Apply Supabase migrations through `005_faq_rules.sql`, then run `scripts/seed_demo_data.py` whenever the database needs to be rebuilt or refreshed.
+- Apply Supabase migrations through `006_operational_hardening.sql`, then run `scripts/seed_demo_data.py` whenever the database needs to be rebuilt or refreshed.
 - `scripts/import_knowledge.py` is optional future vector-search work; the current public chat path uses keyword FAQ rules plus fixed safe replies.
 - Store secrets only in local `.env` or deployment secret storage, not in repo files.

@@ -51,7 +51,7 @@ Last updated: 2026-08-14
    Upload `assets/brand/line-oa-profile-background-v1.png` as the profile page background image.
 
 9. Edit LINE business profile.
-   Use `docs/LINE_BUSINESS_PROFILE_SETUP.md` or `/admin/release` for the exact business profile copy. Keep the Demo disclaimer visible unless the temple has provided written authorization for official use.
+   Use `docs/LINE_BUSINESS_PROFILE_SETUP.md` or `/admin/release` for the exact business profile copy, public links, and release checklist. Keep the Demo disclaimer visible unless the temple has provided written authorization for official use.
 
 ## Official spec notes
 

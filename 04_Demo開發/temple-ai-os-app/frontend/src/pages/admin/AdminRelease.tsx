@@ -1,4 +1,4 @@
-import { CheckCircle, Copy, ExternalLink, Image, Rocket, Store } from "lucide-react";
+import { CheckCircle, Copy, ExternalLink, Image, Rocket, ShieldCheck, Store } from "lucide-react";
 import { useState } from "react";
 import { Shell } from "../../components/Shell";
 import { apiFetch } from "../../lib/api";
@@ -14,6 +14,7 @@ const profileBackgroundUrl = "/assets/brand/line-oa-profile-background-v1.png";
 const stickerPreviewUrl = "/stickers";
 const lineManagerUrl = "https://manager.line.biz/account/@983zhzni";
 const businessProfileUrl = "https://page.line.biz/account-page/2010643275365275/profile";
+const releaseChecklistStorageKey = "templeReleaseChecklist";
 
 const businessProfileFields = [
   {
@@ -59,15 +60,68 @@ const businessProfileChecklist = [
   "完成後按下 Publish changes / 發布變更。"
 ];
 
+const publicLinks = [
+  ["公開官網", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/site"],
+  ["LINE 社群入口", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/community"],
+  ["LIFF 入口", "https://liff.line.me/2010938588-VJXpaoyH"],
+  ["加入好友", "https://line.me/R/ti/p/%40983zhzni"],
+  ["貼圖小舖", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/stickers"],
+  ["隱私權政策", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/privacy"],
+  ["服務條款", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/terms"]
+] as const;
+
+const releaseChecklist = [
+  "LINE 商業簡介已貼上 Demo 聲明與公開網址",
+  "LINE 大頭貼已換成 line-oa-profile-v2.png",
+  "LINE 背景圖已換成 line-oa-profile-background-v1.png",
+  "Messaging API Webhook 驗證成功",
+  "Rich Menu 已發布且貼圖小舖入口可開啟",
+  "手機 LINE 實測可開 LIFF 與活動頁",
+  "貼圖素材已確認，等待 LINE Creators Market 送審或審核",
+  "Demo 現場前已暖機 Render 後端"
+];
+
+function readChecklistState() {
+  try {
+    return JSON.parse(localStorage.getItem(releaseChecklistStorageKey) || "{}") as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
+
 export function AdminRelease() {
   const [publishing, setPublishing] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
+  const [checked, setChecked] = useState<Record<string, boolean>>(readChecklistState);
 
   async function copyText(label: string, value: string) {
-    await navigator.clipboard.writeText(value);
-    setCopied(label);
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.setAttribute("readonly", "true");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+      }
+      setCopied(label);
+      setError("");
+    } catch {
+      setError("複製失敗，請手動選取文字。");
+    }
+  }
+
+  function toggleChecklist(item: string) {
+    const next = { ...checked, [item]: !checked[item] };
+    setChecked(next);
+    localStorage.setItem(releaseChecklistStorageKey, JSON.stringify(next));
   }
 
   async function publishRichMenu() {
@@ -91,9 +145,38 @@ export function AdminRelease() {
     }
   }
 
+  const copiedProfileText = businessProfileFields.map((field) => `${field.label}：${field.value}`).join("\n");
+  const doneCount = releaseChecklist.filter((item) => checked[item]).length;
+
   return (
     <Shell title="正式發布" mode="admin">
       <section className="release-grid">
+        <article className="tool-panel release-card release-wide-card release-status-card">
+          <div className="section-title">
+            <ShieldCheck size={20} />
+            <h2>發布狀態總覽</h2>
+          </div>
+          <div className="release-status-grid">
+            <div>
+              <strong>{doneCount}/{releaseChecklist.length}</strong>
+              <span>人工設定完成</span>
+            </div>
+            <div>
+              <strong>33</strong>
+              <span>後端測試通過</span>
+            </div>
+            <div>
+              <strong>已發布</strong>
+              <span>公開網站狀態</span>
+            </div>
+            <div>
+              <strong>Demo</strong>
+              <span>商業簡介定位</span>
+            </div>
+          </div>
+          <p className="notice">這裡記錄的是你在 LINE 後台手動設定的進度，勾選狀態只存在這台電腦的瀏覽器。</p>
+        </article>
+
         <article className="tool-panel release-card">
           <div className="section-title">
             <Rocket size={20} />
@@ -139,6 +222,10 @@ export function AdminRelease() {
           <p>
             這份文案用於 LINE Profile / 商業簡介頁面。帳號仍定位為 Demo，避免誤導使用者以為是萬春宮官方客服。
           </p>
+          <button className="button" type="button" onClick={() => copyText("全部商業簡介", copiedProfileText)}>
+            <Copy size={17} />
+            {copied === "全部商業簡介" ? "已複製全部欄位" : "複製全部欄位"}
+          </button>
           <div className="profile-copy-list">
             {businessProfileFields.map((field) => (
               <div className="profile-copy-row" key={field.label}>
@@ -170,6 +257,48 @@ export function AdminRelease() {
               <ExternalLink size={18} />
               LINE 後台
             </a>
+          </div>
+        </article>
+
+        <article className="tool-panel release-card release-wide-card">
+          <div className="section-title">
+            <ExternalLink size={20} />
+            <h2>公開連結檢查</h2>
+          </div>
+          <div className="profile-copy-list">
+            {publicLinks.map(([label, href]) => (
+              <div className="profile-copy-row" key={label}>
+                <div>
+                  <strong>{label}</strong>
+                  <p>{href}</p>
+                </div>
+                <div className="inline-actions">
+                  <button className="button icon-button" type="button" onClick={() => copyText(label, href)}>
+                    <Copy size={17} />
+                    <span>{copied === label ? "已複製" : "複製"}</span>
+                  </button>
+                  <a className="button icon-button" href={href} target="_blank" rel="noreferrer">
+                    <ExternalLink size={17} />
+                    <span>開啟</span>
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="tool-panel release-card release-wide-card">
+          <div className="section-title">
+            <CheckCircle size={20} />
+            <h2>正式發布清單</h2>
+          </div>
+          <div className="release-checklist">
+            {releaseChecklist.map((item) => (
+              <label className="check-row release-check-row" key={item}>
+                <input type="checkbox" checked={Boolean(checked[item])} onChange={() => toggleChecklist(item)} />
+                <span>{item}</span>
+              </label>
+            ))}
           </div>
         </article>
 
