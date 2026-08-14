@@ -369,6 +369,13 @@ label {
   font-weight: 700;
 }
 
+label small {
+  color: #667680;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
 .form-panel {
   display: grid;
   gap: 14px;

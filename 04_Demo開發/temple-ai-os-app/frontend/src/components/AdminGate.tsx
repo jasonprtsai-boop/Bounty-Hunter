@@ -49,10 +49,32 @@ export function AdminGate({ children }: AdminGateProps) {
     };
   }, [token]);
 
+  function normalizeAdminTokenInput(value: string) {
+    let normalized = value.trim();
+    normalized = normalized.replace(/^Bearer\s+/i, "");
+    normalized = normalized.replace(/^ADMIN_TOKENS\s*=\s*/i, "");
+    normalized = normalized.replace(/^ADMIN_DEMO_TOKEN\s*=\s*/i, "");
+
+    const firstEntry = normalized.split(",")[0]?.trim() || normalized;
+    const [actor, tokenValue] = firstEntry.split(":", 2);
+    if (actor && tokenValue) {
+      return {
+        token: tokenValue.trim(),
+        actor: actor.trim()
+      };
+    }
+
+    return {
+      token: normalized,
+      actor: ""
+    };
+  }
+
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextToken = draftToken.trim();
-    const nextActor = draftActor.trim() || "admin";
+    const normalized = normalizeAdminTokenInput(draftToken);
+    const nextToken = normalized.token;
+    const nextActor = draftActor.trim() || normalized.actor || "admin";
     if (!nextToken) {
       setError("請輸入後台管理 Token");
       return;
@@ -85,8 +107,9 @@ export function AdminGate({ children }: AdminGateProps) {
             type="password"
             value={draftToken}
             onChange={(event) => setDraftToken(event.target.value)}
-            placeholder="請輸入 ADMIN_DEMO_TOKEN"
+            placeholder="可貼 ADMIN_TOKENS 或冒號後的 token"
           />
+          <small>Render 裡的黑點不是密碼；請按複製或眼睛查看實際值。若是 `temple-staff:xxxx`，系統會自動使用 `xxxx`。</small>
         </label>
         <label>
           管理者名稱
