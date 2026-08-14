@@ -237,7 +237,8 @@ def write_metadata() -> None:
 def copy_public_assets() -> None:
     for path in STICKER_DIR.glob("*.png"):
         shutil.copy2(path, PUBLIC_STICKER_DIR / path.name)
-    shutil.copy2(BRAND_DIR / "line-oa-profile-v1.png", PUBLIC_BRAND_DIR / "line-oa-profile-v1.png")
+    for path in BRAND_DIR.glob("line-oa-profile-*.png"):
+        shutil.copy2(path, PUBLIC_BRAND_DIR / path.name)
 
 
 def main() -> None:

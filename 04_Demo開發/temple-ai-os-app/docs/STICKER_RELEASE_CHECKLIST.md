@@ -11,7 +11,7 @@ Last updated: 2026-08-14
 - Main image: `main.png`, 240 x 240 PNG
 - Chat tab image: `tab.png`, 96 x 74 PNG
 - Sticker images: `sticker_*.png`, 370 x 320 PNG, transparent background
-- LINE OA profile image: `assets/brand/line-oa-profile-v1.png`, 640 x 640 PNG
+- LINE OA profile image: `assets/brand/line-oa-profile-v2.png`, 640 x 640 PNG
 
 ## Submission order
 
@@ -46,7 +46,7 @@ Last updated: 2026-08-14
    Rebuild and redeploy the frontend. The `/stickers` button will change from `審核後開放購買` to `前往購買`.
 
 8. Change LINE OA profile image.
-   In LINE Official Account Manager, upload `assets/brand/line-oa-profile-v1.png` as the profile image.
+   In LINE Official Account Manager, upload `assets/brand/line-oa-profile-v2.png` as the profile image.
 
 ## Official spec notes
 

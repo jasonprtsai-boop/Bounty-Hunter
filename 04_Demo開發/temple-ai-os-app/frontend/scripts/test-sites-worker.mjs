@@ -67,7 +67,7 @@ for (const pathname of [
 
 for (const pathname of [
   "/assets/stickers/spring-fortune-messenger/main.png",
-  "/assets/brand/line-oa-profile-v1.png"
+  "/assets/brand/line-oa-profile-v2.png"
 ]) {
   const response = await worker.fetch(new Request(`https://example.test${pathname}`), env);
   if (response.status !== 200) {

@@ -34,7 +34,7 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable or missing required rules.
 - Database operational hardening is in migration `006_operational_hardening.sql`, and the generated all-in-one setup file is `database/supabase_full_setup.sql`.
 - `/stickers` page and first 8-image sticker pack assets are prepared for LINE Creators Market submission.
-- LINE OA profile image asset is prepared at `assets/brand/line-oa-profile-v1.png`.
+- LINE OA profile image asset is prepared at `assets/brand/line-oa-profile-v2.png`.
 
 ## 2. Current backend mode
 
@@ -166,7 +166,7 @@ Submit the files in `assets/stickers/spring-fortune-messenger/` through LINE Cre
 Change the LINE OA profile image manually in LINE Official Account Manager using:
 
 ```text
-assets/brand/line-oa-profile-v1.png
+assets/brand/line-oa-profile-v2.png
 ```
 
 Do not describe the pack as an official Wan Chun Gong sticker set unless written authorization exists.

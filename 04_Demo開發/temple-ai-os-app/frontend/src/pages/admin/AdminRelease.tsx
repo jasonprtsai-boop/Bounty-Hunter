@@ -9,7 +9,7 @@ type RichMenuPublishResult = {
   reason?: string;
 };
 
-const profileImageUrl = "/assets/brand/line-oa-profile-v1.png";
+const profileImageUrl = "/assets/brand/line-oa-profile-v2.png";
 const stickerPreviewUrl = "/stickers";
 const lineManagerUrl = "https://manager.line.biz/account/@983zhzni";
 
