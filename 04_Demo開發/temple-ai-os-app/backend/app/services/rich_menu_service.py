@@ -35,7 +35,7 @@ class RichMenuService:
                 },
                 {
                     "bounds": {"x": 833, "y": 973, "width": 834, "height": 713},
-                    "action": {"type": "uri", "label": "會員中心", "uri": f"{base}/member"},
+                    "action": {"type": "uri", "label": "貼圖小舖", "uri": f"{base}/stickers"},
                 },
                 {
                     "bounds": {"x": 1667, "y": 973, "width": 833, "height": 713},

@@ -244,6 +244,18 @@ def test_admin_rich_menu_publish(monkeypatch) -> None:
     assert response.json()["data"] == {"published": True, "rich_menu_id": "richmenu-test"}
 
 
+def test_rich_menu_payload_links_to_sticker_shop() -> None:
+    payload = RichMenuService().main_menu_payload()
+    actions = [area["action"] for area in payload["areas"]]
+
+    assert any(
+        action["type"] == "uri"
+        and action["label"] == "貼圖小舖"
+        and action["uri"].endswith("/stickers")
+        for action in actions
+    )
+
+
 def test_support_ticket_admin_flow() -> None:
     create_response = client.post(
         "/api/support/tickets",
