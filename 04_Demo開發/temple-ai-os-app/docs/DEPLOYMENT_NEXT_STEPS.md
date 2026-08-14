@@ -32,6 +32,7 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Flex event and fortune messages now include public hero images.
 - Production Supabase path now has pgvector search RPC and atomic event registration RPC in migration `004_search_and_atomic_registration.sql`.
 - FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable or missing required rules.
+- Database operational hardening is in migration `006_operational_hardening.sql`, and the generated all-in-one setup file is `database/supabase_full_setup.sql`.
 - `/stickers` page and first 8-image sticker pack assets are prepared for LINE Creators Market submission.
 - LINE OA profile image asset is prepared at `assets/brand/line-oa-profile-v1.png`.
 
@@ -95,6 +96,13 @@ database/migrations/002_rls_policies.sql
 database/migrations/003_line_webhook_events.sql
 database/migrations/004_search_and_atomic_registration.sql
 database/migrations/005_faq_rules.sql
+database/migrations/006_operational_hardening.sql
+```
+
+For a fresh Supabase project, you can run the generated bundle instead:
+
+```text
+database/supabase_full_setup.sql
 ```
 
 Seed demo content after migrations:
@@ -102,6 +110,13 @@ Seed demo content after migrations:
 ```text
 cd 04_Demo開發/temple-ai-os-app
 python scripts/seed_demo_data.py
+```
+
+Validate database reads and writes after SQL is applied:
+
+```text
+cd 04_Demo開發/temple-ai-os-app
+python scripts/verify_database.py
 ```
 
 Optional future vector-search import after migrations:
@@ -113,7 +128,7 @@ python scripts/import_knowledge.py
 
 `scripts/import_knowledge.py` does a dry run without secrets. It is not required for the current fixed FAQ reply flow.
 
-Registration capacity is now handled by the `register_for_event` database function in migration `004`; do not switch production traffic to `DEMO_MODE=false` until that migration is applied.
+Registration capacity is handled by the `register_for_event` database function; do not switch production traffic to `DEMO_MODE=false` until migrations through `006` are applied and `scripts/verify_database.py` passes.
 
 ## 5. Frontend API target
 

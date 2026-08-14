@@ -158,13 +158,30 @@ class RAGService:
             for chunk in self._lexical_search(message)
         ]
 
+    def _record_reply(self, message: str, user_id: str, reply: ChatReply) -> None:
+        if not hasattr(self.repository, "record_message"):
+            return
+        try:
+            self.repository.record_message(
+                user_id=user_id,
+                channel="line",
+                user_text=message,
+                intent=reply.intent,
+                ai_reply=reply.reply,
+                source_refs=reply.sources,
+                demo_notice=reply.demo_notice,
+            )
+        except Exception:
+            # Chat must remain available even if analytics logging is temporarily unavailable.
+            return
+
     async def answer(self, message: str, user_id: str) -> ChatReply:
         match = self.match_rule(message)
         rule = match.rule
 
         if rule.intent == "event_query":
             events = self.repository.list_events()
-            return ChatReply(
+            reply = ChatReply(
                 intent=rule.intent,
                 reply=rule.reply,
                 sources=self._sources_for_rule(rule, message),
@@ -172,10 +189,14 @@ class RAGService:
                 flex_message=events_carousel(events),
                 demo_notice=DEMO_NOTICE,
             )
+            self._record_reply(message, user_id, reply)
+            return reply
 
-        return ChatReply(
+        reply = ChatReply(
             intent=rule.intent,
             reply=rule.reply,
             sources=self._sources_for_rule(rule, message),
             demo_notice=DEMO_NOTICE,
         )
+        self._record_reply(message, user_id, reply)
+        return reply

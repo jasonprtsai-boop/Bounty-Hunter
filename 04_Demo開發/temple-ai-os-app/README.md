@@ -82,6 +82,19 @@ database/migrations/002_rls_policies.sql
 database/migrations/003_line_webhook_events.sql
 database/migrations/004_search_and_atomic_registration.sql
 database/migrations/005_faq_rules.sql
+database/migrations/006_operational_hardening.sql
+```
+
+Fresh Supabase project can run this generated bundle instead:
+
+```text
+database/supabase_full_setup.sql
+```
+
+Validate database reads and writes after applying SQL:
+
+```powershell
+python scripts/verify_database.py
 ```
 
 再執行：

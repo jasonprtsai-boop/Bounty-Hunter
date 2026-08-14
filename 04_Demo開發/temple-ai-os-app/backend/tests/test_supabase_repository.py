@@ -18,6 +18,7 @@ class FakeResponse:
 class FakeSupabaseClient:
     def __init__(self, *args: object, **kwargs: object) -> None:
         self.inserted_webhook_ids: set[str] = set()
+        self.messages: list[object] = []
 
     def request(
         self,
@@ -90,6 +91,9 @@ class FakeSupabaseClient:
                     }
                 ],
             )
+        if method == "POST" and url.endswith("/messages"):
+            self.messages.append(json)
+            return FakeResponse(201, None)
         raise AssertionError(f"Unhandled request: {method} {url} {params} {json} {headers}")
 
     def post(

@@ -71,6 +71,7 @@ class DemoRepository:
         ]
         self.processed_line_event_ids: set[str] = set()
         self.audit_logs: list[dict[str, Any]] = []
+        self.messages: list[dict[str, Any]] = []
         self.fortune_slips = self._build_fortune_slips()
         self.tour_spots = self._build_tour_spots()
 
@@ -340,6 +341,30 @@ class DemoRepository:
             }
         )
 
+    def record_message(
+        self,
+        *,
+        user_id: str,
+        channel: str,
+        user_text: str,
+        intent: str,
+        ai_reply: str,
+        source_refs: list[dict[str, str]],
+        demo_notice: str,
+    ) -> None:
+        self.messages.append(
+            {
+                "user_id": user_id,
+                "channel": channel,
+                "user_text": user_text,
+                "intent": intent,
+                "ai_reply": ai_reply,
+                "source_refs": source_refs,
+                "demo_notice": demo_notice,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+
 
 class SupabaseRepository:
     """Supabase REST repository used when DEMO_MODE=false."""
@@ -428,6 +453,9 @@ class SupabaseRepository:
             for detail in [
                 "event_not_found",
                 "registration_not_required",
+                "event_not_open",
+                "invalid_user_id",
+                "invalid_contact_name",
                 "invalid_party_size",
                 "event_capacity_exceeded",
             ]:
@@ -660,6 +688,32 @@ class SupabaseRepository:
         if not rows:
             raise RuntimeError("supabase_dashboard_snapshot_missing")
         return DashboardSummary.model_validate(rows[0])
+
+    def record_message(
+        self,
+        *,
+        user_id: str,
+        channel: str,
+        user_text: str,
+        intent: str,
+        ai_reply: str,
+        source_refs: list[dict[str, str]],
+        demo_notice: str,
+    ) -> None:
+        self._request(
+            "POST",
+            "messages",
+            json_body={
+                "user_id": user_id,
+                "channel": channel,
+                "user_text": user_text,
+                "intent": intent,
+                "ai_reply": ai_reply,
+                "source_refs": source_refs,
+                "demo_notice": demo_notice,
+            },
+            prefer="return=minimal",
+        )
 
     def record_audit_log(
         self,
