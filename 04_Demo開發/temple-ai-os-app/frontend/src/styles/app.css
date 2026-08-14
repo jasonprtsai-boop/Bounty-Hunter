@@ -627,6 +627,15 @@ label {
   background: #fff4d6;
 }
 
+.release-cover {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border: 1px solid #e6d7b8;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #fff4d6;
+}
+
 .bottom-nav {
   position: fixed;
   right: 0;

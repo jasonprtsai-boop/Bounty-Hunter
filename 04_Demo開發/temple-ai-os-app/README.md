@@ -118,4 +118,4 @@ python scripts/seed_demo_data.py
 
 ## 貼圖與大頭貼發布
 
-第一套貼圖素材在 `assets/stickers/spring-fortune-messenger/`，LINE OA 大頭貼在 `assets/brand/line-oa-profile-v2.png`。正式送審與上架步驟請看 `docs/STICKER_RELEASE_CHECKLIST.md`。
+第一套貼圖素材在 `assets/stickers/spring-fortune-messenger/`，LINE OA 大頭貼在 `assets/brand/line-oa-profile-v2.png`，背景圖在 `assets/brand/line-oa-profile-background-v1.png`。正式送審與上架步驟請看 `docs/STICKER_RELEASE_CHECKLIST.md`。

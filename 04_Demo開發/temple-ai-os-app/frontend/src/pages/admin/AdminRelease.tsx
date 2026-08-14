@@ -10,6 +10,7 @@ type RichMenuPublishResult = {
 };
 
 const profileImageUrl = "/assets/brand/line-oa-profile-v2.png";
+const profileBackgroundUrl = "/assets/brand/line-oa-profile-background-v1.png";
 const stickerPreviewUrl = "/stickers";
 const lineManagerUrl = "https://manager.line.biz/account/@983zhzni";
 
@@ -59,13 +60,18 @@ export function AdminRelease() {
         <article className="tool-panel release-card">
           <div className="section-title">
             <Image size={20} />
-            <h2>大頭貼</h2>
+            <h2>大頭貼與背景</h2>
           </div>
           <img className="release-avatar" src={profileImageUrl} alt="Temple AI OS LINE 官方帳號大頭貼" />
+          <img className="release-cover" src={profileBackgroundUrl} alt="Temple AI OS LINE 官方帳號背景圖" />
           <div className="inline-actions">
             <a className="button" href={profileImageUrl} target="_blank" rel="noreferrer">
               <Image size={18} />
-              開啟 PNG
+              大頭貼
+            </a>
+            <a className="button" href={profileBackgroundUrl} target="_blank" rel="noreferrer">
+              <Image size={18} />
+              背景圖
             </a>
             <a className="button" href={lineManagerUrl} target="_blank" rel="noreferrer">
               <ExternalLink size={18} />

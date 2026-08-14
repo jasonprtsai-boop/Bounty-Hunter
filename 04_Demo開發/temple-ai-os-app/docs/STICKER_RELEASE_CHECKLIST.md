@@ -12,6 +12,7 @@ Last updated: 2026-08-14
 - Chat tab image: `tab.png`, 96 x 74 PNG
 - Sticker images: `sticker_*.png`, 370 x 320 PNG, transparent background
 - LINE OA profile image: `assets/brand/line-oa-profile-v2.png`, 640 x 640 PNG
+- LINE OA profile background: `assets/brand/line-oa-profile-background-v1.png`, 1080 x 720 PNG
 
 ## Submission order
 
@@ -47,6 +48,7 @@ Last updated: 2026-08-14
 
 8. Change LINE OA profile image.
    In LINE Official Account Manager, upload `assets/brand/line-oa-profile-v2.png` as the profile image.
+   Upload `assets/brand/line-oa-profile-background-v1.png` as the profile page background image.
 
 ## Official spec notes
 
