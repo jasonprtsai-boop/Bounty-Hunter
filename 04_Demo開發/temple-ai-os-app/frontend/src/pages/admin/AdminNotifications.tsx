@@ -20,6 +20,9 @@ type NotificationForm = {
   event_id: string;
   status: string;
   scheduled_at: string;
+  registration_id: string;
+  reminder_type: string;
+  party_size: string;
   text: string;
 };
 
@@ -30,6 +33,9 @@ const emptyNotificationForm: NotificationForm = {
   event_id: "evt_demo_worship_intro",
   status: "draft",
   scheduled_at: "",
+  registration_id: "reg_0002",
+  reminder_type: "day_before",
+  party_size: "1",
   text: "Temple AI OS Demo：這是一則測試推播。"
 };
 
@@ -61,6 +67,9 @@ export function AdminNotifications() {
       event_id: job.event_id || "",
       status: job.status,
       scheduled_at: job.scheduled_at || "",
+      registration_id: String(job.payload.registration_id || ""),
+      reminder_type: String(job.payload.reminder_type || "day_before"),
+      party_size: String(job.payload.party_size || "1"),
       text: String(job.payload.text || "")
     });
     setMessage("");
@@ -79,7 +88,12 @@ export function AdminNotifications() {
       event_id: form.event_id.trim() || null,
       status: form.status,
       scheduled_at: form.scheduled_at.trim() || null,
-      payload: { text: form.text.trim() }
+      payload: {
+        text: form.text.trim(),
+        registration_id: form.registration_id.trim() || undefined,
+        reminder_type: form.reminder_type,
+        party_size: Number(form.party_size) || 1
+      }
     };
     try {
       const saved = editingId
@@ -112,14 +126,30 @@ export function AdminNotifications() {
     setError("");
     setMessage("");
     try {
-      const result = await apiFetch<{ sent: boolean; reason?: string }>(
+      const result = await apiFetch<{ sent: boolean; reason?: string; message_type?: string }>(
         `/api/admin/notification-jobs/${jobId}/send-test`,
         { method: "POST" },
         true
       );
-      setMessage(result.sent ? "已送出測試" : result.reason || "未送出");
+      setMessage(result.sent ? "已送出通知" : `${result.message_type || "通知"}：${result.reason || "未送出"}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "送測試失敗");
+    }
+  }
+
+  async function sendDueJobs() {
+    setError("");
+    setMessage("");
+    try {
+      const result = await apiFetch<{ processed: number }>(
+        "/api/admin/notification-jobs/send-due",
+        { method: "POST" },
+        true
+      );
+      setMessage(`已處理 ${result.processed} 筆到期任務`);
+      apiFetch<NotificationJob[]>("/api/admin/notification-jobs", {}, true).then(setJobs).catch(console.error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "送出到期任務失敗");
     }
   }
 
@@ -147,10 +177,16 @@ export function AdminNotifications() {
         <form className="form-panel" onSubmit={saveJob}>
           <div className="admin-actions">
             <strong>{editingId ? "編輯任務" : "新增任務"}</strong>
-            <button className="button" type="button" onClick={resetForm}>
-              <Plus size={18} />
-              新增
-            </button>
+            <div className="inline-actions">
+              <button className="button" type="button" onClick={sendDueJobs}>
+                <Send size={18} />
+                送出到期
+              </button>
+              <button className="button" type="button" onClick={resetForm}>
+                <Plus size={18} />
+                新增
+              </button>
+            </div>
           </div>
           <label>
             任務 ID
@@ -164,9 +200,12 @@ export function AdminNotifications() {
             <label>
               類型
               <select value={form.job_type} onChange={(event) => setForm({ ...form, job_type: event.target.value })}>
-                <option value="event_reminder">event_reminder</option>
-                <option value="registration_confirmation">registration_confirmation</option>
-                <option value="knowledge_gap_followup">knowledge_gap_followup</option>
+                <option value="event_reminder_day_before">報名前一天提醒</option>
+                <option value="event_reminder_day_of">活動當天提醒</option>
+                <option value="registration_confirmation">報名成功補發</option>
+                <option value="registration_waitlist">名額已滿候補通知</option>
+                <option value="registration_cancellation">取消報名通知</option>
+                <option value="knowledge_gap_followup">一般文字推播</option>
               </select>
             </label>
             <label>
@@ -186,6 +225,28 @@ export function AdminNotifications() {
           <label>
             Event ID
             <input value={form.event_id} onChange={(event) => setForm({ ...form, event_id: event.target.value })} />
+          </label>
+          <div className="form-grid">
+            <label>
+              報名編號
+              <input value={form.registration_id} onChange={(event) => setForm({ ...form, registration_id: event.target.value })} />
+            </label>
+            <label>
+              提醒類型
+              <select value={form.reminder_type} onChange={(event) => setForm({ ...form, reminder_type: event.target.value })}>
+                <option value="day_before">前一天</option>
+                <option value="day_of">當天</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            候補/詢問人數
+            <input
+              min="1"
+              type="number"
+              value={form.party_size}
+              onChange={(event) => setForm({ ...form, party_size: event.target.value })}
+            />
           </label>
           <label>
             預定時間
@@ -232,7 +293,7 @@ export function AdminNotifications() {
                   </button>
                   <button className="button icon-button" type="button" onClick={() => sendTest(job.job_id)}>
                     <Send size={17} />
-                    <span>測試</span>
+                    <span>補發</span>
                   </button>
                   <button className="button icon-button danger" type="button" onClick={() => deleteJob(job.job_id)}>
                     <Trash2 size={17} />

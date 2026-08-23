@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,14 +8,26 @@ from app.core.config import get_settings
 from app.core.security import resolve_admin_principal
 from app.db.supabase import get_repository
 from app.schemas.common import ApiResponse
+from app.services.rag_service import warm_fast_reply_cache
 
 
 settings = get_settings()
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    try:
+        warm_fast_reply_cache(get_repository())
+    except Exception:
+        pass
+    yield
+
 
 app = FastAPI(
     title="Temple AI OS API",
     version="0.1.0",
     description="Wan Chun Gong demo backend for LINE, LIFF, AI, and admin dashboard.",
+    lifespan=lifespan,
 )
 
 app.add_middleware(

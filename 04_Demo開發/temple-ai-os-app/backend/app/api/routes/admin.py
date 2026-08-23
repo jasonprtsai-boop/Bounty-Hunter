@@ -265,10 +265,14 @@ async def admin_send_notification_job_test(job_id: str) -> ApiResponse[dict[str,
     job = repo.get_notification_job(job_id)
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="notification_job_not_found")
-    target_user_id = job.target_user_id or "demo_u001"
-    text = str(job.payload.get("text") or "Temple AI OS 測試推播：這是 Demo 訊息。")
-    result = await NotificationService(repo).send_test_notification(target_user_id, text)
-    return ApiResponse(data=result, meta={"job_id": job_id, "target_user_id": target_user_id})
+    result = await NotificationService(repo).send_notification_job(job)
+    return ApiResponse(data=result, meta={"job_id": job_id, "target_user_id": job.target_user_id})
+
+
+@router.post("/notification-jobs/send-due", response_model=ApiResponse[dict[str, object]])
+async def admin_send_due_notification_jobs() -> ApiResponse[dict[str, object]]:
+    result = await NotificationService(get_repository()).send_due_notification_jobs()
+    return ApiResponse(data=result)
 
 
 @router.post("/rich-menu/publish", response_model=ApiResponse[dict[str, object]])

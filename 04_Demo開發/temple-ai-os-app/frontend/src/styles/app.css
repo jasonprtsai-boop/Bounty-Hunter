@@ -711,6 +711,54 @@ label small {
   overflow-wrap: anywhere;
 }
 
+.post-template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.post-template-grid.compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.post-template-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 12px;
+  border: 1px solid #e6d7b8;
+  border-radius: 8px;
+  background: #fffaf0;
+}
+
+.post-template-card strong {
+  display: block;
+  color: #7a1e17;
+}
+
+.post-template-card small {
+  display: block;
+  margin-top: 5px;
+  color: #667680;
+  font-weight: 800;
+}
+
+.post-template-card pre {
+  min-height: 210px;
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #4f625b;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.post-template-grid.compact .post-template-card pre {
+  min-height: 180px;
+}
+
 .setting-steps div {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr);
@@ -1163,6 +1211,8 @@ label small {
   .release-grid,
   .release-status-grid,
   .release-checklist,
+  .post-template-grid,
+  .post-template-grid.compact,
   .sticker-status-grid,
   .sticker-grid {
     grid-template-columns: 1fr 1fr;
@@ -1211,6 +1261,8 @@ label small {
   .profile-copy-row,
   .release-status-grid,
   .release-checklist,
+  .post-template-grid,
+  .post-template-grid.compact,
   .sticker-status-grid,
   .sticker-grid {
     grid-template-columns: 1fr;

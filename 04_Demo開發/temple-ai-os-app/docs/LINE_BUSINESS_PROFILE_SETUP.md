@@ -1,6 +1,6 @@
 # LINE 商業簡介設定稿
 
-Last updated: 2026-08-14
+Last updated: 2026-08-23
 
 ## 定位
 
@@ -35,16 +35,29 @@ Last updated: 2026-08-14
 這些項目也已放在 `/admin/release`，可直接在後台頁面勾選追蹤。
 
 - LINE 商業簡介已貼上 Demo 聲明與公開網址。
+- 帳號名稱、狀態訊息、歡迎訊息與 LINE VOOM 互動設定已確認。
 - LINE 大頭貼已換成 `line-oa-profile-v2.png`。
 - LINE 背景圖已換成 `line-oa-profile-background-v1.png`。
 - Messaging API Webhook 驗證成功。
 - Rich Menu 已發布且貼圖小舖入口可開啟。
+- 至少一篇 LINE VOOM Demo 貼文已建立草稿或排程。
 - 手機 LINE 實測可開 LIFF 與活動頁。
 - 貼圖素材已確認，等待 LINE Creators Market 送審或審核。
 - Demo 現場前已暖機 Render 後端。
+
+## 帳號設定與貼文範例
+
+完整帳號設定稿、LINE VOOM 貼文範例、廣播訊息範例與官方限制紀錄已整理在：
+
+```text
+docs/LINE_CONTENT_PLAYBOOK.md
+```
+
+同一份內容也已放在 `/admin/release`，可從後台直接複製。
 
 ## 風險提醒
 
 - 若未取得廟方正式授權，不要把帳號名稱改成「萬春宮官方」。
 - 真實電話與地址屬於公開資料，但放在 LINE 商業簡介上容易被理解成正式客服入口；若要降低誤會，可只保留網站與 Demo 說明，不顯示電話。
 - 正式上架貼圖後，才把 LINE STORE 貼圖購買網址加進 `/stickers` 的環境變數。
+- LINE VOOM 貼文與廣播訊息都不能暗示這是廟方正式公告；Demo 聲明要保留在貼文本文或圖片說明中。

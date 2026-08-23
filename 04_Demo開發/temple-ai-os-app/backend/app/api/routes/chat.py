@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Header, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request, status
 
 from app.core.rate_limit import InMemoryRateLimiter
 from app.db.supabase import get_repository
 from app.schemas.common import ApiResponse, ChatReply, ChatRequest
 from app.services.liff_auth import resolve_liff_user_id
-from app.services.rag_service import RAGService
+from app.services.rag_service import get_rag_service, record_chat_activity
 
 router = APIRouter()
 chat_rate_limiter = InMemoryRateLimiter(max_requests=12, window_seconds=60)
@@ -21,6 +21,7 @@ def _client_key(request: Request, user_id: str) -> str:
 @router.post("/chat", response_model=ApiResponse[ChatReply])
 async def chat(
     request: Request,
+    background_tasks: BackgroundTasks,
     payload: ChatRequest,
     x_liff_id_token: str | None = Header(default=None, alias="X-LIFF-ID-Token"),
 ) -> ApiResponse[ChatReply]:
@@ -31,6 +32,14 @@ async def chat(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid_liff_token") from exc
     if not chat_rate_limiter.allow(_client_key(request, user_id)):
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="chat_rate_limited")
-    repo.get_or_create_line_user(user_id)
-    reply = await RAGService(repo).answer(payload.message, user_id)
+    reply = await get_rag_service(repo).answer(payload.message, user_id, record=False)
+    background_tasks.add_task(
+        record_chat_activity,
+        repo,
+        user_id=user_id,
+        channel=payload.source,
+        user_text=payload.message,
+        reply=reply,
+        ensure_user=True,
+    )
     return ApiResponse(data=reply)

@@ -58,6 +58,53 @@ def test_liff_token_overrides_client_user_id_for_registration() -> None:
     assert response.json()["data"]["user_id"] == "demo_u001"
 
 
+def test_registration_capacity_exceeded_returns_waitlist_notification_meta() -> None:
+    event_id = "evt_test_full_capacity"
+    delete_existing = client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
+    assert delete_existing.status_code in {200, 404}
+
+    create_event = client.post(
+        "/api/admin/events",
+        headers=ADMIN_HEADERS,
+        json={
+            "event_id": event_id,
+            "title": "額滿測試活動",
+            "category": "測試",
+            "source_type": "test",
+            "date": "2026-10-01",
+            "start_time": "10:00",
+            "end_time": "11:00",
+            "location": "萬春宮",
+            "address": "臺中市中區成功路212號",
+            "summary": "用於驗證名額已滿通知。",
+            "requires_registration": True,
+            "capacity": 1,
+            "registered_count": 0,
+            "status": "open",
+            "registration_fields": ["姓名", "參加人數"],
+            "demo_note": "測試活動。",
+        },
+    )
+    assert create_event.status_code == 201
+
+    response = client.post(
+        f"/api/events/{event_id}/registrations",
+        json={
+            "user_id": "demo_u001",
+            "contact_name": "小安",
+            "party_size": 2,
+            "reminder_opt_in": True,
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"]["reason"] == "event_capacity_exceeded"
+    assert response.json()["detail"]["notification"]["message_type"] == "registration_waitlist"
+
+    delete_response = client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
+    assert delete_response.status_code == 200
+
+
 def test_chat_safety_boundary() -> None:
     response = client.post(
         "/api/chat",
@@ -282,6 +329,26 @@ def test_rich_menu_payload_links_to_sticker_shop() -> None:
     )
 
 
+def test_rich_menu_payload_uses_current_image_card_bounds() -> None:
+    payload = RichMenuService().main_menu_payload()
+    bounds = [area["bounds"] for area in payload["areas"]]
+
+    assert payload["size"] == {"width": 2500, "height": 1686}
+    assert bounds == [
+        {"x": 86, "y": 340, "width": 699, "height": 590},
+        {"x": 900, "y": 340, "width": 700, "height": 590},
+        {"x": 1715, "y": 340, "width": 699, "height": 590},
+        {"x": 86, "y": 1020, "width": 699, "height": 590},
+        {"x": 900, "y": 1020, "width": 700, "height": 590},
+        {"x": 1715, "y": 1020, "width": 699, "height": 590},
+    ]
+    for area in bounds:
+        assert area["x"] >= 0
+        assert area["y"] >= 0
+        assert area["x"] + area["width"] <= payload["size"]["width"]
+        assert area["y"] + area["height"] <= payload["size"]["height"]
+
+
 def test_support_ticket_admin_flow() -> None:
     create_response = client.post(
         "/api/support/tickets",
@@ -393,6 +460,7 @@ def test_admin_notification_job_flow() -> None:
     )
     assert send_response.status_code == 200
     assert send_response.json()["data"]["sent"] is False
+    assert send_response.json()["data"]["message_type"] == "event_reminder_day_before"
 
     delete_response = client.delete(
         f"/api/admin/notification-jobs/{job_id}",
@@ -400,3 +468,82 @@ def test_admin_notification_job_flow() -> None:
     )
     assert delete_response.status_code == 200
     assert delete_response.json()["data"]["deleted"] is True
+
+
+def test_admin_notification_job_can_send_waitlist_notice() -> None:
+    job_id = "job_test_waitlist_notice"
+    delete_existing = client.delete(
+        f"/api/admin/notification-jobs/{job_id}",
+        headers=ADMIN_HEADERS,
+    )
+    assert delete_existing.status_code in {200, 404}
+
+    create_response = client.post(
+        "/api/admin/notification-jobs",
+        headers=ADMIN_HEADERS,
+        json={
+            "job_id": job_id,
+            "job_type": "registration_waitlist",
+            "target_user_id": "demo_u001",
+            "event_id": "evt_demo_worship_intro",
+            "status": "draft",
+            "payload": {"party_size": 2},
+        },
+    )
+    assert create_response.status_code == 201
+
+    send_response = client.post(
+        f"/api/admin/notification-jobs/{job_id}/send-test",
+        headers=ADMIN_HEADERS,
+    )
+    assert send_response.status_code == 200
+    assert send_response.json()["data"]["sent"] is False
+    assert send_response.json()["data"]["message_type"] == "registration_waitlist"
+
+    delete_response = client.delete(
+        f"/api/admin/notification-jobs/{job_id}",
+        headers=ADMIN_HEADERS,
+    )
+    assert delete_response.status_code == 200
+
+
+def test_admin_can_send_due_notification_jobs() -> None:
+    job_id = "job_test_due_reminder"
+    delete_existing = client.delete(
+        f"/api/admin/notification-jobs/{job_id}",
+        headers=ADMIN_HEADERS,
+    )
+    assert delete_existing.status_code in {200, 404}
+
+    create_response = client.post(
+        "/api/admin/notification-jobs",
+        headers=ADMIN_HEADERS,
+        json={
+            "job_id": job_id,
+            "job_type": "event_reminder_day_before",
+            "target_user_id": "demo_u001",
+            "event_id": "evt_demo_worship_intro",
+            "status": "ready",
+            "scheduled_at": "2020-01-01T00:00:00+00:00",
+            "payload": {"registration_id": "reg_0002", "reminder_type": "day_before"},
+        },
+    )
+    assert create_response.status_code == 201
+
+    send_due_response = client.post(
+        "/api/admin/notification-jobs/send-due",
+        headers=ADMIN_HEADERS,
+    )
+    assert send_due_response.status_code == 200
+    assert send_due_response.json()["data"]["processed"] >= 1
+
+    job_response = client.get("/api/admin/notification-jobs", headers=ADMIN_HEADERS)
+    job = next(item for item in job_response.json()["data"] if item["job_id"] == job_id)
+    assert job["status"] == "failed"
+    assert job["payload"]["last_send_result"]["message_type"] == "event_reminder_day_before"
+
+    delete_response = client.delete(
+        f"/api/admin/notification-jobs/{job_id}",
+        headers=ADMIN_HEADERS,
+    )
+    assert delete_response.status_code == 200

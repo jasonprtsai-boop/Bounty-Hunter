@@ -5,6 +5,16 @@ import httpx
 from app.core.config import get_settings
 
 
+RICH_MENU_AREAS = [
+    {"x": 86, "y": 340, "width": 699, "height": 590},
+    {"x": 900, "y": 340, "width": 700, "height": 590},
+    {"x": 1715, "y": 340, "width": 699, "height": 590},
+    {"x": 86, "y": 1020, "width": 699, "height": 590},
+    {"x": 900, "y": 1020, "width": 700, "height": 590},
+    {"x": 1715, "y": 1020, "width": 699, "height": 590},
+]
+
+
 class RichMenuService:
     def __init__(self) -> None:
         self.settings = get_settings()
@@ -18,27 +28,27 @@ class RichMenuService:
             "chatBarText": "Temple AI OS",
             "areas": [
                 {
-                    "bounds": {"x": 0, "y": 260, "width": 833, "height": 713},
+                    "bounds": RICH_MENU_AREAS[0],
                     "action": {"type": "message", "label": "AI 助手", "text": "我第一次來萬春宮，怎麼參拜？"},
                 },
                 {
-                    "bounds": {"x": 833, "y": 260, "width": 834, "height": 713},
+                    "bounds": RICH_MENU_AREAS[1],
                     "action": {"type": "uri", "label": "活動中心", "uri": f"{base}/events"},
                 },
                 {
-                    "bounds": {"x": 1667, "y": 260, "width": 833, "height": 713},
+                    "bounds": RICH_MENU_AREAS[2],
                     "action": {"type": "uri", "label": "文化抽籤", "uri": f"{base}/fortune"},
                 },
                 {
-                    "bounds": {"x": 0, "y": 973, "width": 833, "height": 713},
+                    "bounds": RICH_MENU_AREAS[3],
                     "action": {"type": "uri", "label": "宮廟導覽", "uri": f"{base}/tour/main-hall"},
                 },
                 {
-                    "bounds": {"x": 833, "y": 973, "width": 834, "height": 713},
+                    "bounds": RICH_MENU_AREAS[4],
                     "action": {"type": "uri", "label": "貼圖小舖", "uri": f"{base}/stickers"},
                 },
                 {
-                    "bounds": {"x": 1667, "y": 973, "width": 833, "height": 713},
+                    "bounds": RICH_MENU_AREAS[5],
                     "action": {"type": "uri", "label": "客服中心", "uri": f"{base}/support"},
                 },
             ],

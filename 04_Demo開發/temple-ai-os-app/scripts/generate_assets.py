@@ -18,14 +18,47 @@ GOLD = "#D6A33A"
 PALE_GOLD = "#FFF4D6"
 JADE = "#1F7A5B"
 PAPER = "#FFFCF4"
+COCOA = "#6B3F2A"
+MILK = "#FFF7E8"
+BLUSH = "#FFE8F0"
+PEACH = "#FF9D7A"
+PINK = "#FF6FA4"
+LILAC = "#B985FF"
+MINT = "#7EDCC2"
+CREAM = "#FFE7A8"
+SKY = "#9CDCF5"
 
 
-def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+def font(
+    size: int,
+    bold: bool = False,
+    *,
+    style: str = "sans",
+) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     env_key = "TEMPLE_AI_OS_FONT_BOLD" if bold else "TEMPLE_AI_OS_FONT_REGULAR"
+    if style == "serif":
+        styled_candidates = [
+            "C:/Windows/Fonts/NotoSerifTC-VF.ttf",
+            "C:/Windows/Fonts/mingliub.ttc" if bold else "C:/Windows/Fonts/mingliu.ttc",
+        ]
+    elif style == "hand":
+        styled_candidates = [
+            "C:/Windows/Fonts/kaiu.ttf",
+            "C:/Windows/Fonts/NotoSerifTC-VF.ttf",
+        ]
+    elif style == "round":
+        styled_candidates = [
+            "C:/Windows/Fonts/msjhbd.ttc" if bold else "C:/Windows/Fonts/msjh.ttc",
+            "C:/Windows/Fonts/NotoSansTC-VF.ttf",
+        ]
+    else:
+        styled_candidates = []
     candidates = [
         os.getenv(env_key),
+        *styled_candidates,
         FONT_DIR / ("NotoSansTC-Bold.otf" if bold else "NotoSansTC-Regular.otf"),
         FONT_DIR / ("NotoSansCJKtc-Bold.otf" if bold else "NotoSansCJKtc-Regular.otf"),
+        "C:/Windows/Fonts/NotoSansTC-VF.ttf",
         "C:/Windows/Fonts/msjhbd.ttc" if bold else "C:/Windows/Fonts/msjh.ttc",
         "C:/Windows/Fonts/mingliub.ttc" if bold else "C:/Windows/Fonts/mingliu.ttc",
         "/System/Library/Fonts/PingFang.ttc",
@@ -69,8 +102,9 @@ def text_center(
     *,
     bold: bool = False,
     spacing: int = 8,
+    style: str = "sans",
 ) -> None:
-    fnt = font(size, bold=bold)
+    fnt = font(size, bold=bold, style=style)
     bbox = draw.multiline_textbbox((0, 0), text, font=fnt, spacing=spacing, align="center")
     width = bbox[2] - bbox[0]
     height = bbox[3] - bbox[1]
@@ -96,74 +130,184 @@ def draw_roof(draw: ImageDraw.ImageDraw, cx: int, y: int, scale: int, color: str
     draw.rectangle((cx - 96 * scale, y + 216 * scale, cx + 96 * scale, y + 236 * scale), fill=color)
 
 
-def rich_menu() -> None:
-    image = Image.new("RGB", (2500, 1686), PAPER)
+def vertical_gradient(size: tuple[int, int], top: str, bottom: str) -> Image.Image:
+    width, height = size
+    image = Image.new("RGB", size, top)
     draw = ImageDraw.Draw(image)
-    draw.rectangle((0, 0, 2500, 260), fill=DEEP_RED)
-    draw.rectangle((0, 236, 2500, 260), fill=GOLD)
-    draw_roof(draw, 2140, 36, 1, RED)
-    draw.text((90, 54), "Temple AI OS", fill="#FFFFFF", font=font(78, bold=True))
-    draw.text((94, 148), "萬春宮示範服務入口", fill=PALE_GOLD, font=font(42, bold=True))
+    top_rgb = tuple(int(top[index : index + 2], 16) for index in (1, 3, 5))
+    bottom_rgb = tuple(int(bottom[index : index + 2], 16) for index in (1, 3, 5))
+    for y in range(height):
+        ratio = y / max(1, height - 1)
+        color = tuple(
+            int(top_rgb[channel] + (bottom_rgb[channel] - top_rgb[channel]) * ratio)
+            for channel in range(3)
+        )
+        draw.line((0, y, width, y), fill=color)
+    return image
+
+
+def paste_sticker(
+    image: Image.Image,
+    filename: str,
+    box: tuple[int, int, int, int],
+    *,
+    opacity: float = 1,
+) -> None:
+    path = ASSETS / "stickers" / "spring-fortune-messenger" / filename
+    if not path.exists():
+        return
+    sticker = Image.open(path).convert("RGBA")
+    sticker.thumbnail((box[2] - box[0], box[3] - box[1]), Image.Resampling.LANCZOS)
+    if opacity < 1:
+        alpha = sticker.getchannel("A").point(lambda value: int(value * opacity))
+        sticker.putalpha(alpha)
+    x = box[0] + (box[2] - box[0] - sticker.width) // 2
+    y = box[1] + (box[3] - box[1] - sticker.height) // 2
+    image.paste(sticker, (x, y), sticker)
+
+
+def draw_sparkle(draw: ImageDraw.ImageDraw, cx: int, cy: int, size: int, color: str) -> None:
+    inner = max(8, size // 3)
+    draw.polygon(
+        [
+            (cx, cy - size),
+            (cx + inner, cy - inner),
+            (cx + size, cy),
+            (cx + inner, cy + inner),
+            (cx, cy + size),
+            (cx - inner, cy + inner),
+            (cx - size, cy),
+            (cx - inner, cy - inner),
+        ],
+        fill=color,
+    )
+
+
+def draw_soft_pattern(draw: ImageDraw.ImageDraw, width: int, height: int) -> None:
+    dots = [
+        (120, 250, 34, "#FFD1DD"),
+        (420, 1450, 44, "#FFFFFF"),
+        (2120, 260, 58, "#FFD1DD"),
+        (2280, 1220, 46, "#FFFFFF"),
+        (1680, 1440, 38, "#FFD1DD"),
+        (720, 230, 28, "#FFFFFF"),
+    ]
+    for x, y, radius, color in dots:
+        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
+    for x, y, color in [
+        (210, 1160, PINK),
+        (2020, 920, LILAC),
+        (1060, 1540, PEACH),
+        (1510, 360, MINT),
+    ]:
+        draw_sparkle(draw, x, y, 42, color)
+
+
+def cute_panel(
+    draw: ImageDraw.ImageDraw,
+    box: tuple[int, int, int, int],
+    *,
+    fill: str,
+    outline: str,
+    shadow: str = "#E5AFC0",
+) -> None:
+    x0, y0, x1, y1 = box
+    draw.rounded_rectangle((x0 + 18, y0 + 22, x1 + 18, y1 + 22), radius=72, fill=shadow)
+    draw.rounded_rectangle(box, radius=72, fill=fill, outline=outline, width=5)
+
+
+def rich_menu() -> None:
+    image = vertical_gradient((2500, 1686), "#FFF5DF", "#FFD7E6").convert("RGBA")
+    draw = ImageDraw.Draw(image)
+    draw_soft_pattern(draw, 2500, 1686)
+    draw.rounded_rectangle((84, 70, 2416, 278), radius=96, fill=COCOA)
+    text_center(
+        draw,
+        (130, 88, 1940, 258),
+        "萬春宮服務選單",
+        "#FFFFFF",
+        88,
+        bold=True,
+        spacing=0,
+        style="round",
+    )
+    draw_sparkle(draw, 2110, 170, 54, CREAM)
+    draw_sparkle(draw, 2262, 170, 54, CREAM)
 
     labels = [
-        ("AI 助手", "問", "參拜與文化問答", JADE),
-        ("活動中心", "曆", "法會與講座 Demo", RED),
-        ("文化抽籤", "籤", "正向提醒", "#8A5A12"),
-        ("宮廟導覽", "廟", "QR/NFC 動線", "#245B8A"),
-        ("貼圖小舖", "貼", "春福小使", "#334155"),
-        ("客服中心", "話", "人工確認入口", "#6B3A8F"),
+        ("AI 小幫手", "問", PINK),
+        ("活動報名", "曆", PEACH),
+        ("文化抽籤", "籤", LILAC),
+        ("宮廟導覽", "廟", MINT),
+        ("貼圖小舖", "貼", SKY),
+        ("客服中心", "聊", CREAM),
     ]
     cells = [
-        (0, 260, 833, 973),
-        (833, 260, 1667, 973),
-        (1667, 260, 2500, 973),
-        (0, 973, 833, 1686),
-        (833, 973, 1667, 1686),
-        (1667, 973, 2500, 1686),
+        (86, 340, 785, 930),
+        (900, 340, 1600, 930),
+        (1715, 340, 2414, 930),
+        (86, 1020, 785, 1610),
+        (900, 1020, 1600, 1610),
+        (1715, 1020, 2414, 1610),
     ]
-    for box, (title, icon, subtitle, accent) in zip(cells, labels):
-        draw.rectangle(box, fill="#FFFFFF", outline="#E4D5B0", width=4)
-        draw.rectangle((box[0], box[1], box[2], box[1] + 16), fill=accent)
-        icon_box = (box[0] + 322, box[1] + 92, box[0] + 511, box[1] + 281)
-        draw.ellipse(icon_box, fill=PALE_GOLD, outline=accent, width=10)
-        text_center(draw, icon_box, icon, accent, 82, bold=True)
-        text_center(draw, (box[0] + 80, box[1] + 326, box[2] - 80, box[1] + 458), title, INK, 82, bold=True)
-        text_center(draw, (box[0] + 80, box[1] + 486, box[2] - 80, box[1] + 582), subtitle, "#5C4635", 36)
+    for box, (title, icon, accent) in zip(cells, labels):
+        panel_fill = "#FFFFFF" if accent != CREAM else "#FFF4CC"
+        cute_panel(draw, box, fill=panel_fill, outline=accent)
+        draw.rounded_rectangle((box[0] + 42, box[1] + 42, box[0] + 218, box[1] + 218), radius=88, fill=accent)
+        text_center(
+            draw,
+            (box[0] + 42, box[1] + 42, box[0] + 218, box[1] + 218),
+            icon,
+            "#FFFFFF",
+            86,
+            bold=True,
+            spacing=0,
+            style="round",
+        )
+        draw_sparkle(draw, box[2] - 170, box[1] + 126, 58, accent)
+        draw_sparkle(draw, box[2] - 86, box[1] + 210, 34, BLUSH)
+        text_center(
+            draw,
+            (box[0] + 48, box[1] + 292, box[2] - 48, box[1] + 548),
+            title,
+            COCOA,
+            96,
+            bold=True,
+            spacing=0,
+            style="round",
+        )
 
     out = ASSETS / "rich-menu" / "main-2500x1686.png"
-    image.save(out, optimize=True)
+    image.convert("RGB").save(out, optimize=True)
 
 
 def banner(name: str, title: str, subtitle: str, accent: str) -> None:
-    image = Image.new("RGB", (1200, 520), PAPER)
+    image = vertical_gradient((1200, 520), "#FFF9E8", "#FFD9E8").convert("RGBA")
     draw = ImageDraw.Draw(image)
-    draw.rectangle((0, 0, 1200, 520), fill=PAPER)
-    draw.rectangle((0, 0, 1200, 82), fill=DEEP_RED)
-    draw.rectangle((0, 82, 1200, 96), fill=GOLD)
-    draw_roof(draw, 916, 150, 1, RED)
-    draw.text((86, 148), title, fill=INK, font=font(66, bold=True))
-    draw.text((90, 238), subtitle, fill="#5C4635", font=font(36))
-    draw.rounded_rectangle((88, 320, 576, 388), radius=8, fill=accent)
-    draw.text((120, 337), "LINE + AI + LIFF", fill="#FFFFFF", font=font(32, bold=True))
-    draw.text((92, 430), "Demo 資料不代表萬春宮官方營運", fill="#8A6A12", font=font(27))
+    draw.rounded_rectangle((58, 58, 1142, 462), radius=64, fill="#FFFFFF", outline=accent, width=5)
+    draw.ellipse((778, -34, 1118, 306), fill="#FFF1F6")
+    paste_sticker(image, "main.png", (820, 36, 1090, 314))
+    draw.text((112, 122), title, fill=COCOA, font=font(72, bold=True, style="round"))
+    draw.text((116, 224), subtitle, fill="#8B5A45", font=font(44, bold=True, style="hand"))
     for out in [ASSETS / "banners" / f"{name}.png", PUBLIC_ASSETS / "banners" / f"{name}.png"]:
-        image.save(out, optimize=True)
+        image.convert("RGB").save(out, optimize=True)
 
 
 def flex_card(name: str, title: str, subtitle: str, accent: str) -> None:
-    image = Image.new("RGB", (1024, 1024), PAPER)
+    image = vertical_gradient((1024, 1024), "#FFF9E8", "#FFD4E4").convert("RGBA")
     draw = ImageDraw.Draw(image)
-    draw.rectangle((0, 0, 1024, 1024), fill=PAPER)
-    draw.rectangle((0, 0, 1024, 140), fill=DEEP_RED)
-    draw.rectangle((0, 140, 1024, 162), fill=GOLD)
-    draw_roof(draw, 512, 252, 1, accent)
-    text_center(draw, (80, 532, 944, 646), title, INK, 74, bold=True)
-    text_center(draw, (120, 660, 904, 742), subtitle, "#5C4635", 34)
-    draw.rounded_rectangle((210, 804, 814, 872), radius=8, fill=accent)
-    text_center(draw, (210, 804, 814, 872), "Temple AI OS 示範卡片", "#FFFFFF", 32, bold=True)
-    draw.text((80, 938), "自製示意圖｜開放資料示範情境", fill="#8A6A12", font=font(26))
+    draw_soft_pattern(draw, 1024, 1024)
+    draw.rounded_rectangle((76, 78, 948, 946), radius=78, fill="#FFFFFF", outline=accent, width=7)
+    draw.rounded_rectangle((76, 78, 948, 198), radius=78, fill=accent)
+    draw.rectangle((76, 136, 948, 204), fill=accent)
+    draw.text((136, 106), "萬春宮服務", fill="#FFFFFF", font=font(52, bold=True, style="round"))
+    paste_sticker(image, "main.png", (300, 230, 724, 548))
+    text_center(draw, (104, 574, 920, 694), title, COCOA, 84, bold=True, spacing=0, style="round")
+    text_center(draw, (142, 708, 882, 802), subtitle, "#8B5A45", 42, bold=True, spacing=4, style="hand")
+    draw.rounded_rectangle((178, 840, 846, 922), radius=41, fill=accent)
+    text_center(draw, (178, 840, 846, 922), "查看詳情", "#FFFFFF", 46, bold=True, style="round")
     for out in [ASSETS / "flex" / f"{name}.png", PUBLIC_ASSETS / "flex" / f"{name}.png"]:
-        image.save(out, optimize=True)
+        image.convert("RGB").save(out, optimize=True)
 
 
 def main() -> None:

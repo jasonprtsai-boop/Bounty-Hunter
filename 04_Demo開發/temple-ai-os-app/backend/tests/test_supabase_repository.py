@@ -19,6 +19,7 @@ class FakeSupabaseClient:
     def __init__(self, *args: object, **kwargs: object) -> None:
         self.inserted_webhook_ids: set[str] = set()
         self.messages: list[object] = []
+        self.event_get_count = 0
 
     def request(
         self,
@@ -47,6 +48,7 @@ class FakeSupabaseClient:
                 ],
             )
         if method == "GET" and url.endswith("/events"):
+            self.event_get_count += 1
             return FakeResponse(
                 200,
                 [
@@ -179,6 +181,20 @@ def test_get_repository_uses_supabase_when_not_demo(monkeypatch: pytest.MonkeyPa
     assert isinstance(repository, DummySupabaseRepository)
     assert repository.supabase_url == "https://example.supabase.co"
     assert repository.service_role_key == "service-role"
+
+
+def test_supabase_events_are_cached_within_ttl(monkeypatch: pytest.MonkeyPatch) -> None:
+    reset_repository_state()
+    monkeypatch.setattr(supabase.httpx, "Client", FakeSupabaseClient)
+    repository = supabase.SupabaseRepository("https://example.supabase.co", "service-role")
+
+    first = repository.list_events()
+    second = repository.list_events()
+
+    assert first[0].event_id == "evt_supabase_test"
+    assert second[0].event_id == "evt_supabase_test"
+    assert isinstance(repository.client, FakeSupabaseClient)
+    assert repository.client.event_get_count == 1
 
     reset_repository_state()
 

@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     admin_password: str = ""
     admin_session_secret: str = ""
     admin_session_ttl_seconds: int = 12 * 60 * 60
+    rag_service_cache_ttl_seconds: int = 300
+    event_cache_ttl_seconds: int = 60
     project_root: Path = Field(default_factory=lambda: Path(__file__).resolve().parents[3])
 
     model_config = SettingsConfigDict(

@@ -47,6 +47,16 @@ async def create_registration(
     except ValueError as exc:
         detail = str(exc)
         status_code = status.HTTP_404_NOT_FOUND if detail == "event_not_found" else status.HTTP_409_CONFLICT
+        if detail == "event_capacity_exceeded":
+            notification = await NotificationService(repo).send_waitlist_notice(
+                event_id=event_id,
+                user_id=user_id,
+                party_size=payload.party_size,
+            )
+            raise HTTPException(
+                status_code=status_code,
+                detail={"reason": detail, "notification": notification},
+            ) from exc
         raise HTTPException(status_code=status_code, detail=detail) from exc
 
     notification = await NotificationService(repo).send_registration_confirmation(registration)

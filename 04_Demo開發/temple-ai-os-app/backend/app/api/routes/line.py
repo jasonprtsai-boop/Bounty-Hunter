@@ -1,13 +1,13 @@
 from typing import Any
 
-from fastapi import APIRouter, Header, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request, status
 
 from app.core.config import get_settings
 from app.core.security import verify_line_signature
 from app.db.supabase import get_repository
 from app.schemas.common import ApiResponse
 from app.services.line_client import LineClient, text_message
-from app.services.rag_service import RAGService
+from app.services.rag_service import get_rag_service, record_chat_activity
 
 router = APIRouter()
 
@@ -15,6 +15,7 @@ router = APIRouter()
 @router.post("/webhook", response_model=ApiResponse[dict[str, Any]])
 async def line_webhook(
     request: Request,
+    background_tasks: BackgroundTasks,
     x_line_signature: str | None = Header(default=None, alias="x-line-signature"),
 ) -> ApiResponse[dict[str, Any]]:
     settings = get_settings()
@@ -25,7 +26,7 @@ async def line_webhook(
 
     payload = await request.json()
     repo = get_repository()
-    rag = RAGService(repo)
+    rag = get_rag_service(repo)
     line_client = LineClient()
     processed = 0
     skipped_duplicates = 0
@@ -42,8 +43,8 @@ async def line_webhook(
             continue
 
         user_id = event.get("source", {}).get("userId", "demo_line_user")
-        repo.get_or_create_line_user(user_id)
-        reply = await rag.answer(event["message"]["text"], user_id)
+        user_text = event["message"]["text"]
+        reply = await rag.answer(user_text, user_id, record=False)
         messages = [text_message(reply.reply)]
         if reply.flex_message:
             messages = [reply.flex_message]
@@ -51,9 +52,17 @@ async def line_webhook(
         send_result = {"sent": False, "reason": "missing_reply_token"}
         if reply_token:
             send_result = await line_client.reply_message(reply_token, messages)
+        background_tasks.add_task(
+            record_chat_activity,
+            repo,
+            user_id=user_id,
+            channel="line",
+            user_text=user_text,
+            reply=reply,
+            ensure_user=True,
+        )
         replies.append({"event_id": webhook_event_id, "intent": reply.intent, "send_result": send_result})
 
     return ApiResponse(
         data={"processed": processed, "skipped_duplicates": skipped_duplicates, "replies": replies}
     )
-

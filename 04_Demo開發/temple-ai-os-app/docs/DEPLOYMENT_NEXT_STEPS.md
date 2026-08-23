@@ -29,6 +29,8 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Admin APIs support named `ADMIN_TOKENS` / `ADMIN_ACCOUNTS` so audit logs can record the server-verified operator.
 - `/api/chat` has message length bounds and a simple per-user/IP rate limit.
 - `/api/chat` now uses keyword FAQ rules plus fixed safe replies; OpenAI is no longer required for the public demo chat path.
+- LINE and LIFF replies use a fast path: required duplicate-event checks stay synchronous, while user upsert and message logging run after the reply is prepared.
+- FAQ/knowledge service data is cached with `RAG_SERVICE_CACHE_TTL_SECONDS`; event Flex data is cached with `EVENT_CACHE_TTL_SECONDS`.
 - Flex event and fortune messages now include public hero images.
 - Production Supabase path now has pgvector search RPC and atomic event registration RPC in migration `004_search_and_atomic_registration.sql`.
 - FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable or missing required rules.
@@ -37,6 +39,10 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - LINE OA profile image asset is prepared at `assets/brand/line-oa-profile-v2.png`.
 - LINE OA profile background asset is prepared at `assets/brand/line-oa-profile-background-v1.png`.
 - `/admin/release` now includes copy buttons for LINE business profile fields, public links, and a local release checklist.
+- `/admin/release` now also includes LINE account setting copy, LINE VOOM post examples, and broadcast message examples.
+- P1 acceptance and the 3-minute demo script are documented in `docs/P1_ACCEPTANCE_AND_DEMO_SCRIPT.md`.
+- LINE content operations are documented in `docs/LINE_CONTENT_PLAYBOOK.md`.
+- Public no-secret smoke testing is available through `scripts/smoke_public_demo.py`.
 
 ## 2. Current backend mode
 
@@ -91,6 +97,8 @@ LINE_CHANNEL_ID=2010991408
 LINE_LOGIN_CHANNEL_ID=2010938588
 LINE_LIFF_ID=2010938588-VJXpaoyH
 LINE_SKIP_SIGNATURE_VALIDATION=false
+RAG_SERVICE_CACHE_TTL_SECONDS=300
+EVENT_CACHE_TTL_SECONDS=60
 ```
 
 ## 4. Supabase database setup
@@ -177,7 +185,7 @@ assets/brand/line-oa-profile-v2.png
 assets/brand/line-oa-profile-background-v1.png
 ```
 
-Use `/admin/release` or `docs/LINE_BUSINESS_PROFILE_SETUP.md` to edit the LINE business profile. Keep the Demo disclaimer visible unless written authorization exists.
+Use `/admin/release`, `docs/LINE_BUSINESS_PROFILE_SETUP.md`, or `docs/LINE_CONTENT_PLAYBOOK.md` to edit the LINE account settings, business profile, LINE VOOM posts, and broadcast drafts. Keep the Demo disclaimer visible unless written authorization exists.
 
 Do not describe the pack as an official Wan Chun Gong sticker set unless written authorization exists.
 
@@ -213,6 +221,8 @@ python scripts/create_rich_menu.py
 Use `assets/rich-menu/main-2500x1686.png`.
 
 ## 9. Acceptance checklist
+
+Run `scripts/smoke_public_demo.py` before a demo rehearsal, then complete the manual LINE checks below. The full P1 flow and talk track are in `docs/P1_ACCEPTANCE_AND_DEMO_SCRIPT.md`.
 
 - Add friend URL opens `@983zhzni`.
 - Public site opens without login.

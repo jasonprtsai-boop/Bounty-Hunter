@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from pathlib import Path
 import re
+from threading import Lock
+import time
 
 from app.core.config import get_settings
 from app.db.supabase import Repository
-from app.schemas.common import ChatReply, FAQRule
+from app.schemas.common import ChatReply, Event, FAQRule
 from app.services.flex_templates import events_carousel
 
 
@@ -25,6 +27,8 @@ class RuleMatch:
 
 DEMO_NOTICE = "Temple AI OS 目前為示範系統，Demo 活動、報名與 Dashboard 非萬春宮官方營運資料。"
 REQUIRED_RULE_INTENTS = {"safety_boundary", "event_query", "temple_location", "general"}
+_RAG_SERVICE_CACHE: dict[int, tuple[float, "RAGService"]] = {}
+_RAG_SERVICE_CACHE_LOCK = Lock()
 
 
 class RAGService:
@@ -35,6 +39,8 @@ class RAGService:
         self.settings = get_settings()
         self.chunks = self._load_knowledge_chunks(self.settings.knowledge_dir)
         self.rules = self._load_rules()
+        self._events_cache: list[Event] | None = None
+        self._events_cache_expires_at = 0.0
 
     def _load_knowledge_chunks(self, knowledge_dir: Path) -> list[KnowledgeChunk]:
         if not knowledge_dir.exists():
@@ -147,6 +153,16 @@ class RAGService:
     async def search(self, message: str, limit: int = 3) -> list[KnowledgeChunk]:
         return self._lexical_search(message, limit=limit)
 
+    def _list_events(self) -> list[Event]:
+        now = time.monotonic()
+        if self._events_cache is not None and now < self._events_cache_expires_at:
+            return self._events_cache
+        events = self.repository.list_events()
+        ttl = max(0, self.settings.event_cache_ttl_seconds)
+        self._events_cache = events
+        self._events_cache_expires_at = now + ttl
+        return events
+
     def _sources_for_rule(self, rule: FAQRule, message: str) -> list[dict[str, str]]:
         if rule.source_refs:
             return [
@@ -175,12 +191,12 @@ class RAGService:
             # Chat must remain available even if analytics logging is temporarily unavailable.
             return
 
-    async def answer(self, message: str, user_id: str) -> ChatReply:
+    async def answer(self, message: str, user_id: str, *, record: bool = True) -> ChatReply:
         match = self.match_rule(message)
         rule = match.rule
 
         if rule.intent == "event_query":
-            events = self.repository.list_events()
+            events = self._list_events()
             reply = ChatReply(
                 intent=rule.intent,
                 reply=rule.reply,
@@ -189,7 +205,8 @@ class RAGService:
                 flex_message=events_carousel(events),
                 demo_notice=DEMO_NOTICE,
             )
-            self._record_reply(message, user_id, reply)
+            if record:
+                self._record_reply(message, user_id, reply)
             return reply
 
         reply = ChatReply(
@@ -198,5 +215,70 @@ class RAGService:
             sources=self._sources_for_rule(rule, message),
             demo_notice=DEMO_NOTICE,
         )
-        self._record_reply(message, user_id, reply)
+        if record:
+            self._record_reply(message, user_id, reply)
         return reply
+
+
+def get_rag_service(repository: Repository) -> RAGService:
+    settings = get_settings()
+    ttl = max(0, settings.rag_service_cache_ttl_seconds)
+    if ttl == 0:
+        return RAGService(repository)
+
+    cache_key = id(repository)
+    now = time.monotonic()
+    with _RAG_SERVICE_CACHE_LOCK:
+        cached = _RAG_SERVICE_CACHE.get(cache_key)
+        if cached and now - cached[0] < ttl:
+            return cached[1]
+        service = RAGService(repository)
+        _RAG_SERVICE_CACHE[cache_key] = (now, service)
+        return service
+
+
+def clear_rag_service_cache() -> None:
+    with _RAG_SERVICE_CACHE_LOCK:
+        _RAG_SERVICE_CACHE.clear()
+
+
+def warm_fast_reply_cache(repository: Repository | None = None) -> RAGService:
+    if repository is None:
+        from app.db.supabase import get_repository
+
+        repository = get_repository()
+    service = get_rag_service(repository)
+    service.match_rule("近期活動")
+    service.match_rule("萬春宮在哪裡？")
+    service._list_events()
+    return service
+
+
+def record_chat_activity(
+    repository: Repository,
+    *,
+    user_id: str,
+    channel: str,
+    user_text: str,
+    reply: ChatReply,
+    ensure_user: bool = True,
+) -> None:
+    if ensure_user and hasattr(repository, "get_or_create_line_user"):
+        try:
+            repository.get_or_create_line_user(user_id)
+        except Exception:
+            pass
+    if not hasattr(repository, "record_message"):
+        return
+    try:
+        repository.record_message(
+            user_id=user_id,
+            channel=channel,
+            user_text=user_text,
+            intent=reply.intent,
+            ai_reply=reply.reply,
+            source_refs=reply.sources,
+            demo_notice=reply.demo_notice,
+        )
+    except Exception:
+        return

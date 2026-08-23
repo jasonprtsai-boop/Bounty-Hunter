@@ -1,4 +1,5 @@
 import json
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -371,6 +372,9 @@ class SupabaseRepository:
 
     def __init__(self, supabase_url: str, service_role_key: str) -> None:
         self.rest_url = f"{supabase_url.rstrip('/')}/rest/v1"
+        self.settings = get_settings()
+        self._events_cache: list[Event] | None = None
+        self._events_cache_expires_at = 0.0
         self.client = httpx.Client(
             timeout=20,
             headers={
@@ -489,11 +493,32 @@ class SupabaseRepository:
             data["temple_id"] = TEMPLE_ID
         return {key: value for key, value in data.items() if value is not None}
 
+    def _events_cache_is_valid(self) -> bool:
+        return self._events_cache is not None and time.monotonic() < self._events_cache_expires_at
+
+    def _clear_event_cache(self) -> None:
+        self._events_cache = None
+        self._events_cache_expires_at = 0.0
+
     def list_events(self) -> list[Event]:
+        if self._events_cache_is_valid():
+            return self._events_cache or []
         rows = self._select("events", {"order": "event_date.asc,start_time.asc"})
-        return [self._event_from_row(row) for row in rows]
+        events = [self._event_from_row(row) for row in rows]
+        ttl = max(0, self.settings.event_cache_ttl_seconds)
+        if ttl > 0:
+            self._events_cache = events
+            self._events_cache_expires_at = time.monotonic() + ttl
+        return events
 
     def get_event(self, event_id: str) -> Event | None:
+        if self._events_cache_is_valid():
+            cached_event = next(
+                (event for event in self._events_cache or [] if event.event_id == event_id),
+                None,
+            )
+            if cached_event:
+                return cached_event
         row = self._single("events", "event_id", event_id)
         return self._event_from_row(row) if row else None
 
@@ -503,7 +528,9 @@ class SupabaseRepository:
             raise ValueError("event_already_exists")
         if payload.capacity is not None and payload.registered_count > payload.capacity:
             raise ValueError("event_capacity_below_registrations")
-        return self._event_from_row(self._insert_returning("events", self._event_row(payload, event_id)))
+        event = self._event_from_row(self._insert_returning("events", self._event_row(payload, event_id)))
+        self._clear_event_cache()
+        return event
 
     def update_event(self, event_id: str, payload: EventUpdate) -> Event | None:
         event = self.get_event(event_id)
@@ -515,10 +542,14 @@ class SupabaseRepository:
         if next_capacity is not None and confirmed_total > int(next_capacity):
             raise ValueError("event_capacity_below_registrations")
         row = self._patch_returning("events", "event_id", event_id, updates)
+        self._clear_event_cache()
         return self._event_from_row(row) if row else None
 
     def delete_event(self, event_id: str) -> bool:
-        return self._delete_returning("events", "event_id", event_id)
+        deleted = self._delete_returning("events", "event_id", event_id)
+        if deleted:
+            self._clear_event_cache()
+        return deleted
 
     def list_users(self) -> list[LineUser]:
         return [LineUser.model_validate(row) for row in self._select("line_users")]
@@ -563,7 +594,9 @@ class SupabaseRepository:
         )
         if not rows:
             raise RuntimeError("supabase_registration_empty_rpc")
-        return Registration.model_validate(rows[0] if isinstance(rows, list) else rows)
+        registration = Registration.model_validate(rows[0] if isinstance(rows, list) else rows)
+        self._clear_event_cache()
+        return registration
 
     def _confirmed_party_total(self, event_id: str) -> int:
         rows = self._select(
