@@ -32,10 +32,10 @@ select {
 
 .admin-app {
   display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
   grid-template-rows: auto 1fr;
   padding-bottom: 0;
-  background: #f7f1e4;
+  background: #eef3ef;
 }
 
 .topbar {
@@ -114,13 +114,22 @@ select {
 
 .admin-app .topbar {
   grid-column: 1 / -1;
+  min-height: 66px;
+  background: rgba(251, 253, 251, 0.96);
 }
 
 .admin-app .main {
-  width: 100%;
+  width: min(1280px, 100%);
   max-width: none;
-  margin: 0;
-  padding: 24px;
+  margin: 0 auto;
+  padding: 24px 28px 42px;
+}
+
+.admin-app .main > h1 {
+  margin-bottom: 16px;
+  color: #172f26;
+  font-size: 24px;
+  line-height: 1.2;
 }
 
 .route-loading {
@@ -136,18 +145,20 @@ select {
   min-height: 100vh;
   place-items: center;
   padding: 24px;
-  background: #f7f1e4;
+  background:
+    linear-gradient(135deg, rgba(23, 53, 42, 0.96), rgba(122, 30, 23, 0.88)),
+    #172f26;
 }
 
 .admin-login-card {
   display: grid;
-  width: min(420px, 100%);
-  gap: 16px;
-  padding: 22px;
-  border: 1px solid #dce4e0;
+  width: min(460px, 100%);
+  gap: 15px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 18px 46px rgba(16, 37, 54, 0.12);
+  box-shadow: 0 22px 56px rgba(16, 37, 54, 0.24);
 }
 
 .admin-login-card h1,
@@ -157,15 +168,16 @@ select {
 
 .admin-login-card p {
   color: #667680;
+  font-size: 14px;
 }
 
 .admin-login-mark {
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   place-items: center;
   border-radius: 8px;
-  background: #7a1e17;
+  background: #17352a;
   color: #fff;
 }
 
@@ -298,7 +310,7 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: 42px;
   padding: 0 14px;
   border: 1px solid #cbd5d1;
   border-radius: 8px;
@@ -346,7 +358,7 @@ textarea,
 input,
 select {
   width: 100%;
-  min-height: 44px;
+  min-height: 42px;
   border: 1px solid #cbd5d1;
   border-radius: 8px;
   padding: 10px 12px;
@@ -378,7 +390,44 @@ label small {
 
 .form-panel {
   display: grid;
-  gap: 14px;
+  gap: 12px;
+}
+
+.admin-app .tool-panel,
+.admin-app .form-panel,
+.admin-app .metric {
+  border-color: #d5e0da;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(23, 47, 38, 0.08);
+}
+
+.admin-app .metric-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin: 0 0 16px;
+}
+
+.admin-app .metric {
+  min-height: 88px;
+  padding: 13px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfb 100%);
+}
+
+.admin-app .metric strong {
+  color: #7a1e17;
+  font-size: 25px;
+  line-height: 1;
+}
+
+.admin-app .metric span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-app .form-panel {
+  position: sticky;
+  top: 82px;
+  max-height: calc(100vh - 104px);
+  overflow: auto;
 }
 
 .check-row {
@@ -523,15 +572,26 @@ label small {
   font-weight: 800;
 }
 
+.table {
+  overflow-x: auto;
+}
+
+.table-row span,
+.table-head span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .events-table .table-head,
 .events-table .table-row {
   grid-template-columns: minmax(180px, 1.5fr) 0.7fr 0.55fr 0.55fr minmax(150px, 0.9fr);
+  min-width: 760px;
 }
 
 .admin-event-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
-  gap: 14px;
+  grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
+  gap: 16px;
   align-items: start;
 }
 
@@ -549,6 +609,7 @@ label small {
 }
 
 .admin-actions {
+  flex-wrap: wrap;
   justify-content: space-between;
 }
 
@@ -558,7 +619,7 @@ label small {
 
 .support-list {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .knowledge-list {
@@ -571,8 +632,10 @@ label small {
   grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
   gap: 12px;
   align-items: start;
-  padding: 14px 0;
-  border-bottom: 1px solid #e3e9e6;
+  padding: 13px;
+  border: 1px solid #e3e9e6;
+  border-radius: 8px;
+  background: #fbfdfb;
 }
 
 .support-ticket p {
@@ -588,8 +651,10 @@ label small {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #e3e9e6;
+  padding: 12px;
+  border: 1px solid #e3e9e6;
+  border-radius: 8px;
+  background: #fbfdfb;
 }
 
 .knowledge-doc-card small {
@@ -605,7 +670,7 @@ label small {
 }
 
 .chart-panel {
-  min-height: 300px;
+  min-height: 292px;
 }
 
 .release-grid {
@@ -882,29 +947,34 @@ label small {
 
 .side-nav {
   position: sticky;
-  top: 67px;
+  top: 66px;
   align-self: start;
   display: grid;
   gap: 6px;
-  min-height: calc(100vh - 67px);
+  min-height: calc(100vh - 66px);
   padding: 18px 12px;
-  border-right: 1px solid #e6d7b8;
-  background: #fffaf0;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: #17352a;
 }
 
 .side-nav a {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 44px;
+  min-height: 42px;
   padding: 0 12px;
   border-radius: 8px;
-  color: #5c4635;
+  color: #dce8e1;
   font-weight: 800;
 }
 
 .side-nav a.active {
-  background: #b42318;
+  background: #fff9f4;
+  color: #7a1e17;
+}
+
+.side-nav a:not(.active):hover {
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 
@@ -1229,24 +1299,44 @@ label small {
   }
 
   .admin-app .main {
-    padding: 20px 16px 30px;
+    padding: 18px 14px 30px;
+  }
+
+  .admin-app .main > h1 {
+    margin-bottom: 12px;
+    font-size: 22px;
+  }
+
+  .admin-app .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-app .form-panel {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 
   .side-nav {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    position: sticky;
+    top: 66px;
+    z-index: 9;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
     min-height: 0;
-    padding: 8px;
+    padding: 8px 12px;
     border-right: 0;
-    border-bottom: 1px solid #e6d7b8;
+    border-bottom: 1px solid rgba(23, 53, 42, 0.14);
+    background: rgba(23, 53, 42, 0.96);
   }
 
   .side-nav a {
-    display: grid;
-    justify-items: center;
-    gap: 4px;
-    padding: 7px 4px;
+    flex: 0 0 auto;
+    min-width: 74px;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 10px;
     font-size: 12px;
   }
 
@@ -1271,6 +1361,10 @@ label small {
   .sticker-status-grid,
   .sticker-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-event-grid {
+    grid-template-columns: 1fr;
   }
 
   .table-head,
@@ -1326,6 +1420,7 @@ label small {
 @media (max-width: 560px) {
   .quick-grid,
   .metric-grid,
+  .admin-app .metric-grid,
   .two-column,
   .admin-event-grid,
   .form-grid,
