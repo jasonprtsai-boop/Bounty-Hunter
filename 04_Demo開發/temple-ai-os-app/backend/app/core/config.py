@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_service_role_key: str | None = None
     supabase_anon_key: str | None = None
+    supabase_fallback_to_demo: bool = True
 
     admin_demo_token: str = "temple-ai-os-admin-demo"
     admin_tokens: str = ""

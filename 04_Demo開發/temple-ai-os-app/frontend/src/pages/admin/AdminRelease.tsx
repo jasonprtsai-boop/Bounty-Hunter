@@ -249,7 +249,7 @@ export function AdminRelease() {
               <span>人工設定完成</span>
             </div>
             <div>
-              <strong>47</strong>
+              <strong>49</strong>
               <span>後端測試通過</span>
             </div>
             <div>

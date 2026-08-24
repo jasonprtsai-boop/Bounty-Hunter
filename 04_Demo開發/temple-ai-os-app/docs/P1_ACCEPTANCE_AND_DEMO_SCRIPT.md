@@ -24,7 +24,7 @@ cd 04_Demo開發\temple-ai-os-app\backend
 Expected result:
 
 ```text
-47 passed
+49 passed
 ```
 
 ```powershell

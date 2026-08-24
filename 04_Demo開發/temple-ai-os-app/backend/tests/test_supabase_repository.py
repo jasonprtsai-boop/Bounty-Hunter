@@ -183,6 +183,46 @@ def test_get_repository_uses_supabase_when_not_demo(monkeypatch: pytest.MonkeyPa
     assert repository.service_role_key == "service-role"
 
 
+def test_get_repository_falls_back_to_demo_when_supabase_initialization_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FailingSupabaseRepository:
+        def __init__(self, supabase_url: str, service_role_key: str) -> None:
+            raise RuntimeError("supabase_temple_profile_missing")
+
+    reset_repository_state()
+    monkeypatch.setenv("DEMO_MODE", "false")
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "service-role")
+    monkeypatch.setattr(supabase, "SupabaseRepository", FailingSupabaseRepository)
+    get_settings.cache_clear()
+
+    repository = supabase.get_repository()
+
+    assert isinstance(repository, supabase.DemoRepository)
+    assert repository.list_events()
+    reset_repository_state()
+
+
+def test_get_repository_can_disable_supabase_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FailingSupabaseRepository:
+        def __init__(self, supabase_url: str, service_role_key: str) -> None:
+            raise RuntimeError("supabase_temple_profile_missing")
+
+    reset_repository_state()
+    monkeypatch.setenv("DEMO_MODE", "false")
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "service-role")
+    monkeypatch.setenv("SUPABASE_FALLBACK_TO_DEMO", "false")
+    monkeypatch.setattr(supabase, "SupabaseRepository", FailingSupabaseRepository)
+    get_settings.cache_clear()
+
+    with pytest.raises(RuntimeError, match="supabase_temple_profile_missing"):
+        supabase.get_repository()
+
+    reset_repository_state()
+
+
 def test_supabase_events_are_cached_within_ttl(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_repository_state()
     monkeypatch.setattr(supabase.httpx, "Client", FakeSupabaseClient)

@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 import uuid
 from datetime import datetime, timezone
@@ -30,6 +31,7 @@ from app.schemas.common import (
 
 
 TEMPLE_ID = "wcg_taichung_demo"
+logger = logging.getLogger(__name__)
 
 
 def _read_json(path: Path, fallback: Any) -> Any:
@@ -783,5 +785,11 @@ def get_repository() -> Repository:
         else:
             if not settings.supabase_url or not settings.supabase_service_role_key:
                 raise RuntimeError("supabase_not_configured")
-            _repo = SupabaseRepository(settings.supabase_url, settings.supabase_service_role_key)
+            try:
+                _repo = SupabaseRepository(settings.supabase_url, settings.supabase_service_role_key)
+            except Exception:
+                if not settings.supabase_fallback_to_demo:
+                    raise
+                logger.exception("Supabase repository initialization failed; falling back to demo data")
+                _repo = DemoRepository()
     return _repo
