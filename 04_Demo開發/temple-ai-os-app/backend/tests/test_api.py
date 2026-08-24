@@ -1,3 +1,8 @@
+import base64
+import hashlib
+import hmac
+import json
+
 from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
@@ -17,6 +22,29 @@ def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["data"]["status"] == "ok"
+
+
+def test_line_webhook_acknowledges_valid_empty_event_payload(monkeypatch) -> None:
+    get_settings.cache_clear()
+    monkeypatch.setenv("LINE_CHANNEL_SECRET", "test-secret")
+
+    body = json.dumps({"destination": "Utest", "events": []}, separators=(",", ":")).encode(
+        "utf-8"
+    )
+    signature = base64.b64encode(
+        hmac.new(b"test-secret", body, hashlib.sha256).digest()
+    ).decode("utf-8")
+
+    response = client.post(
+        "/api/line/webhook",
+        content=body,
+        headers={"Content-Type": "application/json", "X-Line-Signature": signature},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["data"] == {"accepted": 0}
+
+    get_settings.cache_clear()
 
 
 def test_events_are_loaded_from_demo_data() -> None:

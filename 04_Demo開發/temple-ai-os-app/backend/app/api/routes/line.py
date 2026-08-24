@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request, status
@@ -10,6 +11,47 @@ from app.services.line_client import LineClient, text_message
 from app.services.rag_service import get_rag_service, record_chat_activity
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+async def _process_line_webhook_events(payload: dict[str, Any]) -> None:
+    try:
+        repo = get_repository()
+        rag = None
+        line_client = None
+
+        for event in payload.get("events", []):
+            webhook_event_id = event.get("webhookEventId")
+            if not repo.mark_line_event_processed(webhook_event_id):
+                continue
+
+            if event.get("type") != "message" or event.get("message", {}).get("type") != "text":
+                continue
+
+            if rag is None:
+                rag = get_rag_service(repo)
+            if line_client is None:
+                line_client = LineClient()
+
+            user_id = event.get("source", {}).get("userId", "demo_line_user")
+            user_text = event["message"]["text"]
+            reply = await rag.answer(user_text, user_id, record=False)
+            messages = [text_message(reply.reply)]
+            if reply.flex_message:
+                messages = [reply.flex_message]
+            reply_token = event.get("replyToken")
+            if reply_token:
+                await line_client.reply_message(reply_token, messages)
+            await record_chat_activity(
+                repo,
+                user_id=user_id,
+                channel="line",
+                user_text=user_text,
+                reply=reply,
+                ensure_user=True,
+            )
+    except Exception:
+        logger.exception("line_webhook_background_processing_failed")
 
 
 @router.post("/webhook", response_model=ApiResponse[dict[str, Any]])
@@ -25,44 +67,8 @@ async def line_webhook(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid_line_signature")
 
     payload = await request.json()
-    repo = get_repository()
-    rag = get_rag_service(repo)
-    line_client = LineClient()
-    processed = 0
-    skipped_duplicates = 0
-    replies: list[dict[str, Any]] = []
+    events = payload.get("events", [])
+    if events:
+        background_tasks.add_task(_process_line_webhook_events, payload)
 
-    for event in payload.get("events", []):
-        webhook_event_id = event.get("webhookEventId")
-        if not repo.mark_line_event_processed(webhook_event_id):
-            skipped_duplicates += 1
-            continue
-        processed += 1
-
-        if event.get("type") != "message" or event.get("message", {}).get("type") != "text":
-            continue
-
-        user_id = event.get("source", {}).get("userId", "demo_line_user")
-        user_text = event["message"]["text"]
-        reply = await rag.answer(user_text, user_id, record=False)
-        messages = [text_message(reply.reply)]
-        if reply.flex_message:
-            messages = [reply.flex_message]
-        reply_token = event.get("replyToken")
-        send_result = {"sent": False, "reason": "missing_reply_token"}
-        if reply_token:
-            send_result = await line_client.reply_message(reply_token, messages)
-        background_tasks.add_task(
-            record_chat_activity,
-            repo,
-            user_id=user_id,
-            channel="line",
-            user_text=user_text,
-            reply=reply,
-            ensure_user=True,
-        )
-        replies.append({"event_id": webhook_event_id, "intent": reply.intent, "send_result": send_result})
-
-    return ApiResponse(
-        data={"processed": processed, "skipped_duplicates": skipped_duplicates, "replies": replies}
-    )
+    return ApiResponse(data={"accepted": len(events)})
