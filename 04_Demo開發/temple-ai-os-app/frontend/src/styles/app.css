@@ -610,27 +610,54 @@ label small {
 
 .release-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 1.1fr) minmax(240px, 0.9fr);
-  gap: 14px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  width: min(1240px, 100%);
+  margin: 0 auto;
+  gap: 12px;
   align-items: start;
 }
 
 .release-card {
   display: grid;
-  gap: 14px;
+  gap: 12px;
+  align-content: start;
+}
+
+.release-card h2 {
+  font-size: 18px;
 }
 
 .release-wide-card {
   grid-column: 1 / -1;
 }
 
+.release-status-card {
+  grid-column: span 8;
+}
+
+.release-action-card {
+  grid-column: span 4;
+}
+
+.release-media-card,
+.release-sticker-card {
+  grid-column: span 4;
+}
+
+.release-copy-card,
+.release-links-card,
+.release-checklist-card {
+  grid-column: span 8;
+}
+
 .release-card p {
   margin: 0;
   color: #4f625b;
+  font-size: 14px;
 }
 
 .release-status-card {
-  background: #172f26;
+  background: linear-gradient(135deg, #17352a 0%, #23493d 100%);
   color: #fff;
 }
 
@@ -642,32 +669,49 @@ label small {
 .release-status-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .release-status-grid div {
   display: grid;
   gap: 5px;
-  min-height: 84px;
+  min-height: 72px;
   align-content: center;
-  padding: 14px;
+  padding: 12px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.08);
 }
 
 .release-status-grid strong {
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .release-status-grid span {
   color: #f6e3a4;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
 }
 
+.release-action-card {
+  min-height: 100%;
+  border-color: #f0c9c4;
+  background: #fff9f4;
+}
+
+.release-action-card .button.primary {
+  width: 100%;
+}
+
+.release-media-preview {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
 .release-avatar {
-  width: min(220px, 100%);
+  width: 104px;
   aspect-ratio: 1;
   border: 1px solid #e6d7b8;
   border-radius: 8px;
@@ -687,15 +731,20 @@ label small {
 .profile-copy-list,
 .setting-steps {
   display: grid;
-  gap: 10px;
+  gap: 8px;
+}
+
+.profile-copy-list.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .profile-copy-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: start;
-  padding: 12px;
+  gap: 10px;
+  align-items: center;
+  min-height: 64px;
+  padding: 10px;
   border: 1px solid #e6d7b8;
   border-radius: 8px;
   background: #fffaf0;
@@ -703,17 +752,22 @@ label small {
 
 .profile-copy-row strong {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   color: #7a1e17;
+  font-size: 13px;
 }
 
 .profile-copy-row p {
+  margin: 0;
   overflow-wrap: anywhere;
+  color: #4f625b;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .post-template-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -723,9 +777,9 @@ label small {
 
 .post-template-card {
   display: grid;
-  gap: 10px;
+  gap: 9px;
   align-content: start;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid #e6d7b8;
   border-radius: 8px;
   background: #fffaf0;
@@ -744,25 +798,25 @@ label small {
 }
 
 .post-template-card pre {
-  min-height: 210px;
+  height: 168px;
   margin: 0;
   overflow: auto;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   color: #4f625b;
   font-family: inherit;
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .post-template-grid.compact .post-template-card pre {
-  min-height: 180px;
+  height: 142px;
 }
 
 .setting-steps div {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr);
-  gap: 10px;
+  gap: 8px;
   align-items: start;
 }
 
@@ -780,14 +834,14 @@ label small {
 
 .release-checklist {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .release-check-row {
   display: flex;
-  min-height: 52px;
-  padding: 12px;
+  min-height: 48px;
+  padding: 10px;
   border: 1px solid #e6d7b8;
   border-radius: 8px;
   background: #fffaf0;
@@ -795,6 +849,7 @@ label small {
 }
 
 .release-check-row span {
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -1248,6 +1303,23 @@ label small {
 
   .band-actions {
     justify-content: flex-start;
+  }
+
+  .release-status-card,
+  .release-action-card,
+  .release-media-card,
+  .release-sticker-card,
+  .release-copy-card,
+  .release-links-card,
+  .release-checklist-card {
+    grid-column: 1 / -1;
+  }
+
+  .profile-copy-list.compact,
+  .post-template-grid,
+  .post-template-grid.compact,
+  .release-checklist {
+    grid-template-columns: 1fr;
   }
 }
 

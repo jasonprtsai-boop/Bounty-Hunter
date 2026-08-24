@@ -238,7 +238,7 @@ export function AdminRelease() {
   return (
     <Shell title="正式發布" mode="admin">
       <section className="release-grid">
-        <article className="tool-panel release-card release-wide-card release-status-card">
+        <article className="tool-panel release-card release-status-card">
           <div className="section-title">
             <ShieldCheck size={20} />
             <h2>發布狀態總覽</h2>
@@ -264,7 +264,7 @@ export function AdminRelease() {
           <p className="notice">這裡記錄的是你在 LINE 後台手動設定的進度，勾選狀態只存在這台電腦的瀏覽器。</p>
         </article>
 
-        <article className="tool-panel release-card">
+        <article className="tool-panel release-card release-action-card">
           <div className="section-title">
             <Rocket size={20} />
             <h2>Rich Menu</h2>
@@ -278,13 +278,15 @@ export function AdminRelease() {
           {error && <p className="error-text">{error}</p>}
         </article>
 
-        <article className="tool-panel release-card">
+        <article className="tool-panel release-card release-media-card">
           <div className="section-title">
             <Image size={20} />
             <h2>大頭貼與背景</h2>
           </div>
-          <img className="release-avatar" src={profileImageUrl} alt="Temple AI OS LINE 官方帳號大頭貼" />
-          <img className="release-cover" src={profileBackgroundUrl} alt="Temple AI OS LINE 官方帳號背景圖" />
+          <div className="release-media-preview">
+            <img className="release-avatar" src={profileImageUrl} alt="Temple AI OS LINE 官方帳號大頭貼" />
+            <img className="release-cover" src={profileBackgroundUrl} alt="Temple AI OS LINE 官方帳號背景圖" />
+          </div>
           <div className="inline-actions">
             <a className="button" href={profileImageUrl} target="_blank" rel="noreferrer">
               <Image size={18} />
@@ -301,7 +303,7 @@ export function AdminRelease() {
           </div>
         </article>
 
-        <article className="tool-panel release-card release-wide-card">
+        <article className="tool-panel release-card release-copy-card">
           <div className="section-title">
             <CheckCircle size={20} />
             <h2>商業簡介設定稿</h2>
@@ -313,7 +315,7 @@ export function AdminRelease() {
             <Copy size={17} />
             {copied === "全部商業簡介" ? "已複製全部欄位" : "複製全部欄位"}
           </button>
-          <div className="profile-copy-list">
+          <div className="profile-copy-list compact">
             {businessProfileFields.map((field) => (
               <div className="profile-copy-row" key={field.label}>
                 <div>
@@ -347,7 +349,7 @@ export function AdminRelease() {
           </div>
         </article>
 
-        <article className="tool-panel release-card release-wide-card">
+        <article className="tool-panel release-card release-copy-card">
           <div className="section-title">
             <Settings size={20} />
             <h2>帳號設定稿</h2>
@@ -357,7 +359,7 @@ export function AdminRelease() {
             <Copy size={17} />
             {copied === "全部帳號設定" ? "已複製全部設定" : "複製全部設定"}
           </button>
-          <div className="profile-copy-list">
+          <div className="profile-copy-list compact">
             {accountSettingFields.map((field) => (
               <div className="profile-copy-row" key={field.label}>
                 <div>
@@ -373,12 +375,12 @@ export function AdminRelease() {
           </div>
         </article>
 
-        <article className="tool-panel release-card release-wide-card">
+        <article className="tool-panel release-card release-links-card">
           <div className="section-title">
             <ExternalLink size={20} />
             <h2>公開連結檢查</h2>
           </div>
-          <div className="profile-copy-list">
+          <div className="profile-copy-list compact">
             {publicLinks.map(([label, href]) => (
               <div className="profile-copy-row" key={label}>
                 <div>
@@ -443,7 +445,7 @@ export function AdminRelease() {
           </div>
         </article>
 
-        <article className="tool-panel release-card release-wide-card">
+        <article className="tool-panel release-card release-checklist-card">
           <div className="section-title">
             <CheckCircle size={20} />
             <h2>正式發布清單</h2>
@@ -458,7 +460,7 @@ export function AdminRelease() {
           </div>
         </article>
 
-        <article className="tool-panel release-card">
+        <article className="tool-panel release-card release-sticker-card">
           <div className="section-title">
             <Store size={20} />
             <h2>貼圖素材</h2>
