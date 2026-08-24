@@ -25,6 +25,17 @@ export function Shell({ title, children, mode = "liff" }: ShellProps) {
           ["/member", User, "會員"],
           ["/support", Headphones, "客服"]
         ];
+  const navigation = (
+    <nav className={mode === "admin" ? "side-nav" : "bottom-nav"} aria-label="主要導覽">
+      {links.map(([path, Icon, label]) => (
+        <NavLink key={path as string} to={path as string}>
+          <Icon size={19} />
+          <span>{label as string}</span>
+        </NavLink>
+      ))}
+    </nav>
+  );
+
   return (
     <div className={mode === "admin" ? "app admin-app" : "app"}>
       <header className="topbar">
@@ -53,18 +64,12 @@ export function Shell({ title, children, mode = "liff" }: ShellProps) {
           )}
         </div>
       </header>
+      {mode === "admin" && navigation}
       <main className="main">
         <h1>{title}</h1>
         {children}
       </main>
-      <nav className={mode === "admin" ? "side-nav" : "bottom-nav"} aria-label="主要導覽">
-        {links.map(([path, Icon, label]) => (
-          <NavLink key={path as string} to={path as string}>
-            <Icon size={19} />
-            <span>{label as string}</span>
-          </NavLink>
-        ))}
-      </nav>
+      {mode !== "admin" && navigation}
     </div>
   );
 }
