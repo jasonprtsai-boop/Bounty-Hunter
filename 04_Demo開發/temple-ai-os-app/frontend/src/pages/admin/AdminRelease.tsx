@@ -11,8 +11,9 @@ import {
   Store
 } from "lucide-react";
 import { useState } from "react";
-import { Shell } from "../../components/Shell";
+import { Shell } from "../../components/AdminShell";
 import { apiFetch } from "../../lib/api";
+import { PUBLIC_SITE_BASE_URL } from "../../lib/siteLinks";
 
 type RichMenuPublishResult = {
   published: boolean;
@@ -25,6 +26,7 @@ const profileBackgroundUrl = "/assets/brand/line-oa-profile-background-v1.png";
 const stickerPreviewUrl = "/stickers";
 const lineManagerUrl = "https://manager.line.biz/account/@983zhzni";
 const businessProfileUrl = "https://page.line.biz/account-page/2010643275365275/profile";
+const publicSiteBaseUrl = PUBLIC_SITE_BASE_URL;
 const releaseChecklistStorageKey = "templeReleaseChecklist";
 
 const businessProfileFields = [
@@ -39,15 +41,15 @@ const businessProfileFields = [
   },
   {
     label: "網站",
-    value: "https://temple-ai-os-demo.jasonprtsai.chatgpt.site"
+    value: publicSiteBaseUrl
   },
   {
     label: "隱私權政策",
-    value: "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/privacy"
+    value: `${publicSiteBaseUrl}/privacy`
   },
   {
     label: "服務條款",
-    value: "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/terms"
+    value: `${publicSiteBaseUrl}/terms`
   },
   {
     label: "示範場景地址",
@@ -100,13 +102,13 @@ const accountSettingFields = [
 ];
 
 const publicLinks = [
-  ["公開官網", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/site"],
-  ["LINE 社群入口", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/community"],
+  ["公開官網", `${publicSiteBaseUrl}/site`],
+  ["LINE 社群入口", `${publicSiteBaseUrl}/community`],
   ["LIFF 入口", "https://liff.line.me/2010938588-VJXpaoyH"],
   ["加入好友", "https://line.me/R/ti/p/%40983zhzni"],
-  ["貼圖小舖", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/stickers"],
-  ["隱私權政策", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/privacy"],
-  ["服務條款", "https://temple-ai-os-demo.jasonprtsai.chatgpt.site/terms"]
+  ["貼圖小舖", `${publicSiteBaseUrl}/stickers`],
+  ["隱私權政策", `${publicSiteBaseUrl}/privacy`],
+  ["服務條款", `${publicSiteBaseUrl}/terms`]
 ] as const;
 
 const voomPostExamples = [
@@ -114,25 +116,25 @@ const voomPostExamples = [
     title: "Demo 上線介紹",
     asset: "assets/banners/home.png",
     value:
-      "Temple AI OS 示範帳號上線。\n\n這是一個以 LINE 為入口的智慧宮廟服務 Demo，示範 AI 問答、活動報名、會員紀錄、文化抽籤與後台管理如何整合在同一個流程。\n\n本帳號以公開資料建立展示場景，用於競賽與系統測試，不代表萬春宮官方正式營運。正式活動、開放時間與服務內容請以廟方公告為準。\n\n體驗入口：https://temple-ai-os-demo.jasonprtsai.chatgpt.site/site\n\n#TempleAIOS #LINE智慧服務 #宮廟數位轉型 #競賽Demo"
+      `Temple AI OS 示範帳號上線。\n\n這是一個以 LINE 為入口的智慧宮廟服務 Demo，示範 AI 問答、活動報名、會員紀錄、文化抽籤與後台管理如何整合在同一個流程。\n\n本帳號以公開資料建立展示場景，用於競賽與系統測試，不代表萬春宮官方正式營運。正式活動、開放時間與服務內容請以廟方公告為準。\n\n體驗入口：${publicSiteBaseUrl}/site\n\n#TempleAIOS #LINE智慧服務 #宮廟數位轉型 #競賽Demo`
   },
   {
     title: "活動報名示範",
     asset: "assets/banners/events.png",
     value:
-      "活動報名也可以從 LINE 開始。\n\nTemple AI OS Demo 示範使用者在 LINE 收到活動卡片後，直接開啟 LIFF 表單完成報名，後台同步看到報名狀態與提醒任務。\n\n提醒：這是示範流程，不代表萬春宮正式活動報名。正式名額、時間與參加規則仍以廟方公告為準。\n\n活動入口：https://temple-ai-os-demo.jasonprtsai.chatgpt.site/events\n\n#活動報名 #LIFF #LINE官方帳號 #TempleAIOS"
+      `活動報名也可以從 LINE 開始。\n\nTemple AI OS Demo 示範使用者在 LINE 收到活動卡片後，直接開啟 LIFF 表單完成報名，後台同步看到報名狀態與提醒任務。\n\n提醒：這是示範流程，不代表萬春宮正式活動報名。正式名額、時間與參加規則仍以廟方公告為準。\n\n活動入口：${publicSiteBaseUrl}/events\n\n#活動報名 #LIFF #LINE官方帳號 #TempleAIOS`
   },
   {
     title: "貼圖小舖預告",
     asset: "assets/flex/fortune-card.png",
     value:
-      "春福小使貼圖準備中。\n\nTemple AI OS Demo 的第一套靜態貼圖以「日常祝福、收到、感謝、平安、已報名」為核心語境，讓宮廟服務不只提供資訊，也能保留一點溫度。\n\n貼圖展示：https://temple-ai-os-demo.jasonprtsai.chatgpt.site/stickers\n\n貼圖正式上架需等待 LINE Creators Market 審核，頁面目前為展示用途。\n\n#LINE貼圖 #春福小使 #TempleAIOS #文化服務"
+      `春福小使貼圖準備中。\n\nTemple AI OS Demo 的第一套靜態貼圖以「日常祝福、收到、感謝、平安、已報名」為核心語境，讓宮廟服務不只提供資訊，也能保留一點溫度。\n\n貼圖展示：${publicSiteBaseUrl}/stickers\n\n貼圖正式上架需等待 LINE Creators Market 審核，頁面目前為展示用途。\n\n#LINE貼圖 #春福小使 #TempleAIOS #文化服務`
   },
   {
     title: "文化導覽示範",
     asset: "assets/banners/tour.png",
     value:
-      "從 LINE 開始的文化導覽。\n\nTemple AI OS Demo 示範使用者掃描 QR 或點選 Rich Menu 後，可開啟導覽頁，閱讀宮廟歷史、參拜提醒與文化脈絡。未來可延伸到現場 QR/NFC 點位。\n\n導覽入口：https://temple-ai-os-demo.jasonprtsai.chatgpt.site/tour/main-hall\n\n本內容為 Demo 展示，正式導覽文字仍需廟方審稿。\n\n#文化導覽 #QR導覽 #宮廟文化 #TempleAIOS"
+      `從 LINE 開始的文化導覽。\n\nTemple AI OS Demo 示範使用者掃描 QR 或點選 Rich Menu 後，可開啟導覽頁，閱讀宮廟歷史、參拜提醒與文化脈絡。未來可延伸到現場 QR/NFC 點位。\n\n導覽入口：${publicSiteBaseUrl}/tour/main-hall\n\n本內容為 Demo 展示，正式導覽文字仍需廟方審稿。\n\n#文化導覽 #QR導覽 #宮廟文化 #TempleAIOS`
   }
 ];
 
@@ -150,7 +152,7 @@ const broadcastExamples = [
   {
     title: "Demo 展示前暖場",
     value:
-      "Temple AI OS Demo 今日展示重點：\n1. LINE Rich Menu 服務入口\n2. AI 安全問答與活動卡片\n3. LIFF 活動報名\n4. 後台管理與通知任務\n\n公開展示頁：\nhttps://temple-ai-os-demo.jasonprtsai.chatgpt.site/site"
+      `Temple AI OS Demo 今日展示重點：\n1. LINE Rich Menu 服務入口\n2. AI 安全問答與活動卡片\n3. LIFF 活動報名\n4. 後台管理與通知任務\n\n公開展示頁：\n${publicSiteBaseUrl}/site`
   }
 ];
 
@@ -165,6 +167,13 @@ const releaseChecklist = [
   "手機 LINE 實測可開 LIFF 與活動頁",
   "貼圖素材已確認，等待 LINE Creators Market 送審或審核",
   "Demo 現場前已暖機 Render 後端"
+];
+
+const setupSequence = [
+  ["1", "公開頁面", "確認官網、活動、隱私權與條款都可正常開啟。"],
+  ["2", "LINE 帳號", "更新大頭貼、背景圖、商業簡介與歡迎訊息。"],
+  ["3", "Rich Menu", "發布 LINE 底部選單，確認每個入口都能到正確頁面。"],
+  ["4", "實機驗收", "用手機 LINE 測試加入好友、活動、客服、推播與貼圖入口。"]
 ];
 
 function readChecklistState() {
@@ -234,9 +243,35 @@ export function AdminRelease() {
   const copiedProfileText = businessProfileFields.map((field) => `${field.label}：${field.value}`).join("\n");
   const copiedAccountText = accountSettingFields.map((field) => `${field.label}：${field.value}`).join("\n");
   const doneCount = releaseChecklist.filter((item) => checked[item]).length;
+  const nextChecklistItems = releaseChecklist.filter((item) => !checked[item]).slice(0, 3);
 
   return (
-    <Shell title="正式發布" mode="admin">
+    <Shell title="設定與發布中心" mode="admin">
+      <section className="admin-setup-flow" aria-label="設定順序">
+        {setupSequence.map(([step, title, body]) => (
+          <article key={title}>
+            <span>{step}</span>
+            <strong>{title}</strong>
+            <p>{body}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="release-next-panel" aria-label="下一步設定">
+        <div>
+          <span className="panel-kicker">下一步</span>
+          <h2>先完成最會影響上線的設定</h2>
+        </div>
+        <div className="release-next-list">
+          {(nextChecklistItems.length ? nextChecklistItems : ["所有設定已勾選，請用手機 LINE 做最後實機驗收。"]).map((item) => (
+            <span key={item}>
+              <CheckCircle size={17} />
+              {item}
+            </span>
+          ))}
+        </div>
+      </section>
+
       <section className="release-grid">
         <article className="tool-panel release-card release-status-card">
           <div className="section-title">

@@ -1,75 +1,64 @@
 import { Link, NavLink } from "react-router-dom";
-import { Bot, CalendarDays, Headphones, Home, LayoutDashboard, LogOut, Rocket, ScrollText, User } from "lucide-react";
+import { CalendarDays, Headphones, Home, ScrollText, User } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 type ShellProps = {
   title: string;
   children: React.ReactNode;
-  mode?: "liff" | "admin";
 };
 
-export function Shell({ title, children, mode = "liff" }: ShellProps) {
-  const links =
-    mode === "admin"
-      ? [
-          ["/admin", LayoutDashboard, "總覽"],
-          ["/admin/events", CalendarDays, "活動"],
-          ["/admin/knowledge", ScrollText, "知識庫"],
-          ["/admin/support", Headphones, "客服"],
-          ["/admin/notifications", Bot, "推播"],
-          ["/admin/release", Rocket, "發布"]
-        ]
-      : [
-          ["/", Home, "首頁"],
-          ["/events", CalendarDays, "活動"],
-          ["/fortune", ScrollText, "抽籤"],
-          ["/member", User, "會員"],
-          ["/support", Headphones, "客服"]
-        ];
-  const navigation = (
-    <nav className={mode === "admin" ? "side-nav" : "bottom-nav"} aria-label="主要導覽">
-      {links.map(([path, Icon, label]) => (
-        <NavLink key={path as string} to={path as string}>
-          <Icon size={19} />
-          <span>{label as string}</span>
-        </NavLink>
-      ))}
-    </nav>
-  );
+type NavItem = {
+  path: string;
+  icon: LucideIcon;
+  label: string;
+  hint: string;
+};
 
+const liffLinks: NavItem[] = [
+  { path: "/", icon: Home, label: "首頁", hint: "服務" },
+  { path: "/events", icon: CalendarDays, label: "活動", hint: "報名" },
+  { path: "/fortune", icon: ScrollText, label: "抽籤", hint: "文化" },
+  { path: "/member", icon: User, label: "會員", hint: "紀錄" },
+  { path: "/support", icon: Headphones, label: "客服", hint: "提問" }
+];
+
+export function Shell({ title, children }: ShellProps) {
   return (
-    <div className={mode === "admin" ? "app admin-app" : "app"}>
-      <header className="topbar">
-        <Link to={mode === "admin" ? "/admin" : "/"} className="brand">
-          <span className="brand-mark">AI</span>
-          <span>
+    <div className="app">
+      <header className="topbar liff-topbar">
+        <Link to="/" className="brand">
+          <span className="brand-mark">宮</span>
+          <span className="brand-copy">
             <strong>Temple AI OS</strong>
-            <small>{mode === "admin" ? "管理後台" : "萬春宮示範"}</small>
+            <small>萬春宮示範</small>
           </span>
         </Link>
+        <div className="topbar-context" aria-label="目前介面狀態">
+          <span>LINE 服務入口</span>
+          <strong>活動、導覽、客服快速進入</strong>
+        </div>
         <div className="topbar-actions">
           <span className="demo-pill">Demo</span>
-          {mode === "admin" && (
-            <button
-              className="button icon-button"
-              type="button"
-              onClick={() => {
-                localStorage.removeItem("adminToken");
-                localStorage.removeItem("adminActor");
-                window.location.assign("/admin");
-              }}
-            >
-              <LogOut size={17} />
-              <span>登出</span>
-            </button>
-          )}
         </div>
       </header>
-      {mode === "admin" && navigation}
       <main className="main">
         <h1>{title}</h1>
         {children}
       </main>
-      {mode !== "admin" && navigation}
+      <nav className="bottom-nav" aria-label="主要導覽">
+        {liffLinks.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink key={item.path} to={item.path} end={item.path === "/"}>
+              <span className="bottom-nav-icon">
+                <Icon size={20} />
+              </span>
+              <span>{item.label}</span>
+              <small>{item.hint}</small>
+            </NavLink>
+          );
+        })}
+      </nav>
     </div>
   );
 }

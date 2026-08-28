@@ -8,6 +8,8 @@ export function RegistrationPage() {
   const { eventId } = useParams();
   const [event, setEvent] = useState<EventItem | null>(null);
   const [created, setCreated] = useState<Registration | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     contact_name: "小安",
     phone: "",
@@ -27,14 +29,27 @@ export function RegistrationPage() {
 
   async function submit(eventSubmit: FormEvent) {
     eventSubmit.preventDefault();
-    if (!eventId) return;
-    const session = await getLiffSession();
-    const result = await apiFetch<Registration>(`/api/events/${eventId}/registrations`, {
-      method: "POST",
-      body: JSON.stringify({ ...form, user_id: session.user_id })
-    });
-    setCreated(result);
+    if (!eventId || !canRegister) return;
+    setSaving(true);
+    setError("");
+    try {
+      const session = await getLiffSession();
+      const result = await apiFetch<Registration>(`/api/events/${eventId}/registrations`, {
+        method: "POST",
+        body: JSON.stringify({ ...form, user_id: session.user_id })
+      });
+      setCreated(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "報名失敗，請稍後再試。");
+    } finally {
+      setSaving(false);
+    }
   }
+
+  const canRegister =
+    Boolean(event?.requires_registration) &&
+    ["open", "published"].includes(event?.status || "") &&
+    !(event?.capacity && event.registered_count >= event.capacity);
 
   return (
     <Shell title="活動報名">
@@ -42,6 +57,18 @@ export function RegistrationPage() {
         <section className="detail-panel">
           <h2>{event.title}</h2>
           <p>{event.summary}</p>
+          <div className="event-info-grid">
+            <div>
+              <span>報名狀態</span>
+              <strong>{canRegister ? "開放示範報名" : "目前不開放"}</strong>
+            </div>
+            <div>
+              <span>目前名額</span>
+              <strong>
+                {event.capacity ? `${event.registered_count}/${event.capacity} 人` : "由廟方確認"}
+              </strong>
+            </div>
+          </div>
         </section>
       ) : null}
       {created ? (
@@ -49,6 +76,11 @@ export function RegistrationPage() {
           <h2>報名成功</h2>
           <p>報名編號：{created.registration_id}</p>
           <p className="notice">這是 Demo 報名紀錄，不代表萬春宮官方報名資料。</p>
+        </section>
+      ) : event && !canRegister ? (
+        <section className="form-panel">
+          <h2>目前不開放報名</h2>
+          <p className="notice">此活動可能尚未開放、已截止或名額已滿；正式資訊仍以廟方公告為準。</p>
         </section>
       ) : (
         <form className="form-panel" onSubmit={submit}>
@@ -86,8 +118,9 @@ export function RegistrationPage() {
             備註
             <textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
           </label>
-          <button className="button primary" type="submit">
-            送出示範報名
+          {error && <p className="error-text">{error}</p>}
+          <button className="button primary" disabled={saving || !event} type="submit">
+            {saving ? "送出中" : "送出示範報名"}
           </button>
         </form>
       )}

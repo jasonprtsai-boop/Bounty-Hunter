@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LockKeyhole } from "lucide-react";
+import { LockKeyhole, ShieldCheck } from "lucide-react";
 import { adminLogin, apiFetch, type DashboardSummary } from "../lib/api";
 
 type AdminGateProps = {
@@ -106,21 +106,27 @@ export function AdminGate({ children }: AdminGateProps) {
   return (
     <main className="admin-login-page">
       <form className="admin-login-card" onSubmit={submit}>
-        <div className="admin-login-mark">
-          <LockKeyhole size={26} />
+        <div className="admin-login-header">
+          <div className="admin-login-mark">
+            <LockKeyhole size={26} />
+          </div>
+          <span className="admin-login-badge">
+            <ShieldCheck size={16} />
+            管理人員
+          </span>
         </div>
-        <div>
-          <h1>後台管理登入</h1>
-          <p>輸入 Render 後端設定的後台帳號與密碼後，才能進入活動、知識庫、客服與推播管理。</p>
+        <div className="admin-login-copy">
+          <h1>萬春宮後台</h1>
+          <p>登入後可管理活動、問答內容、客服回覆與推播排程。</p>
         </div>
         <label>
-          帳號
+          後台帳號
           <input
             autoComplete="username"
             autoFocus
             value={draftUsername}
             onChange={(event) => setDraftUsername(event.target.value)}
-            placeholder="例如：temple-staff"
+            placeholder="輸入帳號"
           />
         </label>
         <label>
@@ -130,13 +136,13 @@ export function AdminGate({ children }: AdminGateProps) {
             type="password"
             value={draftPassword}
             onChange={(event) => setDraftPassword(event.target.value)}
-            placeholder="輸入 Render 裡設定的密碼"
+            placeholder="輸入密碼"
           />
-          <small>如果 Render 是 `ADMIN_TOKENS=temple-staff:xxxx`，帳號填 `temple-staff`，密碼填 `xxxx`。</small>
+          <small>忘記帳號或密碼時，請聯絡系統管理員協助重設。</small>
         </label>
         <button className="button primary" disabled={checking || loggingIn} type="submit">
           <LockKeyhole size={18} />
-          {checking || loggingIn ? "驗證中" : "登入後台"}
+          {checking || loggingIn ? "驗證中" : "進入後台"}
         </button>
         {error && <p className="error-text">{error}</p>}
       </form>

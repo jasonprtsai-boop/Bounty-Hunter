@@ -5,10 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build",
-    "build:sites": "npm run build && node scripts/prepare-sites-build.mjs",
+    "build": "npm run build:public",
+    "build:public": "tsc -b && vite build --mode public",
+    "build:admin": "tsc -b && vite build --mode admin",
+    "build:sites": "npm run build:public && node scripts/prepare-sites-build.mjs --surface public",
+    "build:sites:admin": "npm run build:admin && node scripts/prepare-sites-build.mjs --surface admin",
     "preview": "vite preview --host 0.0.0.0",
-    "test:sites-worker": "node scripts/test-sites-worker.mjs"
+    "test:sites-worker": "node scripts/test-sites-worker.mjs --surface public",
+    "test:sites-worker:admin": "node scripts/test-sites-worker.mjs --surface admin"
   },
   "dependencies": {
     "@line/liff": "^2.27.1",

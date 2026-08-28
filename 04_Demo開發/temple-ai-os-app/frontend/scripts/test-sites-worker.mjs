@@ -4,6 +4,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const dist = resolve(root, "dist");
+const requestedSurface = process.argv.includes("--surface")
+  ? process.argv[process.argv.indexOf("--surface") + 1]
+  : "public";
+const surface = requestedSurface === "admin" ? "admin" : "public";
 const workerPath = resolve(dist, "server", "index.js");
 const { default: worker } = await import(`${pathToFileURL(workerPath).href}?t=${Date.now()}`);
 
@@ -41,7 +45,7 @@ const env = {
   }
 };
 
-for (const pathname of [
+const publicRoutes = [
   "/",
   "/site",
   "/community",
@@ -51,17 +55,29 @@ for (const pathname of [
   "/fortune",
   "/member",
   "/stickers",
-  "/support",
+  "/support"
+];
+const adminRoutes = [
   "/admin",
   "/admin/release"
-]) {
+];
+const expectedRoutes = surface === "admin" ? adminRoutes : publicRoutes;
+
+for (const pathname of expectedRoutes) {
   const response = await worker.fetch(new Request(`https://example.test${pathname}`), env);
   if (response.status !== 200) {
     throw new Error(`${pathname} returned ${response.status}`);
   }
   const html = await response.text();
-  if (!html.includes("Temple AI OS")) {
+  if (!html.includes('<div id="root"></div>')) {
     throw new Error(`${pathname} did not return the app shell`);
+  }
+}
+
+if (surface === "public") {
+  const response = await worker.fetch(new Request("https://example.test/admin"), env);
+  if (response.status !== 404) {
+    throw new Error(`/admin should be blocked on public surface, got ${response.status}`);
   }
 }
 
@@ -80,4 +96,4 @@ for (const pathname of [
   }
 }
 
-console.log("Sites worker routes OK");
+console.log(`${surface} Sites worker routes OK`);

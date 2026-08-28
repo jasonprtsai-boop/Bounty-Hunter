@@ -57,9 +57,9 @@ def test_events_are_loaded_from_demo_data() -> None:
 
 def test_create_demo_registration() -> None:
     response = client.post(
-        "/api/events/evt_demo_worship_intro/registrations",
+        "/api/events/evt_demo_culture_talk/registrations",
         json={
-            "user_id": "demo_u001",
+            "user_id": "demo_registration_new_user",
             "contact_name": "小安",
             "party_size": 1,
             "reminder_opt_in": True,
@@ -67,13 +67,13 @@ def test_create_demo_registration() -> None:
     )
     assert response.status_code == 200
     payload = response.json()
-    assert payload["data"]["event_id"] == "evt_demo_worship_intro"
+    assert payload["data"]["event_id"] == "evt_demo_culture_talk"
     assert payload["meta"]["demo_notice"]
 
 
 def test_liff_token_overrides_client_user_id_for_registration() -> None:
     response = client.post(
-        "/api/events/evt_demo_worship_intro/registrations",
+        "/api/events/evt_demo_culture_talk/registrations",
         headers={"X-LIFF-ID-Token": "demo"},
         json={
             "user_id": "spoofed_user",
@@ -84,6 +84,52 @@ def test_liff_token_overrides_client_user_id_for_registration() -> None:
     )
     assert response.status_code == 200
     assert response.json()["data"]["user_id"] == "demo_u001"
+
+
+def test_duplicate_active_registration_is_rejected() -> None:
+    event_id = "evt_test_duplicate_registration"
+    delete_existing = client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
+    assert delete_existing.status_code in {200, 404}
+
+    create_event = client.post(
+        "/api/admin/events",
+        headers=ADMIN_HEADERS,
+        json={
+            "event_id": event_id,
+            "title": "重複報名測試活動",
+            "category": "測試",
+            "source_type": "test",
+            "date": "2026-10-01",
+            "start_time": "10:00",
+            "end_time": "11:00",
+            "location": "萬春宮",
+            "address": "臺中市中區成功路212號",
+            "summary": "用於驗證同一使用者不可重複有效報名。",
+            "requires_registration": True,
+            "capacity": 10,
+            "registered_count": 0,
+            "status": "open",
+            "registration_fields": ["姓名", "參加人數"],
+            "demo_note": "測試活動。",
+        },
+    )
+    assert create_event.status_code == 201
+
+    body = {
+        "user_id": "demo_duplicate_user",
+        "contact_name": "小安",
+        "party_size": 1,
+        "reminder_opt_in": True,
+    }
+    first = client.post(f"/api/events/{event_id}/registrations", json=body)
+    second = client.post(f"/api/events/{event_id}/registrations", json=body)
+
+    assert first.status_code == 200
+    assert second.status_code == 409
+    assert second.json()["detail"] == "duplicate_registration"
+
+    delete_response = client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
+    assert delete_response.status_code == 200
 
 
 def test_registration_capacity_exceeded_returns_waitlist_notification_meta() -> None:

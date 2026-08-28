@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Bell, Pencil, Plus, Save, Send, Trash2, X } from "lucide-react";
-import { Shell } from "../../components/Shell";
+import { Bell, Clock3, FileSpreadsheet, Pencil, Plus, Save, Search, Send, Trash2, X } from "lucide-react";
+import { Shell } from "../../components/AdminShell";
 import { apiFetch } from "../../lib/api";
+import { exportRowsToExcel } from "../../lib/excelExport";
 
 type NotificationJob = {
   job_id: string;
@@ -28,7 +29,7 @@ type NotificationForm = {
 
 const emptyNotificationForm: NotificationForm = {
   job_id: "",
-  job_type: "event_reminder",
+  job_type: "event_reminder_day_before",
   target_user_id: "demo_u001",
   event_id: "evt_demo_worship_intro",
   status: "draft",
@@ -36,8 +37,32 @@ const emptyNotificationForm: NotificationForm = {
   registration_id: "reg_0002",
   reminder_type: "day_before",
   party_size: "1",
-  text: "Temple AI OS Demo：這是一則測試推播。"
+  text: "萬春宮智慧服務示範：這是一則測試推播。"
 };
+
+const notificationTypeOptions = [
+  { value: "event_reminder_day_before", label: "活動前一天提醒" },
+  { value: "event_reminder_day_of", label: "活動當天提醒" },
+  { value: "registration_confirmation", label: "報名成功補發" },
+  { value: "registration_waitlist", label: "名額已滿候補通知" },
+  { value: "registration_cancellation", label: "取消報名通知" },
+  { value: "knowledge_gap_followup", label: "一般文字推播" }
+];
+
+const notificationStatusOptions = [
+  { value: "draft", label: "草稿" },
+  { value: "ready", label: "待送出" },
+  { value: "sent", label: "已送出" },
+  { value: "paused", label: "暫停" }
+];
+
+function notificationTypeLabel(type: string) {
+  return notificationTypeOptions.find((option) => option.value === type)?.label || type;
+}
+
+function notificationStatusLabel(status: string) {
+  return notificationStatusOptions.find((option) => option.value === status)?.label || status;
+}
 
 export function AdminNotifications() {
   const [jobs, setJobs] = useState<NotificationJob[]>([]);
@@ -46,6 +71,8 @@ export function AdminNotifications() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("active");
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     apiFetch<NotificationJob[]>("/api/admin/notification-jobs", {}, true).then(setJobs).catch(console.error);
@@ -171,12 +198,77 @@ export function AdminNotifications() {
     }
   }
 
+  const readyCount = jobs.filter((job) => job.status === "ready").length;
+  const draftCount = jobs.filter((job) => job.status === "draft").length;
+  const sentCount = jobs.filter((job) => job.status === "sent").length;
+  const filteredJobs = jobs.filter((job) => {
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && job.status !== "sent") ||
+      job.status === statusFilter;
+    const keyword = query.trim().toLowerCase();
+    const matchesQuery =
+      !keyword ||
+      [job.job_id, job.job_type, job.status, job.target_user_id || "", job.event_id || "", String(job.payload.text || "")]
+        .join(" ")
+        .toLowerCase()
+        .includes(keyword);
+    return matchesStatus && matchesQuery;
+  });
+
+  function exportJobs() {
+    exportRowsToExcel({
+      filename: "temple-notification-jobs",
+      sheetName: "推播任務",
+      rows: filteredJobs,
+      columns: [
+        { header: "序號", value: (_job, index) => index + 1 },
+        { header: "任務 ID", value: (job) => job.job_id },
+        { header: "類型", value: (job) => notificationTypeLabel(job.job_type) },
+        { header: "狀態", value: (job) => notificationStatusLabel(job.status) },
+        { header: "目標 User ID", value: (job) => job.target_user_id || "" },
+        { header: "活動 ID", value: (job) => job.event_id || "" },
+        { header: "預定時間", value: (job) => job.scheduled_at || "" },
+        { header: "訊息", value: (job) => String(job.payload.text || "") },
+        { header: "報名編號", value: (job) => String(job.payload.registration_id || "") },
+        { header: "提醒類型", value: (job) => String(job.payload.reminder_type || "") },
+        { header: "人數", value: (job) => String(job.payload.party_size || "") }
+      ]
+    });
+  }
+
   return (
     <Shell title="推播管理" mode="admin">
+      <section className="admin-summary-strip" aria-label="推播摘要">
+        <div>
+          <Bell size={20} />
+          <span>全部任務</span>
+          <strong>{jobs.length}</strong>
+        </div>
+        <div>
+          <Clock3 size={20} />
+          <span>待送出</span>
+          <strong>{readyCount}</strong>
+        </div>
+        <div>
+          <Pencil size={20} />
+          <span>草稿</span>
+          <strong>{draftCount}</strong>
+        </div>
+        <div>
+          <Send size={20} />
+          <span>已送出</span>
+          <strong>{sentCount}</strong>
+        </div>
+      </section>
+
       <div className="admin-event-grid">
-        <form className="form-panel" onSubmit={saveJob}>
+        <form className="form-panel admin-editor-panel" onSubmit={saveJob}>
           <div className="admin-actions">
-            <strong>{editingId ? "編輯任務" : "新增任務"}</strong>
+            <div>
+              <span className="panel-kicker">{editingId ? "目前正在編輯" : "新增通知"}</span>
+              <strong>{editingId ? "編輯任務" : "新增任務"}</strong>
+            </div>
             <div className="inline-actions">
               <button className="button" type="button" onClick={sendDueJobs}>
                 <Send size={18} />
@@ -188,74 +280,101 @@ export function AdminNotifications() {
               </button>
             </div>
           </div>
-          <label>
-            任務 ID
-            <input
-              disabled={Boolean(editingId)}
-              value={form.job_id}
-              onChange={(event) => setForm({ ...form, job_id: event.target.value })}
-            />
-          </label>
-          <div className="form-grid">
+
+          <div className="form-section">
+            <div className="form-section-title">
+              <span>1</span>
+              <strong>任務設定</strong>
+            </div>
+            <div className="form-grid">
+              <label>
+                類型
+                <select value={form.job_type} onChange={(event) => setForm({ ...form, job_type: event.target.value })}>
+                  {notificationTypeOptions.map((option) => (
+                    <option value={option.value} key={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                狀態
+                <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}>
+                  {notificationStatusOptions.map((option) => (
+                    <option value={option.value} key={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
             <label>
-              類型
-              <select value={form.job_type} onChange={(event) => setForm({ ...form, job_type: event.target.value })}>
-                <option value="event_reminder_day_before">報名前一天提醒</option>
-                <option value="event_reminder_day_of">活動當天提醒</option>
-                <option value="registration_confirmation">報名成功補發</option>
-                <option value="registration_waitlist">名額已滿候補通知</option>
-                <option value="registration_cancellation">取消報名通知</option>
-                <option value="knowledge_gap_followup">一般文字推播</option>
-              </select>
-            </label>
-            <label>
-              狀態
-              <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}>
-                <option value="draft">draft</option>
-                <option value="ready">ready</option>
-                <option value="sent">sent</option>
-                <option value="paused">paused</option>
-              </select>
-            </label>
-          </div>
-          <label>
-            目標 User ID
-            <input value={form.target_user_id} onChange={(event) => setForm({ ...form, target_user_id: event.target.value })} />
-          </label>
-          <label>
-            Event ID
-            <input value={form.event_id} onChange={(event) => setForm({ ...form, event_id: event.target.value })} />
-          </label>
-          <div className="form-grid">
-            <label>
-              報名編號
-              <input value={form.registration_id} onChange={(event) => setForm({ ...form, registration_id: event.target.value })} />
-            </label>
-            <label>
-              提醒類型
-              <select value={form.reminder_type} onChange={(event) => setForm({ ...form, reminder_type: event.target.value })}>
-                <option value="day_before">前一天</option>
-                <option value="day_of">當天</option>
-              </select>
+              預定時間
+              <input
+                value={form.scheduled_at}
+                onChange={(event) => setForm({ ...form, scheduled_at: event.target.value })}
+                placeholder="例如 2026-09-01 18:00"
+              />
+              <small>立即測試或草稿可以留空；正式排程再填送出時間。</small>
             </label>
           </div>
-          <label>
-            候補/詢問人數
-            <input
-              min="1"
-              type="number"
-              value={form.party_size}
-              onChange={(event) => setForm({ ...form, party_size: event.target.value })}
-            />
-          </label>
-          <label>
-            預定時間
-            <input value={form.scheduled_at} onChange={(event) => setForm({ ...form, scheduled_at: event.target.value })} />
-          </label>
-          <label>
-            訊息
-            <textarea value={form.text} onChange={(event) => setForm({ ...form, text: event.target.value })} required />
-          </label>
+
+          <div className="form-section">
+            <div className="form-section-title">
+              <span>2</span>
+              <strong>訊息內容</strong>
+            </div>
+            <label>
+              訊息
+              <textarea value={form.text} onChange={(event) => setForm({ ...form, text: event.target.value })} required />
+              <small>文字要像廟方服務提醒，避免工程代號或內部說明出現在使用者訊息裡。</small>
+            </label>
+          </div>
+
+          <details className="advanced-fields">
+            <summary>進階欄位</summary>
+            <p>只有在指定單一使用者、補發特定報名，或需要固定任務代號時才需要填寫。</p>
+            <label>
+              任務 ID
+              <input
+                disabled={Boolean(editingId)}
+                value={form.job_id}
+                onChange={(event) => setForm({ ...form, job_id: event.target.value })}
+              />
+              <small>留空可由後端建立；正式任務建議使用容易辨識的命名。</small>
+            </label>
+            <label>
+              目標 User ID
+              <input value={form.target_user_id} onChange={(event) => setForm({ ...form, target_user_id: event.target.value })} />
+            </label>
+            <label>
+              Event ID
+              <input value={form.event_id} onChange={(event) => setForm({ ...form, event_id: event.target.value })} />
+            </label>
+            <div className="form-grid">
+              <label>
+                報名編號
+                <input value={form.registration_id} onChange={(event) => setForm({ ...form, registration_id: event.target.value })} />
+              </label>
+              <label>
+                提醒類型
+                <select value={form.reminder_type} onChange={(event) => setForm({ ...form, reminder_type: event.target.value })}>
+                  <option value="day_before">前一天</option>
+                  <option value="day_of">當天</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              候補/詢問人數
+              <input
+                min="1"
+                type="number"
+                value={form.party_size}
+                onChange={(event) => setForm({ ...form, party_size: event.target.value })}
+              />
+            </label>
+          </details>
+
           <div className="admin-actions">
             <button className="button primary" disabled={saving} type="submit">
               <Save size={18} />
@@ -273,18 +392,57 @@ export function AdminNotifications() {
         </form>
 
         <section className="tool-panel">
+          <div className="panel-header">
+            <div>
+              <span className="panel-kicker">通知任務</span>
+              <h2>檢查待送與補發</h2>
+            </div>
+            <div className="panel-actions">
+              <span className="status">{filteredJobs.length} 筆</span>
+              <button className="button icon-button export-button" type="button" onClick={exportJobs} disabled={filteredJobs.length === 0}>
+                <FileSpreadsheet size={17} />
+                <span>匯出 Excel</span>
+              </button>
+            </div>
+          </div>
+          <div className="admin-filter-bar" aria-label="推播篩選">
+            <label>
+              搜尋
+              <div className="search-field">
+                <Search size={17} />
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="任務、使用者、活動、訊息" />
+              </div>
+            </label>
+            <label>
+              狀態
+              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                <option value="active">未完成</option>
+                <option value="all">全部狀態</option>
+                {notificationStatusOptions.map((option) => (
+                  <option value={option.value} key={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="export-note">
+            <FileSpreadsheet size={16} />
+            會匯出目前搜尋與狀態篩選後的推播任務。
+          </div>
           <div className="knowledge-list">
-            {jobs.map((job) => (
+            {filteredJobs.map((job) => (
               <div className="knowledge-doc-card" key={job.job_id}>
                 <div>
                   <div className="card-row">
                     <Bell size={17} />
-                    <strong>{job.job_type}</strong>
-                    <span className="status">{job.status}</span>
+                    <strong>{notificationTypeLabel(job.job_type)}</strong>
+                    <span className={`status ${job.status}`}>{notificationStatusLabel(job.status)}</span>
                   </div>
                   <small>
                     {job.job_id} · {job.target_user_id || "no target"} · {job.event_id || "no event"}
                   </small>
+                  {job.scheduled_at && <p className="list-preview">預定時間：{job.scheduled_at}</p>}
                 </div>
                 <div className="inline-actions">
                   <button className="button icon-button" type="button" onClick={() => editJob(job)}>
@@ -302,6 +460,7 @@ export function AdminNotifications() {
                 </div>
               </div>
             ))}
+            {filteredJobs.length === 0 && <div className="empty-state">目前沒有符合條件的通知任務。</div>}
           </div>
         </section>
       </div>

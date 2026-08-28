@@ -201,6 +201,14 @@ class DemoRepository:
         if not event.requires_registration:
             raise ValueError("registration_not_required")
 
+        if any(
+            item.event_id == event_id
+            and item.user_id == payload.user_id
+            and item.status in {"confirmed", "pending_review", "checked_in"}
+            for item in self.registrations
+        ):
+            raise ValueError("duplicate_registration")
+
         current_total = self._confirmed_party_total(event_id)
         if event.capacity is not None and current_total + payload.party_size > event.capacity:
             raise ValueError("event_capacity_exceeded")
@@ -463,6 +471,7 @@ class SupabaseRepository:
                 "invalid_user_id",
                 "invalid_contact_name",
                 "invalid_party_size",
+                "duplicate_registration",
                 "event_capacity_exceeded",
             ]:
                 if detail in text:

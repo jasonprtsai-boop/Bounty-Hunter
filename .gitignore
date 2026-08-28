@@ -22,6 +22,9 @@ logs/
 *.log
 *.tsbuildinfo
 
+# Local Sites deployment checkout
+**/frontend-admin-site/
+
 # OS/editor noise
 .DS_Store
 Thumbs.db

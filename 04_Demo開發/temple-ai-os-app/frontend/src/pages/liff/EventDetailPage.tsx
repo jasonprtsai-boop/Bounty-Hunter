@@ -4,6 +4,15 @@ import { CalendarDays, MapPin, Users } from "lucide-react";
 import { Shell } from "../../components/Shell";
 import { apiFetch, type EventItem } from "../../lib/api";
 
+const statusLabels: Record<string, string> = {
+  open: "可報名",
+  published: "可報名",
+  upcoming: "近期活動",
+  draft: "草稿",
+  closed: "已截止",
+  cancelled: "已取消"
+};
+
 export function EventDetailPage() {
   const { eventId } = useParams();
   const [event, setEvent] = useState<EventItem | null>(null);
@@ -18,10 +27,18 @@ export function EventDetailPage() {
     return <Shell title="活動詳情">載入中</Shell>;
   }
 
+  const canRegister = event.requires_registration && ["open", "published"].includes(event.status);
+  const isFull = Boolean(event.capacity && event.registered_count >= event.capacity);
+
   return (
     <Shell title={event.title}>
       <section className="detail-panel">
-        <span className="tag">{event.category}</span>
+        <div className="card-row">
+          <span className="tag">{event.category}</span>
+          <span className={canRegister && !isFull ? "status open" : "status"}>
+            {isFull ? "名額已滿" : statusLabels[event.status] || event.status}
+          </span>
+        </div>
         <p>{event.summary}</p>
         <div className="meta-line">
           <CalendarDays size={18} />
@@ -41,14 +58,33 @@ export function EventDetailPage() {
             </span>
           </div>
         ) : null}
+        <div className="event-info-grid">
+          <div>
+            <span>資料類型</span>
+            <strong>{event.source_type}</strong>
+          </div>
+          <div>
+            <span>報名方式</span>
+            <strong>{event.requires_registration ? "LIFF 示範報名" : "免報名展示"}</strong>
+          </div>
+        </div>
+        {event.registration_fields.length > 0 ? (
+          <div className="field-chip-row" aria-label="報名欄位">
+            {event.registration_fields.map((field) => (
+              <span key={field}>{field}</span>
+            ))}
+          </div>
+        ) : null}
+        {event.payment_policy ? <p className="notice">{event.payment_policy}</p> : null}
         <p className="notice">{event.demo_note}</p>
-        {event.requires_registration ? (
+        {canRegister && !isFull ? (
           <Link className="button primary" to={`/register/${event.event_id}`}>
             示範報名
           </Link>
+        ) : event.requires_registration ? (
+          <span className="button muted">目前不開放報名</span>
         ) : null}
       </section>
     </Shell>
   );
 }
-

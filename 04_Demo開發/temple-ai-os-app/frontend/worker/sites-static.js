@@ -3,6 +3,7 @@ const SECURITY_HEADERS = {
   "referrer-policy": "strict-origin-when-cross-origin",
   "permissions-policy": "camera=(), microphone=(), geolocation=()"
 };
+const SITE_SURFACE = "__SITE_SURFACE__";
 
 function withHeaders(response) {
   const headers = new Headers(response.headers);
@@ -30,9 +31,17 @@ function shouldFallbackToIndex(pathname) {
   return true;
 }
 
+function shouldBlockPath(pathname) {
+  return SITE_SURFACE === "public" && (pathname === "/admin" || pathname.startsWith("/admin/"));
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (shouldBlockPath(url.pathname)) {
+      return withHeaders(new Response("Not found", { status: 404 }));
+    }
+
     const assetRequest = shouldFallbackToIndex(url.pathname)
       ? new Request(new URL("/index.html", request.url), request)
       : request;

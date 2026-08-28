@@ -102,6 +102,11 @@ function errorMessageFromPayload(payload: unknown, fallback: string) {
   return fallback;
 }
 
+function adminActorHeaderValue() {
+  const actor = localStorage.getItem("adminActor") || "admin";
+  return encodeURIComponent(actor);
+}
+
 export async function adminLogin(username: string, password: string): Promise<AdminLoginResult> {
   const response = await fetch(`${API_BASE_URL}/api/admin/auth/login`, {
     method: "POST",
@@ -143,7 +148,7 @@ export async function apiFetch<T>(
       throw new Error("請先登入後台");
     }
     headers.set("Authorization", `Bearer ${adminToken}`);
-    headers.set("X-Admin-Actor", localStorage.getItem("adminActor") || "admin");
+    headers.set("X-Admin-Actor", adminActorHeaderValue());
   }
   const liffIdToken = localStorage.getItem("liffIdToken");
   if (liffIdToken) {

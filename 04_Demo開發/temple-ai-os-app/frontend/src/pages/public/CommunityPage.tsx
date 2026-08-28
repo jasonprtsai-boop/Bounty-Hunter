@@ -1,21 +1,21 @@
 import { Link } from "react-router-dom";
-import { BellRing, Bot, CalendarDays, CheckCircle2, ExternalLink, MessageCircle, ShieldCheck, UsersRound } from "lucide-react";
+import { Bot, CalendarDays, CheckCircle2, ExternalLink, MessageCircle, ShieldCheck, UsersRound } from "lucide-react";
 import "../../styles/public.css";
 
 const lineAddFriendUrl = import.meta.env.VITE_LINE_ADD_FRIEND_URL || "https://line.me/R/ti/p/%40983zhzni";
 const lineOpenChatUrl = import.meta.env.VITE_LINE_OPENCHAT_URL || "";
 
 const communityFlows = [
-  ["加入好友", "信眾先加入 LINE 官方帳號，從 Rich Menu 進入 AI 問答、活動列表與服務單。"],
-  ["查看活動", "法會、導覽與志工活動集中在 LIFF 呈現，減少公告分散與人工重複通知。"],
-  ["後台追蹤", "管理者可在後台檢視報名、客服與推播紀錄，確保每一筆需求都有狀態。"]
+  ["加入好友", "加入 LINE 後，可查看活動、開啟導覽與找到客服入口。"],
+  ["查看活動", "法會、導覽與服務活動集中呈現，快速確認時間、地點與參加方式。"],
+  ["需要協助", "遇到問題時可以留下訊息，後續由服務人員接續處理。"]
 ];
 
 const guardrails = [
-  "此帳號為 Temple AI OS 示範用官方帳號",
-  "不代表萬春宮官方正式營運",
+  "此頁為智慧服務示範頁，正式公告請以廟方為準",
+  "活動時間、名額與服務內容以正式公告為準",
   "不處理正式捐款、交易或敏感個資",
-  "Channel secret 與 access token 僅能放在部署平台 secret"
+  "重要廟務問題請透過正式窗口再次確認"
 ];
 
 function ExternalAction({ href, children }: { href: string; children: React.ReactNode }) {
@@ -34,16 +34,16 @@ export function CommunityPage() {
     <div className="public-shell community-page">
       <header className="public-nav">
         <Link to="/site" className="brand">
-          <span className="brand-mark">AI</span>
+          <span className="brand-mark">宮</span>
           <span>
-            <strong>Temple AI OS</strong>
+            <strong>萬春宮智慧服務</strong>
             <small>LINE 社群入口</small>
           </span>
         </Link>
         <nav aria-label="社群導覽">
           <Link to="/site">官網</Link>
-          <Link to="/">LIFF</Link>
-          <Link to="/admin">後台</Link>
+          <Link to="/">線上服務</Link>
+          <Link to="/events">活動</Link>
           <Link to="/privacy">隱私權</Link>
         </nav>
       </header>
@@ -51,11 +51,11 @@ export function CommunityPage() {
       <main>
         <section className="community-hero">
           <div>
-            <span className="tag">LINE-first</span>
-            <h1>LINE 官方帳號與社群入口</h1>
+            <span className="tag">LINE 入口</span>
+            <h1>LINE 社群與服務入口</h1>
             <p>
-              以 LINE 作為信眾服務入口，串接 AI 問答、活動報名、客服紀錄與管理後台，
-              讓宮廟團隊可以用熟悉的通訊工具維持服務品質。
+              加入 LINE 後，可以查看近期活動、開啟參拜導覽，或留下需要協助的問題。
+              常用服務集中在手機裡，比現場臨時找資訊更方便。
             </p>
             <div className="hero-actions">
               <ExternalAction href={lineAddFriendUrl}>
@@ -66,7 +66,7 @@ export function CommunityPage() {
               </ExternalAction>
             </div>
             <p className="notice">
-              OpenChat 尚未設定時按鈕會停用；目前主要入口為 LINE 官方帳號 @983zhzni。
+              OpenChat 尚未設定時按鈕會停用；目前主要入口為 LINE 帳號 @983zhzni。
             </p>
           </div>
 
@@ -74,7 +74,7 @@ export function CommunityPage() {
             <div className="phone-bar" />
             <div className="chat-bubble bot">
               <Bot size={16} />
-              歡迎使用 Temple AI OS 示範服務
+              歡迎使用萬春宮智慧服務
             </div>
             <div className="chat-bubble user">最近有什麼活動？</div>
             <div className="chat-bubble bot">
@@ -89,7 +89,7 @@ export function CommunityPage() {
 
         <section className="public-section">
           <div className="section-kicker">社群流程</div>
-          <h2>把信眾互動收斂到 LINE 與後台</h2>
+          <h2>把常用服務集中到 LINE</h2>
           <div className="community-flow-grid">
             {communityFlows.map(([title, body], index) => (
               <article className="flow-card" key={title}>
@@ -103,8 +103,8 @@ export function CommunityPage() {
 
         <section className="public-section community-guardrails">
           <div>
-            <div className="section-kicker">安全邊界</div>
-            <h2>Demo 社群保留清楚的服務界線</h2>
+            <div className="section-kicker">使用提醒</div>
+            <h2>示範頁仍需保留清楚界線</h2>
           </div>
           <div className="guardrail-list">
             {guardrails.map((item) => (
@@ -118,29 +118,28 @@ export function CommunityPage() {
 
         <section className="public-section public-band">
           <div>
-            <div className="section-kicker">後續設定</div>
-            <h2>LINE 官方帳號已建立，下一步是綁定公開網址</h2>
+            <div className="section-kicker">開始使用</div>
+            <h2>加入 LINE 後，活動與客服都能接著查</h2>
             <p>
-              官網部署完成後，可在 LINE Login 建立 LIFF app，並把後端 webhook URL 設到 Messaging API。
-              敏感 token 不會寫入 repo。
+              先從活動列表、客服中心或個人紀錄開始；需要回到官網時，也能再查看參拜導覽與聯絡資訊。
             </p>
           </div>
           <div className="band-actions">
-            <Link className="button primary" to="/admin/notifications">
-              推播後台 <BellRing size={18} />
+            <Link className="button primary" to="/events">
+              活動列表 <CalendarDays size={18} />
             </Link>
             <Link className="button" to="/support">
-              服務單 <MessageCircle size={18} />
+              客服中心 <MessageCircle size={18} />
             </Link>
             <Link className="button" to="/member">
-              會員資料 <CheckCircle2 size={18} />
+              我的紀錄 <CheckCircle2 size={18} />
             </Link>
           </div>
         </section>
       </main>
 
       <footer className="public-footer">
-        <span>LINE 官方帳號：Temple AI OS示範 / @983zhzni</span>
+        <span>LINE 帳號：@983zhzni（示範）</span>
         <nav aria-label="頁尾連結">
           <Link to="/privacy">隱私權政策</Link>
           <Link to="/terms">使用條款</Link>

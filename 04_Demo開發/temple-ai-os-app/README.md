@@ -85,6 +85,7 @@ database/migrations/003_line_webhook_events.sql
 database/migrations/004_search_and_atomic_registration.sql
 database/migrations/005_faq_rules.sql
 database/migrations/006_operational_hardening.sql
+database/migrations/007_data_integrity_and_demo_ops.sql
 ```
 
 Fresh Supabase project can run this generated bundle instead:

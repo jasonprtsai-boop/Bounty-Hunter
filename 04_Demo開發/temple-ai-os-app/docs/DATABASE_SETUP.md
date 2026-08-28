@@ -15,8 +15,9 @@ database/supabase_full_setup.sql
 - 基本資料表：宮廟、LINE 使用者、會員、活動、報名、客服、通知、Dashboard、稽核紀錄。
 - FAQ 固定回覆表：支援目前「知識庫關鍵詞比對 + 固定安全回覆」策略。
 - 原子報名 RPC：`register_for_event` 會鎖定活動列，避免容量超賣。
+- 報名一致性：同一使用者同一活動只能保留一筆有效報名，並自動同步活動報名人數。
 - LINE webhook 去重表：避免同一 webhook event 重複處理。
-- 營運補強：常用索引、資料狀態限制、`updated_at` 自動更新。
+- 營運補強：常用索引、資料狀態限制、後台狀態值對齊、`updated_at` 自動更新。
 - Demo seed：萬春宮示範資料、活動、FAQ、Dashboard 樣本資料。
 
 ## 後端環境變數

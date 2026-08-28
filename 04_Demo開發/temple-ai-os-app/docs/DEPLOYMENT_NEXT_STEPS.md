@@ -34,7 +34,7 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Flex event and fortune messages now include public hero images.
 - Production Supabase path now has pgvector search RPC and atomic event registration RPC in migration `004_search_and_atomic_registration.sql`.
 - FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable or missing required rules.
-- Database operational hardening is in migration `006_operational_hardening.sql`, and the generated all-in-one setup file is `database/supabase_full_setup.sql`.
+- Database operational hardening is in migrations `006_operational_hardening.sql` and `007_data_integrity_and_demo_ops.sql`, and the generated all-in-one setup file is `database/supabase_full_setup.sql`.
 - `/stickers` page and first 8-image sticker pack assets are prepared for LINE Creators Market submission.
 - LINE OA profile image asset is prepared at `assets/brand/line-oa-profile-v2.png`.
 - LINE OA profile background asset is prepared at `assets/brand/line-oa-profile-background-v1.png`.
@@ -112,6 +112,7 @@ database/migrations/003_line_webhook_events.sql
 database/migrations/004_search_and_atomic_registration.sql
 database/migrations/005_faq_rules.sql
 database/migrations/006_operational_hardening.sql
+database/migrations/007_data_integrity_and_demo_ops.sql
 ```
 
 For a fresh Supabase project, you can run the generated bundle instead:
@@ -143,7 +144,7 @@ python scripts/import_knowledge.py
 
 `scripts/import_knowledge.py` does a dry run without secrets. It is not required for the current fixed FAQ reply flow.
 
-Registration capacity is handled by the `register_for_event` database function; do not switch production traffic to `DEMO_MODE=false` until migrations through `006` are applied and `scripts/verify_database.py` passes.
+Registration capacity and duplicate active registration checks are handled by the `register_for_event` database function; do not switch production traffic to `DEMO_MODE=false` until migrations through `007` are applied and `scripts/verify_database.py` passes.
 
 ## 5. Frontend API target
 
