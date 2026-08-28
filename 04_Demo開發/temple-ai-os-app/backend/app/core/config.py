@@ -5,6 +5,12 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+DEFAULT_ALLOWED_SITE_ORIGINS = (
+    "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site",
+    "https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site",
+)
+
+
 class Settings(BaseSettings):
     app_env: str = "local"
     demo_mode: bool = True
@@ -48,7 +54,21 @@ class Settings(BaseSettings):
 
     @property
     def origins(self) -> list[str]:
-        return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
+        origins: list[str] = []
+        seen: set[str] = set()
+
+        def add_origin(origin: str | None) -> None:
+            value = (origin or "").strip().rstrip("/")
+            if value and value not in seen:
+                origins.append(value)
+                seen.add(value)
+
+        for origin in self.allowed_origins.split(","):
+            add_origin(origin)
+        add_origin(self.frontend_base_url)
+        for origin in DEFAULT_ALLOWED_SITE_ORIGINS:
+            add_origin(origin)
+        return origins
 
     @property
     def admin_token_map(self) -> dict[str, str]:

@@ -9,7 +9,13 @@ from typing import Any
 import httpx
 
 from app.core.config import get_settings
-from app.core.passwords import hash_admin_password, verify_admin_password
+from app.core.passwords import (
+    DEMO_BOOTSTRAP_ADMIN_DISPLAY_NAME,
+    DEMO_BOOTSTRAP_ADMIN_PASSWORD_HASH,
+    DEMO_BOOTSTRAP_ADMIN_USERNAME,
+    hash_admin_password,
+    verify_admin_password,
+)
 from app.schemas.common import (
     AdminAccount,
     AdminAccountCreate,
@@ -109,6 +115,23 @@ class DemoRepository:
                     "updated_at": now,
                     "last_login_at": None,
                 }
+            )
+        if settings.demo_mode and not any(
+            account["username"] == DEMO_BOOTSTRAP_ADMIN_USERNAME for account in accounts
+        ):
+            accounts.insert(
+                0,
+                {
+                    "account_id": f"acct_{uuid.uuid5(uuid.NAMESPACE_DNS, DEMO_BOOTSTRAP_ADMIN_USERNAME).hex[:12]}",
+                    "username": DEMO_BOOTSTRAP_ADMIN_USERNAME,
+                    "display_name": DEMO_BOOTSTRAP_ADMIN_DISPLAY_NAME,
+                    "role": "owner",
+                    "status": "active",
+                    "password_hash": DEMO_BOOTSTRAP_ADMIN_PASSWORD_HASH,
+                    "created_at": now,
+                    "updated_at": now,
+                    "last_login_at": None,
+                },
             )
         return accounts
 

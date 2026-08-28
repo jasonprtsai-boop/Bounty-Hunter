@@ -7,6 +7,12 @@ import secrets
 
 PASSWORD_HASH_ALGORITHM = "pbkdf2_sha256"
 PBKDF2_ITERATIONS = 260_000
+DEMO_BOOTSTRAP_ADMIN_USERNAME = "temple-owner"
+DEMO_BOOTSTRAP_ADMIN_DISPLAY_NAME = "系統最高管理員"
+DEMO_BOOTSTRAP_ADMIN_PASSWORD_HASH = (
+    "pbkdf2_sha256$260000$W573cLwvTX-EgozNdcw0ZA$"
+    "VzVPzFLQIkJENlFXdx0wWyx7VxbE1nXdEjclBRcloqk"
+)
 
 
 def _b64encode(data: bytes) -> str:
