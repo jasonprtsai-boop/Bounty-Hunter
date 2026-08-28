@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AdminGate } from "./components/AdminGate";
 
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard").then((module) => ({ default: module.AdminDashboard })));
+const AdminAccounts = lazy(() => import("./pages/admin/AdminAccounts").then((module) => ({ default: module.AdminAccounts })));
 const AdminEvents = lazy(() => import("./pages/admin/AdminEvents").then((module) => ({ default: module.AdminEvents })));
 const AdminKnowledge = lazy(() => import("./pages/admin/AdminKnowledge").then((module) => ({ default: module.AdminKnowledge })));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications").then((module) => ({ default: module.AdminNotifications })));
@@ -43,6 +44,7 @@ export default function App() {
         <Route path="/admin/knowledge" element={<AdminGate><AdminKnowledge /></AdminGate>} />
         <Route path="/admin/support" element={<AdminGate><AdminSupport /></AdminGate>} />
         <Route path="/admin/notifications" element={<AdminGate><AdminNotifications /></AdminGate>} />
+        <Route path="/admin/accounts" element={<AdminGate><AdminAccounts /></AdminGate>} />
         <Route path="/admin/release" element={<AdminGate><AdminRelease /></AdminGate>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

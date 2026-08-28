@@ -284,7 +284,7 @@ export function AdminRelease() {
               <span>人工設定完成</span>
             </div>
             <div>
-              <strong>49</strong>
+              <strong>53</strong>
               <span>後端測試通過</span>
             </div>
             <div>

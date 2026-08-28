@@ -26,7 +26,7 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - LINE Official Account created: `Temple AI OS Demo`, Basic ID `@983zhzni`.
 - Messaging API enabled for channel `2010991408`.
 - Admin frontend now requires username/password login; the demo token is no longer bundled in public frontend code.
-- Admin APIs support named `ADMIN_TOKENS` / `ADMIN_ACCOUNTS` so audit logs can record the server-verified operator.
+- Admin APIs support named `ADMIN_TOKENS` / `ADMIN_ACCOUNTS` for first login, plus `/admin/accounts` for database-backed admin account management.
 - `/api/chat` has message length bounds and a simple per-user/IP rate limit.
 - `/api/chat` now uses keyword FAQ rules plus fixed safe replies; OpenAI is no longer required for the public demo chat path.
 - LINE and LIFF replies use a fast path: required duplicate-event checks stay synchronous, while user upsert and message logging run after the reply is prepared.
@@ -34,7 +34,7 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Flex event and fortune messages now include public hero images.
 - Production Supabase path now has pgvector search RPC and atomic event registration RPC in migration `004_search_and_atomic_registration.sql`.
 - FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable or missing required rules.
-- Database operational hardening is in migrations `006_operational_hardening.sql` and `007_data_integrity_and_demo_ops.sql`, and the generated all-in-one setup file is `database/supabase_full_setup.sql`.
+- Database operational hardening is in migrations `006_operational_hardening.sql`, `007_data_integrity_and_demo_ops.sql`, and `008_admin_accounts.sql`; the generated all-in-one setup file is `database/supabase_full_setup.sql`.
 - `/stickers` page and first 8-image sticker pack assets are prepared for LINE Creators Market submission.
 - LINE OA profile image asset is prepared at `assets/brand/line-oa-profile-v2.png`.
 - LINE OA profile background asset is prepared at `assets/brand/line-oa-profile-background-v1.png`.
@@ -80,6 +80,8 @@ ADMIN_SESSION_SECRET=<random long secret for signed admin sessions>
 ADMIN_SESSION_TTL_SECONDS=43200
 ```
 
+Use the initial owner credential only for the first login. After that, create named staff accounts in `/admin/accounts`; those database-backed passwords are stored as hashes, not plaintext.
+
 Then change:
 
 ```text
@@ -113,6 +115,7 @@ database/migrations/004_search_and_atomic_registration.sql
 database/migrations/005_faq_rules.sql
 database/migrations/006_operational_hardening.sql
 database/migrations/007_data_integrity_and_demo_ops.sql
+database/migrations/008_admin_accounts.sql
 ```
 
 For a fresh Supabase project, you can run the generated bundle instead:
@@ -144,7 +147,7 @@ python scripts/import_knowledge.py
 
 `scripts/import_knowledge.py` does a dry run without secrets. It is not required for the current fixed FAQ reply flow.
 
-Registration capacity and duplicate active registration checks are handled by the `register_for_event` database function; do not switch production traffic to `DEMO_MODE=false` until migrations through `007` are applied and `scripts/verify_database.py` passes.
+Registration capacity and duplicate active registration checks are handled by the `register_for_event` database function; do not switch production traffic to `DEMO_MODE=false` until migrations through `008` are applied and `scripts/verify_database.py` passes.
 
 ## 5. Frontend API target
 
@@ -236,7 +239,7 @@ Run `scripts/smoke_public_demo.py` before a demo rehearsal, then complete the ma
 - AI reply is sent through Messaging API.
 - Event Flex Message includes a reachable HTTPS hero image under `/assets/flex/event-card.png`.
 - `/stickers` opens and shows the 8-image sticker pack preview.
-- Admin login requires a server-verified username and password. If Render uses `ADMIN_TOKENS=temple-staff:xxxx`, the login username is `temple-staff` and the password is `xxxx`; successful admin mutations are recorded in `audit_logs` with the server-verified actor.
+- Admin login requires a server-verified username and password. If Render uses `ADMIN_TOKENS=temple-staff:xxxx`, the login username is `temple-staff` and the password is `xxxx`; owner users can manage database-backed accounts in `/admin/accounts`, and successful admin mutations are recorded in `audit_logs` with the server-verified actor.
 - Supabase knowledge search returns results from `match_knowledge_chunks`.
 - Event registration uses `register_for_event` and rejects over-capacity concurrent attempts.
 - Duplicate webhook event is processed only once.

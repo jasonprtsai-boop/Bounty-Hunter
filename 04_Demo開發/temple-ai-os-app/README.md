@@ -7,7 +7,7 @@ Temple AI OS 是以萬春宮公開資料為示範場景的 LINE + AI 宮廟服�
 ## 系統組成
 
 - `backend/`：FastAPI API、LINE Webhook、LIFF token verify、關鍵詞 FAQ 固定回覆、Flex Message、管理後台 API。後端執行所需 demo data、temple profile、knowledge-base 已收在 `backend/app/data/`。
-- `frontend/`：React + Vite，包含 LIFF 使用者端與 Admin 管理後台。Admin 頁需要使用部署環境設定的帳號與密碼登入。
+- `frontend/`：React + Vite，包含 LIFF 使用者端與 Admin 管理後台。Admin 頁使用後端驗證的帳號密碼登入，最高權限者可在後台建立、停用與重設管理員帳號。
 - `database/`：Supabase PostgreSQL migration、FAQ 規則表、atomic registration RPC、可選 pgvector 知識匯入與 demo seed。
 - `assets/`：Rich Menu、LIFF banner、Flex 圖像與可選字型資料夾。
 - `assets/stickers/`：可送 LINE Creators Market 的貼圖素材與送審 metadata。
@@ -59,7 +59,7 @@ VITE_API_BASE_URL=
 VITE_LIFF_ID=
 ```
 
-正式環境後台登入建議使用 `ADMIN_TOKENS` 的 `管理者:密碼` 格式，或改用 `ADMIN_ACCOUNTS`。例如 Render 設為 `ADMIN_TOKENS=temple-staff:xxxx` 時，後台帳號填 `temple-staff`，密碼填 `xxxx`。成功的後台新增、修改、刪除會寫入 `audit_logs`，並以後端驗證出的管理者名稱作為操作人。
+正式環境第一次登入可使用 `ADMIN_TOKENS` 的 `管理者:密碼` 格式，或改用 `ADMIN_ACCOUNTS` / `ADMIN_USERNAME` / `ADMIN_PASSWORD`。例如 Render 設為 `ADMIN_TOKENS=temple-staff:xxxx` 時，後台帳號填 `temple-staff`，密碼填 `xxxx`。登入後可到 `/admin/accounts` 建立正式管理員帳號；資料庫模式會將密碼雜湊後存入 `admin_accounts`，不保存明文密碼。成功的後台新增、修改、刪除會寫入 `audit_logs`，並以後端驗證出的管理者名稱作為操作人。
 
 ## LINE Console 設定摘要
 
@@ -86,6 +86,7 @@ database/migrations/004_search_and_atomic_registration.sql
 database/migrations/005_faq_rules.sql
 database/migrations/006_operational_hardening.sql
 database/migrations/007_data_integrity_and_demo_ops.sql
+database/migrations/008_admin_accounts.sql
 ```
 
 Fresh Supabase project can run this generated bundle instead:

@@ -80,9 +80,32 @@ export type AdminLoginResult = {
   access_token: string;
   token_type: string;
   actor: string;
+  display_name: string;
+  role: AdminRole;
   expires_at: string;
   expires_in_seconds: number;
-  legacy_token_fallback?: boolean;
+};
+
+export type AdminRole = "owner" | "manager" | "staff";
+
+export type AdminAccountStatus = "active" | "disabled";
+
+export type AdminCurrentUser = {
+  actor: string;
+  display_name: string;
+  role: AdminRole;
+};
+
+export type AdminAccount = {
+  account_id: string;
+  username: string;
+  display_name: string;
+  role: AdminRole;
+  status: AdminAccountStatus;
+  password_set: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
+  last_login_at?: string | null;
 };
 
 function errorMessageFromPayload(payload: unknown, fallback: string) {
@@ -116,16 +139,6 @@ export async function adminLogin(username: string, password: string): Promise<Ad
   const payload = (await response.json().catch(() => null)) as
     | (ApiResponse<AdminLoginResult> & { detail?: unknown })
     | null;
-  if (response.status === 404 || response.status === 405) {
-    return {
-      access_token: password,
-      token_type: "bearer",
-      actor: username || "admin",
-      expires_at: "",
-      expires_in_seconds: 0,
-      legacy_token_fallback: true
-    };
-  }
   if (!response.ok || payload?.error) {
     throw new Error(errorMessageFromPayload(payload, response.statusText || "登入失敗"));
   }
@@ -133,6 +146,10 @@ export async function adminLogin(username: string, password: string): Promise<Ad
     throw new Error("登入回應格式不正確");
   }
   return payload.data;
+}
+
+export async function adminMe(): Promise<AdminCurrentUser> {
+  return apiFetch<AdminCurrentUser>("/api/admin/auth/me", {}, true);
 }
 
 export async function apiFetch<T>(

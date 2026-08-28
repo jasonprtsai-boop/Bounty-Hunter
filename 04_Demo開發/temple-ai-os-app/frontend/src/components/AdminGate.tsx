@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { LockKeyhole, ShieldCheck } from "lucide-react";
-import { adminLogin, apiFetch, type DashboardSummary } from "../lib/api";
+import { adminLogin, adminMe } from "../lib/api";
 
 type AdminGateProps = {
   children: React.ReactNode;
@@ -25,15 +25,21 @@ export function AdminGate({ children }: AdminGateProps) {
     let active = true;
     setChecking(true);
     setError("");
-    apiFetch<DashboardSummary>("/api/admin/dashboard/summary", {}, true)
-      .then(() => {
+    adminMe()
+      .then((user) => {
         if (active) {
+          localStorage.setItem("adminActor", user.actor);
+          localStorage.setItem("adminDisplayName", user.display_name);
+          localStorage.setItem("adminRole", user.role);
+          setDraftUsername(user.actor);
           setVerified(true);
         }
       })
       .catch((err) => {
         if (active) {
           localStorage.removeItem("adminToken");
+          localStorage.removeItem("adminDisplayName");
+          localStorage.removeItem("adminRole");
           setToken("");
           setVerified(false);
           setError(err instanceof Error ? err.message : "登入狀態已失效，請重新登入");
@@ -50,32 +56,12 @@ export function AdminGate({ children }: AdminGateProps) {
     };
   }, [token]);
 
-  function normalizeAdminLoginInput(username: string, password: string) {
-    let normalizedPassword = password.trim();
-    normalizedPassword = normalizedPassword.replace(/^Bearer\s+/i, "");
-    normalizedPassword = normalizedPassword.replace(/^ADMIN_TOKENS\s*=\s*/i, "");
-    normalizedPassword = normalizedPassword.replace(/^ADMIN_DEMO_TOKEN\s*=\s*/i, "");
-
-    const firstEntry = normalizedPassword.split(",")[0]?.trim() || normalizedPassword;
-    const separatorIndex = firstEntry.indexOf(":");
-    if (separatorIndex > 0) {
-      const actor = firstEntry.slice(0, separatorIndex).trim();
-      const passwordValue = firstEntry.slice(separatorIndex + 1).trim();
-      return {
-        username: username.trim() || actor,
-        password: passwordValue
-      };
-    }
-
-    return {
-      username: username.trim(),
-      password: normalizedPassword
-    };
-  }
-
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const normalized = normalizeAdminLoginInput(draftUsername, draftPassword);
+    const normalized = {
+      username: draftUsername.trim(),
+      password: draftPassword.trim()
+    };
     if (!normalized.username || !normalized.password) {
       setError("請輸入後台帳號與密碼");
       return;
@@ -86,11 +72,15 @@ export function AdminGate({ children }: AdminGateProps) {
       const result = await adminLogin(normalized.username, normalized.password);
       localStorage.setItem("adminToken", result.access_token);
       localStorage.setItem("adminActor", result.actor);
+      localStorage.setItem("adminDisplayName", result.display_name);
+      localStorage.setItem("adminRole", result.role);
       setToken(result.access_token);
       setDraftUsername(result.actor);
       setDraftPassword("");
     } catch (err) {
       localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminDisplayName");
+      localStorage.removeItem("adminRole");
       setToken("");
       setVerified(false);
       setError(err instanceof Error ? err.message : "登入失敗，請確認帳號與密碼");

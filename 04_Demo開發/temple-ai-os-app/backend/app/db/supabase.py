@@ -9,7 +9,11 @@ from typing import Any
 import httpx
 
 from app.core.config import get_settings
+from app.core.passwords import hash_admin_password, verify_admin_password
 from app.schemas.common import (
+    AdminAccount,
+    AdminAccountCreate,
+    AdminAccountUpdate,
     DashboardSummary,
     Event,
     EventCreate,
@@ -72,11 +76,147 @@ class DemoRepository:
         self.faq_rules = [
             FAQRule.model_validate(item) for item in _read_json(data_dir / "demo_faq_rules.json", [])
         ]
+        self.admin_accounts = self._build_admin_accounts(settings)
         self.processed_line_event_ids: set[str] = set()
         self.audit_logs: list[dict[str, Any]] = []
         self.messages: list[dict[str, Any]] = []
         self.fortune_slips = self._build_fortune_slips()
         self.tour_spots = self._build_tour_spots()
+
+    def _build_admin_accounts(self, settings) -> list[dict[str, Any]]:
+        credentials = settings.admin_token_map.copy()
+        credentials.update(settings.admin_account_map)
+        if settings.app_env != "production" and not credentials:
+            credentials["admin"] = settings.admin_demo_token
+
+        now = datetime.now(timezone.utc).isoformat()
+        accounts: list[dict[str, Any]] = []
+        for index, (username, password) in enumerate(credentials.items()):
+            role = "owner" if index == 0 else "manager"
+            try:
+                password_hash = hash_admin_password(password)
+            except ValueError:
+                password_hash = password
+            accounts.append(
+                {
+                    "account_id": f"acct_{uuid.uuid5(uuid.NAMESPACE_DNS, username).hex[:12]}",
+                    "username": username,
+                    "display_name": "系統管理員" if role == "owner" else username,
+                    "role": role,
+                    "status": "active",
+                    "password_hash": password_hash,
+                    "created_at": now,
+                    "updated_at": now,
+                    "last_login_at": None,
+                }
+            )
+        return accounts
+
+    @staticmethod
+    def _admin_account_from_record(record: dict[str, Any]) -> AdminAccount:
+        return AdminAccount(
+            account_id=record["account_id"],
+            username=record["username"],
+            display_name=record["display_name"],
+            role=record["role"],
+            status=record["status"],
+            password_set=bool(record.get("password_hash")),
+            created_at=record.get("created_at"),
+            updated_at=record.get("updated_at"),
+            last_login_at=record.get("last_login_at"),
+        )
+
+    def _admin_account_record(self, username: str) -> dict[str, Any] | None:
+        normalized = username.strip()[:80]
+        return next((account for account in self.admin_accounts if account["username"] == normalized), None)
+
+    def _active_owner_count(self) -> int:
+        return sum(
+            1
+            for account in self.admin_accounts
+            if account["role"] == "owner" and account["status"] == "active"
+        )
+
+    def list_admin_accounts(self) -> list[AdminAccount]:
+        return [
+            self._admin_account_from_record(account)
+            for account in sorted(self.admin_accounts, key=lambda item: item["username"])
+        ]
+
+    def get_admin_account(self, username: str) -> AdminAccount | None:
+        account = self._admin_account_record(username)
+        return self._admin_account_from_record(account) if account else None
+
+    def authenticate_admin_account(self, username: str, password: str) -> AdminAccount | None:
+        account = self._admin_account_record(username)
+        if not account or account["status"] != "active":
+            return None
+        if not verify_admin_password(password, account["password_hash"]):
+            return None
+        account["last_login_at"] = datetime.now(timezone.utc).isoformat()
+        return self._admin_account_from_record(account)
+
+    def create_admin_account(
+        self,
+        payload: AdminAccountCreate,
+        *,
+        created_by: str,
+    ) -> AdminAccount:
+        if self._admin_account_record(payload.username):
+            raise ValueError("admin_account_exists")
+        now = datetime.now(timezone.utc).isoformat()
+        account = {
+            "account_id": f"acct_{uuid.uuid4().hex[:12]}",
+            "username": payload.username,
+            "display_name": payload.display_name,
+            "role": payload.role,
+            "status": payload.status,
+            "password_hash": hash_admin_password(payload.password),
+            "created_by": created_by,
+            "created_at": now,
+            "updated_at": now,
+            "last_login_at": None,
+        }
+        self.admin_accounts.append(account)
+        return self._admin_account_from_record(account)
+
+    def update_admin_account(
+        self,
+        username: str,
+        payload: AdminAccountUpdate,
+    ) -> AdminAccount | None:
+        account = self._admin_account_record(username)
+        if not account:
+            return None
+        updates = payload.model_dump(exclude_unset=True)
+        next_role = updates.get("role", account["role"])
+        next_status = updates.get("status", account["status"])
+        if (
+            account["role"] == "owner"
+            and account["status"] == "active"
+            and (next_role != "owner" or next_status != "active")
+            and self._active_owner_count() <= 1
+        ):
+            raise ValueError("last_owner_account")
+        if "display_name" in updates and updates["display_name"] is not None:
+            account["display_name"] = updates["display_name"]
+        if "role" in updates and updates["role"] is not None:
+            account["role"] = updates["role"]
+        if "status" in updates and updates["status"] is not None:
+            account["status"] = updates["status"]
+        if "password" in updates and updates["password"]:
+            account["password_hash"] = hash_admin_password(updates["password"])
+        account["updated_at"] = datetime.now(timezone.utc).isoformat()
+        return self._admin_account_from_record(account)
+
+    def delete_admin_account(self, username: str) -> bool:
+        account = self._admin_account_record(username)
+        if not account:
+            return False
+        if account["role"] == "owner" and account["status"] == "active" and self._active_owner_count() <= 1:
+            raise ValueError("last_owner_account")
+        self.admin_accounts = [item for item in self.admin_accounts if item["username"] != username]
+        return True
 
     def _build_fortune_slips(self) -> list[FortuneSlip]:
         return [
@@ -428,6 +568,126 @@ class SupabaseRepository:
     def _single(self, table: str, column: str, value: str) -> dict[str, Any] | None:
         rows = self._select(table, {column: f"eq.{value}", "limit": "1"})
         return rows[0] if rows else None
+
+    @staticmethod
+    def _admin_accounts_table_missing(exc: RuntimeError) -> bool:
+        text = str(exc)
+        return "supabase_admin_accounts_404" in text or (
+            "admin_accounts" in text and ("does not exist" in text or "Could not find" in text)
+        )
+
+    @staticmethod
+    def _admin_account_from_row(row: dict[str, Any]) -> AdminAccount:
+        return AdminAccount(
+            account_id=row["account_id"],
+            username=row["username"],
+            display_name=row["display_name"],
+            role=row["role"],
+            status=row["status"],
+            password_set=bool(row.get("password_hash")),
+            created_at=row.get("created_at"),
+            updated_at=row.get("updated_at"),
+            last_login_at=row.get("last_login_at"),
+        )
+
+    def _active_owner_count(self) -> int:
+        rows = self._select(
+            "admin_accounts",
+            {"role": "eq.owner", "status": "eq.active", "select": "account_id"},
+        )
+        return len(rows)
+
+    def list_admin_accounts(self) -> list[AdminAccount]:
+        rows = self._select("admin_accounts", {"order": "username.asc"})
+        return [self._admin_account_from_row(row) for row in rows]
+
+    def get_admin_account(self, username: str) -> AdminAccount | None:
+        try:
+            row = self._single("admin_accounts", "username", username.strip()[:80])
+        except RuntimeError as exc:
+            if self._admin_accounts_table_missing(exc):
+                return None
+            raise
+        return self._admin_account_from_row(row) if row else None
+
+    def authenticate_admin_account(self, username: str, password: str) -> AdminAccount | None:
+        try:
+            row = self._single("admin_accounts", "username", username.strip()[:80])
+        except RuntimeError as exc:
+            if self._admin_accounts_table_missing(exc):
+                return None
+            raise
+        if not row or row.get("status") != "active":
+            return None
+        if not verify_admin_password(password, str(row.get("password_hash") or "")):
+            return None
+        self._patch_returning(
+            "admin_accounts",
+            "username",
+            username.strip()[:80],
+            {"last_login_at": datetime.now(timezone.utc).isoformat()},
+        )
+        return self._admin_account_from_row(row)
+
+    def create_admin_account(
+        self,
+        payload: AdminAccountCreate,
+        *,
+        created_by: str,
+    ) -> AdminAccount:
+        row = {
+            "account_id": f"acct_{uuid.uuid4().hex[:12]}",
+            "username": payload.username,
+            "display_name": payload.display_name,
+            "role": payload.role,
+            "status": payload.status,
+            "password_hash": hash_admin_password(payload.password),
+            "created_by": created_by,
+        }
+        try:
+            return self._admin_account_from_row(self._insert_returning("admin_accounts", row))
+        except RuntimeError as exc:
+            if "duplicate key" in str(exc) or "23505" in str(exc):
+                raise ValueError("admin_account_exists") from exc
+            raise
+
+    def update_admin_account(
+        self,
+        username: str,
+        payload: AdminAccountUpdate,
+    ) -> AdminAccount | None:
+        current = self._single("admin_accounts", "username", username.strip()[:80])
+        if not current:
+            return None
+        updates = payload.model_dump(exclude_unset=True)
+        next_role = updates.get("role", current["role"])
+        next_status = updates.get("status", current["status"])
+        if (
+            current["role"] == "owner"
+            and current["status"] == "active"
+            and (next_role != "owner" or next_status != "active")
+            and self._active_owner_count() <= 1
+        ):
+            raise ValueError("last_owner_account")
+
+        row_updates: dict[str, Any] = {}
+        for key in ["display_name", "role", "status"]:
+            if key in updates and updates[key] is not None:
+                row_updates[key] = updates[key]
+        if updates.get("password"):
+            row_updates["password_hash"] = hash_admin_password(updates["password"])
+        if not row_updates:
+            return self._admin_account_from_row(current)
+        row = self._patch_returning("admin_accounts", "username", username.strip()[:80], row_updates)
+        return self._admin_account_from_row(row) if row else None
+
+    def delete_admin_account(self, username: str) -> bool:
+        current = self._single("admin_accounts", "username", username.strip()[:80])
+        if not current:
+            return False
+        if current["role"] == "owner" and current["status"] == "active" and self._active_owner_count() <= 1:
+            raise ValueError("last_owner_account")
+        return self._delete_returning("admin_accounts", "username", username.strip()[:80])
 
     def _insert_returning(self, table: str, row: dict[str, Any]) -> dict[str, Any]:
         rows = self._request("POST", table, json_body=row, prefer="return=representation")

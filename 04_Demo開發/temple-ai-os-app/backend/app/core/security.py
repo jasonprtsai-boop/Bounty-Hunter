@@ -19,6 +19,8 @@ ADMIN_SESSION_PREFIX = "taos_admin_session."
 @dataclass(frozen=True)
 class AdminPrincipal:
     actor: str
+    role: str = "owner"
+    display_name: str | None = None
 
 
 def _urlsafe_b64encode(data: bytes) -> str:
@@ -48,6 +50,48 @@ def _configured_admin_credentials(settings: Settings) -> dict[str, str]:
     return credentials
 
 
+def _repository_admin_principal(username: str, password: str) -> AdminPrincipal | None:
+    try:
+        from app.db.supabase import get_repository
+
+        repository = get_repository()
+        authenticate = getattr(repository, "authenticate_admin_account", None)
+        if not authenticate:
+            return None
+        account = authenticate(username, password)
+    except Exception:
+        return None
+    if not account:
+        return None
+    return AdminPrincipal(
+        actor=account.username,
+        role=account.role,
+        display_name=account.display_name,
+    )
+
+
+def _refresh_repository_principal(principal: AdminPrincipal) -> AdminPrincipal:
+    try:
+        from app.db.supabase import get_repository
+
+        repository = get_repository()
+        get_account = getattr(repository, "get_admin_account", None)
+        if not get_account:
+            return principal
+        account = get_account(principal.actor)
+    except Exception:
+        return principal
+    if not account:
+        return principal
+    if account.status != "active":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin account disabled")
+    return AdminPrincipal(
+        actor=account.username,
+        role=account.role,
+        display_name=account.display_name,
+    )
+
+
 def _admin_session_secret(settings: Settings) -> bytes:
     material = (
         settings.admin_session_secret.strip()
@@ -64,6 +108,10 @@ def authenticate_admin_credentials(
     settings: Settings | None = None,
 ) -> AdminPrincipal:
     settings = settings or get_settings()
+    repository_principal = _repository_admin_principal(username, password)
+    if repository_principal:
+        return repository_principal
+
     credentials = _configured_admin_credentials(settings)
     if settings.app_env == "production" and not credentials:
         raise HTTPException(
@@ -75,12 +123,14 @@ def authenticate_admin_credentials(
     normalized_password = password.strip()
     expected_password = credentials.get(normalized_username)
     if expected_password and hmac.compare_digest(normalized_password, expected_password):
-        return AdminPrincipal(actor=normalized_username)
+        return AdminPrincipal(actor=normalized_username, role="owner", display_name=normalized_username)
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid admin credentials")
 
 
 def create_admin_session(
     actor: str,
+    role: str = "owner",
+    display_name: str | None = None,
     settings: Settings | None = None,
 ) -> tuple[str, int]:
     settings = settings or get_settings()
@@ -88,6 +138,8 @@ def create_admin_session(
     expires_at = issued_at + settings.admin_session_ttl_seconds
     payload = {
         "actor": actor.strip()[:80] or "admin",
+        "role": role if role in {"owner", "manager", "staff"} else "manager",
+        "display_name": (display_name or actor).strip()[:80] or actor.strip()[:80] or "admin",
         "iat": issued_at,
         "exp": expires_at,
     }
@@ -121,7 +173,13 @@ def _resolve_admin_session(token: str, settings: Settings) -> AdminPrincipal | N
     if int(payload.get("exp") or 0) < int(time.time()):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin session expired")
     actor = str(payload.get("actor") or "admin").strip()[:80] or "admin"
-    return AdminPrincipal(actor=actor)
+    role = str(payload.get("role") or "owner")
+    if role not in {"owner", "manager", "staff"}:
+        role = "manager"
+    display_name = str(payload.get("display_name") or actor).strip()[:80] or actor
+    return _refresh_repository_principal(
+        AdminPrincipal(actor=actor, role=role, display_name=display_name)
+    )
 
 
 def resolve_admin_principal(
@@ -150,13 +208,13 @@ def resolve_admin_principal(
         )
     for actor, expected_token in admin_token_map.items():
         if hmac.compare_digest(token, expected_token):
-            return AdminPrincipal(actor=actor)
+            return AdminPrincipal(actor=actor, role="owner", display_name=actor)
     if (
         not admin_token_map
         and not (settings.app_env == "production" and settings.admin_demo_token == DEFAULT_ADMIN_TOKEN)
         and hmac.compare_digest(token, settings.admin_demo_token)
     ):
-        return AdminPrincipal(actor="admin")
+        return AdminPrincipal(actor="admin", role="owner", display_name="系統管理員")
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid admin token")
 
 

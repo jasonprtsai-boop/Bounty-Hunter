@@ -7,12 +7,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import get_settings
 from app.core.security import (
+    AdminPrincipal,
     authenticate_admin_credentials,
     create_admin_session,
     require_admin_token,
 )
 from app.db.supabase import get_repository
 from app.schemas.common import (
+    AdminAccount,
+    AdminAccountCreate,
+    AdminAccountUpdate,
+    AdminCurrentUser,
     AdminLoginRequest,
     AdminLoginResponse,
     ApiResponse,
@@ -35,6 +40,19 @@ from app.services.rich_menu_service import RichMenuService
 auth_router = APIRouter()
 router = APIRouter(dependencies=[Depends(require_admin_token)])
 SAFE_DOCUMENT_ID = re.compile(r"^[A-Za-z0-9_\-\u4e00-\u9fff]+$")
+
+
+def _require_owner(principal: AdminPrincipal) -> None:
+    if principal.role != "owner":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="owner_role_required")
+
+
+def _admin_account_error_status(detail: str) -> int:
+    if detail == "admin_account_exists":
+        return status.HTTP_409_CONFLICT
+    if detail == "last_owner_account":
+        return status.HTTP_409_CONFLICT
+    return status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def _knowledge_path(document_id: str) -> Path:
@@ -89,15 +107,98 @@ def _write_knowledge_document(path: Path, title: str, body: str, source_type: st
 async def admin_login(payload: AdminLoginRequest) -> ApiResponse[AdminLoginResponse]:
     settings = get_settings()
     principal = authenticate_admin_credentials(payload.username, payload.password, settings)
-    token, expires_at = create_admin_session(principal.actor, settings)
+    token, expires_at = create_admin_session(
+        principal.actor,
+        role=principal.role,
+        display_name=principal.display_name,
+        settings=settings,
+    )
     return ApiResponse(
         data=AdminLoginResponse(
             access_token=token,
             actor=principal.actor,
+            display_name=principal.display_name or principal.actor,
+            role=principal.role,
             expires_at=datetime.fromtimestamp(expires_at, UTC).isoformat(),
             expires_in_seconds=settings.admin_session_ttl_seconds,
         )
     )
+
+
+@router.get("/auth/me", response_model=ApiResponse[AdminCurrentUser])
+async def admin_me(
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[AdminCurrentUser]:
+    return ApiResponse(
+        data=AdminCurrentUser(
+            actor=principal.actor,
+            display_name=principal.display_name or principal.actor,
+            role=principal.role,
+        )
+    )
+
+
+@router.get("/accounts", response_model=ApiResponse[list[AdminAccount]])
+async def admin_list_accounts(
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[list[AdminAccount]]:
+    _require_owner(principal)
+    return ApiResponse(data=get_repository().list_admin_accounts())
+
+
+@router.post(
+    "/accounts",
+    response_model=ApiResponse[AdminAccount],
+    status_code=status.HTTP_201_CREATED,
+)
+async def admin_create_account(
+    payload: AdminAccountCreate,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[AdminAccount]:
+    _require_owner(principal)
+    try:
+        account = get_repository().create_admin_account(payload, created_by=principal.actor)
+    except ValueError as exc:
+        detail = str(exc)
+        raise HTTPException(status_code=_admin_account_error_status(detail), detail=detail) from exc
+    return ApiResponse(data=account)
+
+
+@router.put("/accounts/{username}", response_model=ApiResponse[AdminAccount])
+async def admin_update_account(
+    username: str,
+    payload: AdminAccountUpdate,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[AdminAccount]:
+    _require_owner(principal)
+    if username == principal.actor and payload.status == "disabled":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="cannot_disable_current_account")
+    try:
+        account = get_repository().update_admin_account(username, payload)
+    except ValueError as exc:
+        detail = str(exc)
+        raise HTTPException(status_code=_admin_account_error_status(detail), detail=detail) from exc
+    if not account:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="admin_account_not_found")
+    return ApiResponse(data=account)
+
+
+@router.delete("/accounts/{username}", response_model=ApiResponse[dict[str, bool]])
+async def admin_delete_account(
+    username: str,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, bool]]:
+    _require_owner(principal)
+    if username == principal.actor:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="cannot_delete_current_account")
+    try:
+        deleted = get_repository().delete_admin_account(username)
+    except ValueError as exc:
+        detail = str(exc)
+        raise HTTPException(status_code=_admin_account_error_status(detail), detail=detail) from exc
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="admin_account_not_found")
+    return ApiResponse(data={"deleted": True})
 
 
 @router.get("/dashboard/summary", response_model=ApiResponse[DashboardSummary])

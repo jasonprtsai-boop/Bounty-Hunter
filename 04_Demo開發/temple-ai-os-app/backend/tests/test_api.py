@@ -299,6 +299,98 @@ def test_admin_login_returns_session_for_named_credentials(monkeypatch) -> None:
     get_settings.cache_clear()
 
 
+def test_admin_account_management_flow() -> None:
+    username = "pytest-staff"
+    delete_existing = client.delete(f"/api/admin/accounts/{username}", headers=ADMIN_HEADERS)
+    assert delete_existing.status_code in {200, 404}
+
+    create_response = client.post(
+        "/api/admin/accounts",
+        headers=ADMIN_HEADERS,
+        json={
+            "username": username,
+            "display_name": "測試服務人員",
+            "role": "staff",
+            "password": "staff-secret-123",
+        },
+    )
+    assert create_response.status_code == 201
+    created = create_response.json()["data"]
+    assert created["username"] == username
+    assert created["role"] == "staff"
+    assert created["password_set"] is True
+    assert "password_hash" not in created
+
+    login_response = client.post(
+        "/api/admin/auth/login",
+        json={"username": username, "password": "staff-secret-123"},
+    )
+    assert login_response.status_code == 200
+    staff_session = login_response.json()["data"]["access_token"]
+    assert login_response.json()["data"]["role"] == "staff"
+
+    forbidden_response = client.get(
+        "/api/admin/accounts",
+        headers={"Authorization": f"Bearer {staff_session}"},
+    )
+    assert forbidden_response.status_code == 403
+
+    update_response = client.put(
+        f"/api/admin/accounts/{username}",
+        headers=ADMIN_HEADERS,
+        json={
+            "display_name": "測試管理員",
+            "role": "manager",
+            "password": "manager-secret-456",
+        },
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["data"]["display_name"] == "測試管理員"
+    assert update_response.json()["data"]["role"] == "manager"
+
+    old_password_login = client.post(
+        "/api/admin/auth/login",
+        json={"username": username, "password": "staff-secret-123"},
+    )
+    assert old_password_login.status_code == 403
+
+    new_password_login = client.post(
+        "/api/admin/auth/login",
+        json={"username": username, "password": "manager-secret-456"},
+    )
+    assert new_password_login.status_code == 200
+
+    disable_response = client.put(
+        f"/api/admin/accounts/{username}",
+        headers=ADMIN_HEADERS,
+        json={"status": "disabled"},
+    )
+    assert disable_response.status_code == 200
+
+    disabled_login = client.post(
+        "/api/admin/auth/login",
+        json={"username": username, "password": "manager-secret-456"},
+    )
+    assert disabled_login.status_code == 403
+
+    delete_response = client.delete(f"/api/admin/accounts/{username}", headers=ADMIN_HEADERS)
+    assert delete_response.status_code == 200
+
+
+def test_admin_cannot_disable_or_delete_current_owner_account() -> None:
+    disable_response = client.put(
+        "/api/admin/accounts/admin",
+        headers=ADMIN_HEADERS,
+        json={"status": "disabled"},
+    )
+    assert disable_response.status_code == 400
+    assert disable_response.json()["detail"] == "cannot_disable_current_account"
+
+    delete_response = client.delete("/api/admin/accounts/admin", headers=ADMIN_HEADERS)
+    assert delete_response.status_code == 400
+    assert delete_response.json()["detail"] == "cannot_delete_current_account"
+
+
 def test_admin_event_crud() -> None:
     event_id = "evt_test_admin_crud"
     create_response = client.post(

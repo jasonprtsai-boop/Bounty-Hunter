@@ -10,6 +10,7 @@ import {
   ScrollText,
   Settings,
   ShieldCheck,
+  UserCog,
   User
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -37,6 +38,7 @@ const adminLinks: NavItem[] = [
 ];
 
 const adminSetupLinks: NavItem[] = [
+  { path: "/admin/accounts", icon: UserCog, label: "權限", hint: "帳號與身分" },
   { path: "/admin/release", icon: Settings, label: "設定", hint: "LINE 與發布" }
 ];
 
@@ -46,12 +48,22 @@ const adminPageDescriptions: Record<string, string> = {
   "/admin/knowledge": "維護問答依據與安全提醒，避免回覆內容過時或不完整。",
   "/admin/support": "集中處理民眾留下的問題，依狀態安排下一步。",
   "/admin/notifications": "管理 LINE 提醒任務、補發訊息與到期通知。",
+  "/admin/accounts": "建立後台帳號、設定身分角色，並停用不再使用的帳號。",
   "/admin/release": "整理 LINE 帳號設定、公開連結、Rich Menu 與上線檢查。"
+};
+
+const roleLabels: Record<string, string> = {
+  owner: "最高權限",
+  manager: "管理員",
+  staff: "服務人員"
 };
 
 export function Shell({ title, children }: ShellProps) {
   const location = useLocation();
   const adminActor = typeof window !== "undefined" ? localStorage.getItem("adminActor") || "管理員" : "管理員";
+  const adminDisplayName =
+    typeof window !== "undefined" ? localStorage.getItem("adminDisplayName") || adminActor : adminActor;
+  const adminRole = typeof window !== "undefined" ? localStorage.getItem("adminRole") || "owner" : "owner";
   const pageDescription = adminPageDescriptions[location.pathname] || "管理資料、服務與發布狀態。";
 
   const renderAdminNavLink = (item: NavItem) => {
@@ -91,7 +103,10 @@ export function Shell({ title, children }: ShellProps) {
           </a>
           <span className="operator-chip">
             <User size={16} />
-            {adminActor}
+            <span>
+              {adminDisplayName}
+              <small>{roleLabels[adminRole] || adminRole}</small>
+            </span>
           </span>
           <button
             className="button icon-button"
@@ -100,6 +115,8 @@ export function Shell({ title, children }: ShellProps) {
             onClick={() => {
               localStorage.removeItem("adminToken");
               localStorage.removeItem("adminActor");
+              localStorage.removeItem("adminDisplayName");
+              localStorage.removeItem("adminRole");
               window.location.assign("/admin");
             }}
           >

@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -294,5 +294,76 @@ class AdminLoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     actor: str
+    display_name: str
+    role: str
     expires_at: str
     expires_in_seconds: int
+
+
+AdminRole = Literal["owner", "manager", "staff"]
+AdminAccountStatus = Literal["active", "disabled"]
+
+
+def _normalize_admin_username(value: str) -> str:
+    normalized = value.strip()
+    if not normalized:
+        raise ValueError("username_empty")
+    if not all(char.isalnum() or char in {"_", "-", "."} for char in normalized):
+        raise ValueError("username_invalid")
+    return normalized[:80]
+
+
+class AdminCurrentUser(BaseModel):
+    actor: str
+    display_name: str
+    role: AdminRole
+
+
+class AdminAccount(BaseModel):
+    account_id: str
+    username: str
+    display_name: str
+    role: AdminRole
+    status: AdminAccountStatus
+    password_set: bool = True
+    created_at: str | None = None
+    updated_at: str | None = None
+    last_login_at: str | None = None
+
+
+class AdminAccountCreate(BaseModel):
+    username: str = Field(min_length=1, max_length=80)
+    display_name: str = Field(min_length=1, max_length=80)
+    role: AdminRole = "manager"
+    status: AdminAccountStatus = "active"
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("username")
+    @classmethod
+    def normalize_username(cls, value: str) -> str:
+        return _normalize_admin_username(value)
+
+    @field_validator("display_name", "password")
+    @classmethod
+    def normalize_required_text(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("field_empty")
+        return normalized
+
+
+class AdminAccountUpdate(BaseModel):
+    display_name: str | None = Field(default=None, min_length=1, max_length=80)
+    role: AdminRole | None = None
+    status: AdminAccountStatus | None = None
+    password: str | None = Field(default=None, min_length=8, max_length=128)
+
+    @field_validator("display_name", "password")
+    @classmethod
+    def normalize_optional_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("field_empty")
+        return normalized
