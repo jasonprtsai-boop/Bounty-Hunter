@@ -75,7 +75,7 @@ export function RegistrationPage() {
         <section className="success-panel">
           <h2>報名成功</h2>
           <p>報名編號：{created.registration_id}</p>
-          <p className="notice">這是 Demo 報名紀錄，不代表萬春宮官方報名資料。</p>
+          <p className="notice">這是示範報名紀錄，不代表萬春宮官方報名資料。</p>
         </section>
       ) : event && !canRegister ? (
         <section className="form-panel">

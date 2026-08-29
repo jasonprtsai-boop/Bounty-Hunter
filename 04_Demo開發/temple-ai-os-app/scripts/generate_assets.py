@@ -217,65 +217,63 @@ def cute_panel(
 
 
 def rich_menu() -> None:
-    image = vertical_gradient((2500, 1686), "#FFF5DF", "#FFD7E6").convert("RGBA")
+    image = vertical_gradient((2500, 1686), "#F7FAF6", "#FFEFE6").convert("RGBA")
     draw = ImageDraw.Draw(image)
     draw_soft_pattern(draw, 2500, 1686)
-    draw.rounded_rectangle((84, 70, 2416, 278), radius=96, fill=COCOA)
+    draw.rounded_rectangle((86, 70, 2414, 252), radius=72, fill=DEEP_RED)
     text_center(
         draw,
-        (130, 88, 1940, 258),
+        (160, 90, 1240, 160),
         "萬春宮服務選單",
         "#FFFFFF",
-        88,
+        66,
         bold=True,
         spacing=0,
         style="round",
     )
-    draw_sparkle(draw, 2110, 170, 54, CREAM)
-    draw_sparkle(draw, 2262, 170, 54, CREAM)
+    draw.text((166, 170), "第一次來、活動報名、導覽與客服都從這裡開始", fill="#FFE9B2", font=font(34, bold=True, style="round"))
+    draw.rounded_rectangle((1745, 104, 2348, 218), radius=56, fill="#FFF7DF")
+    text_center(draw, (1745, 104, 2348, 218), "常用入口  立即點選", DEEP_RED, 42, bold=True, style="round")
 
-    labels = [
-        ("AI 小幫手", "問", PINK),
-        ("活動報名", "曆", PEACH),
-        ("文化抽籤", "籤", LILAC),
-        ("宮廟導覽", "廟", MINT),
-        ("貼圖小舖", "貼", SKY),
-        ("客服中心", "聊", CREAM),
+    main_cells = [
+        ((86, 310, 1216, 870), "AI 參拜助手", "問", "第一次來怎麼參拜？", "直接傳送問題", RED),
+        ((1284, 310, 2414, 870), "活動報名", "曆", "查活動、名額與時間", "開啟活動中心", JADE),
     ]
-    cells = [
-        (86, 340, 785, 930),
-        (900, 340, 1600, 930),
-        (1715, 340, 2414, 930),
-        (86, 1020, 785, 1610),
-        (900, 1020, 1600, 1610),
-        (1715, 1020, 2414, 1610),
-    ]
-    for box, (title, icon, accent) in zip(cells, labels):
-        panel_fill = "#FFFFFF" if accent != CREAM else "#FFF4CC"
-        cute_panel(draw, box, fill=panel_fill, outline=accent)
-        draw.rounded_rectangle((box[0] + 42, box[1] + 42, box[0] + 218, box[1] + 218), radius=88, fill=accent)
+    for box, title, icon, body, cta, accent in main_cells:
+        draw.rounded_rectangle((box[0] + 18, box[1] + 24, box[2] + 18, box[3] + 24), radius=56, fill="#D8C3B4")
+        draw.rounded_rectangle(box, radius=56, fill="#FFFFFF", outline=accent, width=6)
+        draw.rounded_rectangle((box[0] + 48, box[1] + 48, box[0] + 238, box[1] + 238), radius=50, fill=accent)
         text_center(
             draw,
-            (box[0] + 42, box[1] + 42, box[0] + 218, box[1] + 218),
+            (box[0] + 48, box[1] + 48, box[0] + 238, box[1] + 238),
             icon,
             "#FFFFFF",
-            86,
+            82,
             bold=True,
             spacing=0,
             style="round",
         )
-        draw_sparkle(draw, box[2] - 170, box[1] + 126, 58, accent)
-        draw_sparkle(draw, box[2] - 86, box[1] + 210, 34, BLUSH)
-        text_center(
-            draw,
-            (box[0] + 48, box[1] + 292, box[2] - 48, box[1] + 548),
-            title,
-            COCOA,
-            96,
-            bold=True,
-            spacing=0,
-            style="round",
-        )
+        draw.text((box[0] + 292, box[1] + 86), title, fill=INK, font=font(72, bold=True, style="round"))
+        draw.text((box[0] + 296, box[1] + 190), body, fill="#5C6E66", font=font(42, bold=True, style="round"))
+        draw.rounded_rectangle((box[0] + 292, box[1] + 314, box[0] + 760, box[1] + 412), radius=49, fill=accent)
+        text_center(draw, (box[0] + 292, box[1] + 314, box[0] + 760, box[1] + 412), cta, "#FFFFFF", 38, bold=True, style="round")
+        draw_sparkle(draw, box[2] - 172, box[1] + 132, 58, accent)
+        draw_sparkle(draw, box[2] - 100, box[1] + 236, 36, PALE_GOLD)
+
+    small_cells = [
+        ((86, 958, 626, 1518), "文化抽籤", "籤", "抽一支\n平安提醒", "#8A5A12"),
+        ((682, 958, 1222, 1518), "宮廟導覽", "廟", "主殿故事\n參拜動線", "#1F7A5B"),
+        ((1278, 958, 1818, 1518), "我的紀錄", "人", "查看報名\n提醒狀態", "#245B8A"),
+        ((1874, 958, 2414, 1518), "客服中心", "聊", "留下問題\n人工接續", "#7A1E17"),
+    ]
+    for box, title, icon, body, accent in small_cells:
+        draw.rounded_rectangle((box[0] + 14, box[1] + 18, box[2] + 14, box[3] + 18), radius=44, fill="#D8C3B4")
+        draw.rounded_rectangle(box, radius=44, fill="#FFFFFF", outline=accent, width=5)
+        draw.rounded_rectangle((box[0] + 42, box[1] + 42, box[0] + 180, box[1] + 180), radius=38, fill=accent)
+        text_center(draw, (box[0] + 42, box[1] + 42, box[0] + 180, box[1] + 180), icon, "#FFFFFF", 58, bold=True, style="round")
+        draw.text((box[0] + 52, box[1] + 246), title, fill=INK, font=font(54, bold=True, style="round"))
+        draw.multiline_text((box[0] + 56, box[1] + 340), body, fill="#5C6E66", font=font(34, bold=True, style="round"), spacing=10)
+        draw_sparkle(draw, box[2] - 96, box[1] + 84, 34, accent)
 
     out = ASSETS / "rich-menu" / "main-2500x1686.png"
     image.convert("RGB").save(out, optimize=True)

@@ -39,7 +39,7 @@ Last updated: 2026-08-23
 - LINE 大頭貼已換成 `line-oa-profile-v2.png`。
 - LINE 背景圖已換成 `line-oa-profile-background-v1.png`。
 - Messaging API Webhook 驗證成功。
-- Rich Menu 已發布且貼圖小舖入口可開啟。
+- Rich Menu 已發布，活動、導覽、抽籤、紀錄與客服入口可開啟。
 - 至少一篇 LINE VOOM Demo 貼文已建立草稿或排程。
 - 手機 LINE 實測可開 LIFF 與活動頁。
 - 貼圖素材已確認，等待 LINE Creators Market 送審或審核。

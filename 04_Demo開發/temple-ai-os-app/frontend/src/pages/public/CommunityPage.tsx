@@ -1,5 +1,15 @@
 import { Link } from "react-router-dom";
-import { Bot, CalendarDays, CheckCircle2, ExternalLink, MessageCircle, ShieldCheck, UsersRound } from "lucide-react";
+import {
+  Bot,
+  CalendarDays,
+  CheckCircle2,
+  ExternalLink,
+  MapPin,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  UsersRound
+} from "lucide-react";
 import "../../styles/public.css";
 
 const lineAddFriendUrl = import.meta.env.VITE_LINE_ADD_FRIEND_URL || "https://line.me/R/ti/p/%40983zhzni";
@@ -81,9 +91,32 @@ export function CommunityPage() {
               <CalendarDays size={16} />
               可查看近期活動、報名狀態與參拜資訊
             </div>
-            <Link className="button primary" to="/events">
-              查看活動列表
-            </Link>
+            <div className="phone-rich-menu" aria-label="LINE 底部選單示意">
+              <Link to="/">
+                <Bot size={16} />
+                AI 問答
+              </Link>
+              <Link to="/events">
+                <CalendarDays size={16} />
+                活動
+              </Link>
+              <Link to="/tour/main-hall">
+                <MapPin size={16} />
+                導覽
+              </Link>
+              <Link to="/fortune">
+                <Sparkles size={16} />
+                抽籤
+              </Link>
+              <Link to="/member">
+                <CheckCircle2 size={16} />
+                紀錄
+              </Link>
+              <Link to="/support">
+                <MessageCircle size={16} />
+                客服
+              </Link>
+            </div>
           </div>
         </section>
 

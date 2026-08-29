@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { CalendarDays, Headphones, Home, ScrollText, User } from "lucide-react";
+import { CalendarDays, Headphones, Home, Map, ScrollText, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 type ShellProps = {
@@ -18,6 +18,7 @@ const liffLinks: NavItem[] = [
   { path: "/", icon: Home, label: "首頁", hint: "服務" },
   { path: "/events", icon: CalendarDays, label: "活動", hint: "報名" },
   { path: "/fortune", icon: ScrollText, label: "抽籤", hint: "文化" },
+  { path: "/tour/main-hall", icon: Map, label: "導覽", hint: "現場" },
   { path: "/member", icon: User, label: "會員", hint: "紀錄" },
   { path: "/support", icon: Headphones, label: "客服", hint: "提問" }
 ];
@@ -29,16 +30,16 @@ export function Shell({ title, children }: ShellProps) {
         <Link to="/" className="brand">
           <span className="brand-mark">宮</span>
           <span className="brand-copy">
-            <strong>Temple AI OS</strong>
-            <small>萬春宮示範</small>
+            <strong>萬春宮智慧服務</strong>
+            <small>LINE 服務入口</small>
           </span>
         </Link>
         <div className="topbar-context" aria-label="目前介面狀態">
           <span>LINE 服務入口</span>
-          <strong>活動、導覽、客服快速進入</strong>
+          <strong>常用服務快速進入</strong>
         </div>
         <div className="topbar-actions">
-          <span className="demo-pill">Demo</span>
+          <span className="demo-pill">示範</span>
         </div>
       </header>
       <main className="main">

@@ -9,6 +9,7 @@ import {
   ScrollText,
   ShieldCheck,
   Sparkles,
+  UserCheck,
   UsersRound
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -18,10 +19,10 @@ const templeImage =
   "https://travel.taichung.gov.tw/content/images/attractions/60331/640x480_attractions-image-reeo_rka6kg04vfs2xyzmw.jpg";
 
 const publicNavItems = [
-  ["線上服務", "#services"],
-  ["參拜導覽", "#visit-guide"],
-  ["近期活動", "#events-entry"],
-  ["聯絡資訊", "#contact-info"]
+  { label: "活動", to: "/events" },
+  { label: "導覽", to: "/tour/main-hall" },
+  { label: "抽籤", to: "/fortune" },
+  { label: "客服", to: "/support" }
 ];
 
 const visitFacts = [
@@ -35,22 +36,30 @@ const services = [
   {
     icon: Bot,
     title: "LINE 問答",
-    body: "查地址、參拜流程、活動資訊與常見問題，先把民眾最常需要的內容整理成好懂的答案。"
+    body: "查地址、參拜流程、活動資訊與常見問題，先把民眾最常需要的內容整理成好懂的答案。",
+    to: "/",
+    cta: "開啟問答"
   },
   {
     icon: CalendarDays,
     title: "活動資訊",
-    body: "近期法會、導覽、講座與服務活動集中呈現，讓民眾快速知道時間、地點與參加方式。"
+    body: "近期法會、導覽、講座與服務活動集中呈現，讓民眾快速知道時間、地點與參加方式。",
+    to: "/events",
+    cta: "查看活動"
   },
   {
     icon: MapPin,
     title: "參拜導覽",
-    body: "用手機查看主殿、參拜動線、周邊地點與文化故事，第一次到訪也能知道下一步。"
+    body: "用手機查看主殿、參拜動線、周邊地點與文化故事，第一次到訪也能知道下一步。",
+    to: "/tour/main-hall",
+    cta: "開啟導覽"
   },
   {
     icon: HandHeart,
     title: "客服聯繫",
-    body: "需要協助時留下問題與聯絡方式，讓廟方或服務人員可以接續處理。"
+    body: "需要協助時留下問題與聯絡方式，讓廟方或服務人員可以接續處理。",
+    to: "/support",
+    cta: "留下問題"
   }
 ];
 
@@ -74,11 +83,19 @@ const serviceHighlights = [
   ["問", "客服聯繫"]
 ];
 
-const visitorNeeds: Array<{ title: string; body: string; icon: LucideIcon }> = [
-  { title: "怎麼去", body: "地址、電話與基本聯絡資訊放在清楚的位置。", icon: MapPin },
-  { title: "有什麼活動", body: "近期活動入口直接可見，不需要翻找公告。", icon: CalendarDays },
-  { title: "怎麼參拜", body: "用簡短步驟整理進廟前、中、後的常見需求。", icon: ScrollText },
-  { title: "需要協助", body: "留下問題後可以銜接客服，不讓民眾卡在原地。", icon: MessageCircle }
+const visitorNeeds: Array<{ title: string; body: string; icon: LucideIcon; to: string }> = [
+  { title: "怎麼去", body: "先看地址與主殿導覽，抵達後可直接照動線走。", icon: MapPin, to: "/tour/main-hall" },
+  { title: "有什麼活動", body: "近期活動入口直接可見，不需要翻找公告。", icon: CalendarDays, to: "/events" },
+  { title: "怎麼參拜", body: "用 AI 問答快速取得第一次參拜提醒。", icon: ScrollText, to: "/" },
+  { title: "需要協助", body: "留下問題後可以銜接客服，不讓民眾卡在原地。", icon: MessageCircle, to: "/support" }
+];
+
+const quickAccessItems: Array<{ label: string; title: string; body: string; icon: LucideIcon; to: string }> = [
+  { label: "活動", title: "近期活動", body: "時間、地點、報名狀態", icon: CalendarDays, to: "/events" },
+  { label: "導覽", title: "參拜導覽", body: "主殿故事與現場動線", icon: MapPin, to: "/tour/main-hall" },
+  { label: "抽籤", title: "文化抽籤", body: "平安提醒與籤詩解說", icon: Sparkles, to: "/fortune" },
+  { label: "紀錄", title: "我的紀錄", body: "報名與提醒狀態", icon: UserCheck, to: "/member" },
+  { label: "客服", title: "客服中心", body: "找不到資訊時留下問題", icon: MessageCircle, to: "/support" }
 ];
 
 export function PublicSitePage() {
@@ -93,10 +110,10 @@ export function PublicSitePage() {
           </span>
         </Link>
         <nav aria-label="官網導覽">
-          {publicNavItems.map(([label, href]) => (
-            <a key={href} href={href}>
-              {label}
-            </a>
+          {publicNavItems.map((item) => (
+            <Link key={item.to} to={item.to}>
+              {item.label}
+            </Link>
           ))}
           <Link to="/community">LINE 社群</Link>
         </nav>
@@ -105,6 +122,18 @@ export function PublicSitePage() {
         </Link>
       </header>
 
+      <nav className="public-side-menu" aria-label="快速服務選單">
+        {quickAccessItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link key={item.to} to={item.to}>
+              <Icon size={18} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
       <main>
         <section
           className="site-hero"
@@ -112,33 +141,55 @@ export function PublicSitePage() {
             backgroundImage: `linear-gradient(90deg, rgba(10, 28, 41, 0.78), rgba(10, 28, 41, 0.24)), url(${templeImage})`
           }}
         >
-          <div className="site-hero-content">
-            <span className="tag">萬春宮線上服務</span>
-            <h1>萬春宮智慧服務入口</h1>
-            <p>
-              從 LINE 開始查詢參拜資訊、查看近期活動、開啟宮廟導覽，或透過客服留下需要協助的問題。
-            </p>
-            <div className="hero-blessing-strip" aria-label="宮廟識別">
-              <span>參拜資訊</span>
-              <span>活動查詢</span>
-              <span>QR 導覽</span>
-              <span>客服聯繫</span>
+          <div className="site-hero-layout">
+            <div className="site-hero-content">
+              <span className="tag">萬春宮線上服務</span>
+              <h1>萬春宮智慧服務入口</h1>
+              <p>
+                從 LINE 開始查詢參拜資訊、查看近期活動、開啟宮廟導覽，或透過客服留下需要協助的問題。
+              </p>
+              <div className="hero-blessing-strip" aria-label="宮廟識別">
+                <span>參拜資訊</span>
+                <span>活動查詢</span>
+                <span>QR 導覽</span>
+                <span>客服聯繫</span>
+              </div>
+              <div className="hero-actions">
+                <Link className="button primary" to="/events">
+                  查看活動 <ChevronRight size={18} />
+                </Link>
+                <Link className="hero-secondary-link" to="/tour/main-hall">
+                  開啟參拜導覽 <ChevronRight size={16} />
+                </Link>
+              </div>
+              <div className="hero-metrics" aria-label="服務模組摘要">
+                {serviceHighlights.map(([value, label]) => (
+                  <div key={label}>
+                    <strong>{value}</strong>
+                    <span>{label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="hero-actions">
-              <Link className="button primary" to="/">
-                開啟 LINE 服務 <ChevronRight size={18} />
-              </Link>
-              <a className="hero-secondary-link" href="#events-entry">
-                查看近期活動 <ChevronRight size={16} />
-              </a>
-            </div>
-            <div className="hero-metrics" aria-label="服務模組摘要">
-              {serviceHighlights.map(([value, label]) => (
-                <div key={label}>
-                  <strong>{value}</strong>
-                  <span>{label}</span>
-                </div>
-              ))}
+
+            <div className="hero-service-panel" aria-label="常用服務">
+              <div className="hero-service-panel-head">
+                <span>快速入口</span>
+                <strong>常用服務</strong>
+              </div>
+              {quickAccessItems.slice(0, 4).map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.to} to={item.to}>
+                    <Icon size={20} />
+                    <span>
+                      <strong>{item.title}</strong>
+                      <small>{item.body}</small>
+                    </span>
+                    <ChevronRight size={16} />
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -193,11 +244,15 @@ export function PublicSitePage() {
             {services.map((service) => {
               const Icon = service.icon;
               return (
-                <article className="service-card" key={service.title}>
+                <Link className="service-card service-link-card" key={service.title} to={service.to}>
                   <Icon size={24} />
                   <h3>{service.title}</h3>
                   <p>{service.body}</p>
-                </article>
+                  <span>
+                    {service.cta}
+                    <ChevronRight size={15} />
+                  </span>
+                </Link>
               );
             })}
           </div>
@@ -214,18 +269,18 @@ export function PublicSitePage() {
           </div>
           <div className="visitor-board" aria-label="常見服務入口">
             <div className="visitor-board-header">
-              <span>Visit Help</span>
+              <span>常見需求</span>
               <strong>常用入口</strong>
             </div>
-            {visitorNeeds.map(({ title, body, icon: Icon }) => (
-              <article className="visitor-row" key={title}>
+            {visitorNeeds.map(({ title, body, icon: Icon, to }) => (
+              <Link className="visitor-row" key={title} to={to}>
                 <Icon size={20} />
                 <div>
                   <strong>{title}</strong>
                   <p>{body}</p>
                 </div>
                 <ChevronRight size={16} />
-              </article>
+              </Link>
             ))}
           </div>
         </section>
@@ -267,13 +322,13 @@ export function PublicSitePage() {
             <MapPin size={21} />
             <span>QR 導覽</span>
           </Link>
+          <Link className="dock-item" to="/member">
+            <UserCheck size={21} />
+            <span>我的紀錄</span>
+          </Link>
           <Link className="dock-item" to="/support">
             <MessageCircle size={21} />
             <span>客服中心</span>
-          </Link>
-          <Link className="dock-item" to="/community">
-            <UsersRound size={21} />
-            <span>LINE 社群</span>
           </Link>
         </section>
 
@@ -311,6 +366,18 @@ export function PublicSitePage() {
           <Link to="/terms">使用條款</Link>
         </nav>
       </footer>
+
+      <nav className="public-mobile-menu" aria-label="手機快速服務選單">
+        {quickAccessItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link key={item.to} to={item.to}>
+              <Icon size={19} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

@@ -30,7 +30,6 @@ export function TourSpotPage() {
           <h2>{spot.title}</h2>
           <p>{spot.summary}</p>
           <p>{spot.cultural_note}</p>
-          <p className="notice">來源類型：{spot.source_type}</p>
         </section>
       ) : (
         "載入中"
@@ -38,4 +37,3 @@ export function TourSpotPage() {
     </Shell>
   );
 }
-

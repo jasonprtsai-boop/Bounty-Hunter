@@ -6,12 +6,12 @@ from app.core.config import get_settings
 
 
 RICH_MENU_AREAS = [
-    {"x": 86, "y": 340, "width": 699, "height": 590},
-    {"x": 900, "y": 340, "width": 700, "height": 590},
-    {"x": 1715, "y": 340, "width": 699, "height": 590},
-    {"x": 86, "y": 1020, "width": 699, "height": 590},
-    {"x": 900, "y": 1020, "width": 700, "height": 590},
-    {"x": 1715, "y": 1020, "width": 699, "height": 590},
+    {"x": 86, "y": 310, "width": 1130, "height": 560},
+    {"x": 1284, "y": 310, "width": 1130, "height": 560},
+    {"x": 86, "y": 958, "width": 540, "height": 560},
+    {"x": 682, "y": 958, "width": 540, "height": 560},
+    {"x": 1278, "y": 958, "width": 540, "height": 560},
+    {"x": 1874, "y": 958, "width": 540, "height": 560},
 ]
 
 
@@ -25,15 +25,15 @@ class RichMenuService:
             "size": {"width": 2500, "height": 1686},
             "selected": True,
             "name": "Temple AI OS 主選單",
-            "chatBarText": "Temple AI OS",
+            "chatBarText": "開啟服務選單",
             "areas": [
                 {
                     "bounds": RICH_MENU_AREAS[0],
-                    "action": {"type": "message", "label": "AI 助手", "text": "我第一次來萬春宮，怎麼參拜？"},
+                    "action": {"type": "message", "label": "AI 參拜助手", "text": "我第一次來萬春宮，怎麼參拜？"},
                 },
                 {
                     "bounds": RICH_MENU_AREAS[1],
-                    "action": {"type": "uri", "label": "活動中心", "uri": f"{base}/events"},
+                    "action": {"type": "uri", "label": "活動報名", "uri": f"{base}/events"},
                 },
                 {
                     "bounds": RICH_MENU_AREAS[2],
@@ -45,7 +45,7 @@ class RichMenuService:
                 },
                 {
                     "bounds": RICH_MENU_AREAS[4],
-                    "action": {"type": "uri", "label": "貼圖小舖", "uri": f"{base}/stickers"},
+                    "action": {"type": "uri", "label": "我的紀錄", "uri": f"{base}/member"},
                 },
                 {
                     "bounds": RICH_MENU_AREAS[5],

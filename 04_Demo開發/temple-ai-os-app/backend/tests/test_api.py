@@ -483,14 +483,14 @@ def test_admin_rich_menu_publish(monkeypatch) -> None:
     assert response.json()["data"] == {"published": True, "rich_menu_id": "richmenu-test"}
 
 
-def test_rich_menu_payload_links_to_sticker_shop() -> None:
+def test_rich_menu_payload_links_to_member_records() -> None:
     payload = RichMenuService().main_menu_payload()
     actions = [area["action"] for area in payload["areas"]]
 
     assert any(
         action["type"] == "uri"
-        and action["label"] == "貼圖小舖"
-        and action["uri"].endswith("/stickers")
+        and action["label"] == "我的紀錄"
+        and action["uri"].endswith("/member")
         for action in actions
     )
 
@@ -500,13 +500,14 @@ def test_rich_menu_payload_uses_current_image_card_bounds() -> None:
     bounds = [area["bounds"] for area in payload["areas"]]
 
     assert payload["size"] == {"width": 2500, "height": 1686}
+    assert payload["chatBarText"] == "開啟服務選單"
     assert bounds == [
-        {"x": 86, "y": 340, "width": 699, "height": 590},
-        {"x": 900, "y": 340, "width": 700, "height": 590},
-        {"x": 1715, "y": 340, "width": 699, "height": 590},
-        {"x": 86, "y": 1020, "width": 699, "height": 590},
-        {"x": 900, "y": 1020, "width": 700, "height": 590},
-        {"x": 1715, "y": 1020, "width": 699, "height": 590},
+        {"x": 86, "y": 310, "width": 1130, "height": 560},
+        {"x": 1284, "y": 310, "width": 1130, "height": 560},
+        {"x": 86, "y": 958, "width": 540, "height": 560},
+        {"x": 682, "y": 958, "width": 540, "height": 560},
+        {"x": 1278, "y": 958, "width": 540, "height": 560},
+        {"x": 1874, "y": 958, "width": 540, "height": 560},
     ]
     for area in bounds:
         assert area["x"] >= 0

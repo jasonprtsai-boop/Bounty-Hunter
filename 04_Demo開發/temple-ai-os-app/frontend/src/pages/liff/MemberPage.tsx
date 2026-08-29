@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { CalendarDays, MessageCircle } from "lucide-react";
 import { Shell } from "../../components/Shell";
 import { apiFetch, type Registration } from "../../lib/api";
 import { getLiffSession } from "../../lib/session";
@@ -32,22 +34,37 @@ export function MemberPage() {
       {profile ? (
         <section className="detail-panel">
           <h2>{profile.line_display_name}</h2>
-          <p>會員類型：{profile.segment}</p>
-          <p>興趣：{profile.interests.join("、") || "尚未設定"}</p>
+          <p>這裡會集中顯示你的活動報名與提醒狀態。</p>
         </section>
       ) : null}
       <section className="tool-panel">
         <h2>報名紀錄</h2>
-        <div className="stack">
-          {registrations.map((item) => (
-            <div className="list-row" key={item.registration_id}>
-              <strong>{item.event_id}</strong>
-              <span>
-                {item.status} / {item.party_size} 人
-              </span>
+        {registrations.length ? (
+          <div className="stack">
+            {registrations.map((item) => (
+              <div className="list-row" key={item.registration_id}>
+                <strong>{item.event_id}</strong>
+                <span>
+                  {item.status} / {item.party_size} 人
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-action-panel">
+            <p>目前還沒有報名紀錄。你可以先查看近期活動，或到客服中心詢問。</p>
+            <div className="state-actions">
+              <Link className="button primary" to="/events">
+                <CalendarDays size={18} />
+                查看活動
+              </Link>
+              <Link className="button" to="/support">
+                <MessageCircle size={18} />
+                客服中心
+              </Link>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </section>
     </Shell>
   );

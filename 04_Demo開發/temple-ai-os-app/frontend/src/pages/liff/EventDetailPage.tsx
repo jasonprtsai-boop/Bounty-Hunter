@@ -60,21 +60,14 @@ export function EventDetailPage() {
         ) : null}
         <div className="event-info-grid">
           <div>
-            <span>資料類型</span>
-            <strong>{event.source_type}</strong>
+            <span>報名狀態</span>
+            <strong>{canRegister && !isFull ? "現在可報名" : "目前不開放"}</strong>
           </div>
           <div>
-            <span>報名方式</span>
-            <strong>{event.requires_registration ? "LIFF 示範報名" : "免報名展示"}</strong>
+            <span>參加方式</span>
+            <strong>{event.requires_registration ? "線上填寫資料" : "現場自由參加"}</strong>
           </div>
         </div>
-        {event.registration_fields.length > 0 ? (
-          <div className="field-chip-row" aria-label="報名欄位">
-            {event.registration_fields.map((field) => (
-              <span key={field}>{field}</span>
-            ))}
-          </div>
-        ) : null}
         {event.payment_policy ? <p className="notice">{event.payment_policy}</p> : null}
         <p className="notice">{event.demo_note}</p>
         {canRegister && !isFull ? (

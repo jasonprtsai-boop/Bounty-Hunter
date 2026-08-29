@@ -53,7 +53,7 @@ Sensitive values are intentionally not recorded here:
 - Admin login uses the account/email + password credentials stored in Render. For `ADMIN_TOKENS=temple-staff:xxxx`, enter username `temple-staff` and password `xxxx` in `/admin`; for `ADMIN_USERNAME=staff@example.com`, enter the Email and password.
 - Messaging API webhook URL is `https://temple-ai-os-api.onrender.com/api/line/webhook`; webhook, redelivery, and verification are enabled.
 - Rich Menu has been published through the admin API.
-- New Rich Menu source now includes a `貼圖小舖` entry that opens `/stickers`; republish after the frontend deployment.
+- New Rich Menu source now prioritizes AI 參拜助手, 活動報名, 文化抽籤, 宮廟導覽, 我的紀錄, and 客服中心; republish after the frontend deployment.
 - New LINE OA profile image is prepared at `assets/brand/line-oa-profile-v2.png`; upload it in LINE Official Account Manager.
 - New LINE OA profile background is prepared at `assets/brand/line-oa-profile-background-v1.png`; upload it in LINE Official Account Manager.
 - LINE business profile copy, public links, and the release checklist are prepared in `docs/LINE_BUSINESS_PROFILE_SETUP.md` and mirrored on `/admin/release`.

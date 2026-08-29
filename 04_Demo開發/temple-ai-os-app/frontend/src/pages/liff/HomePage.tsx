@@ -4,6 +4,7 @@ import {
   BellRing,
   Bot,
   CalendarDays,
+  ChevronRight,
   Gift,
   Globe2,
   Map,
@@ -11,8 +12,10 @@ import {
   ScrollText,
   ShieldCheck,
   Sparkles,
+  UserCheck,
   UsersRound
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { apiFetch, type ChatReply, type TempleProfile } from "../../lib/api";
 import { getLiffSession } from "../../lib/session";
 import { Shell } from "../../components/Shell";
@@ -26,8 +29,55 @@ const suggestedQuestions = [
 const serviceSteps = [
   ["查詢", "AI 回答參拜、交通與活動資訊"],
   ["導覽", "掃 QR 看正殿與文化故事"],
-  ["報名", "在 LINE 內完成 Demo 活動報名"],
+  ["報名", "在 LINE 內完成活動報名示範"],
   ["追蹤", "後台整理客服、推播與知識缺口"]
+];
+
+const primaryActions: Array<{
+  to: string;
+  icon: LucideIcon;
+  title: string;
+  body: string;
+  label: string;
+  featured?: boolean;
+}> = [
+  {
+    to: "/events",
+    icon: CalendarDays,
+    title: "活動報名",
+    body: "查看近期活動、名額與報名狀態。",
+    label: "查看活動",
+    featured: true
+  },
+  {
+    to: "/tour/main-hall",
+    icon: Map,
+    title: "宮廟導覽",
+    body: "第一次到訪可先看主殿故事與參拜動線。",
+    label: "開啟導覽",
+    featured: true
+  },
+  {
+    to: "/fortune",
+    icon: Sparkles,
+    title: "文化抽籤",
+    body: "用籤詩語感獲得一句平安提醒。",
+    label: "抽一支籤"
+  },
+  {
+    to: "/support",
+    icon: MessageCircle,
+    title: "客服協助",
+    body: "找不到資訊時留下問題，後續由人員接續。",
+    label: "留下問題"
+  }
+];
+
+const secondaryActions: Array<{ to: string; icon: LucideIcon; label: string }> = [
+  { to: "/member", icon: UserCheck, label: "我的紀錄" },
+  { to: "/site", icon: Globe2, label: "示範官網" },
+  { to: "/community", icon: UsersRound, label: "LINE 社群" },
+  { to: "/stickers", icon: Gift, label: "貼圖小舖" }
 ];
 
 const fallbackTemple: TempleProfile = {
@@ -74,7 +124,7 @@ export function HomePage() {
         reply: "AI 問答服務暫時無法連線。你仍可先查看活動、導覽，或到客服中心留下問題。",
         sources: [],
         events: [],
-        demo_notice: "此為 Demo 離線狀態提示，不代表正式服務。"
+        demo_notice: "此為示範離線狀態提示，不代表正式服務。"
       });
     } finally {
       setAsking(false);
@@ -101,6 +151,9 @@ export function HomePage() {
             <Link className="button" to="/tour/main-hall">
               開啟導覽
             </Link>
+            <Link className="button" to="/member">
+              我的紀錄
+            </Link>
           </div>
         </div>
         {templeProfile.image?.url ? <img src={templeProfile.image.url} alt="萬春宮開放資料圖片" /> : null}
@@ -119,40 +172,48 @@ export function HomePage() {
         </div>
         <div>
           <ShieldCheck size={18} />
-          <span>Demo 邊界</span>
+          <span>示範提醒</span>
           <strong>非官方資料</strong>
         </div>
       </section>
 
-      <section className="quick-grid">
-        <Link to="/site" className="quick-action">
-          <Globe2 />
-          <span>示範官網</span>
-        </Link>
-        <Link to="/community" className="quick-action">
-          <UsersRound />
-          <span>社群入口</span>
-        </Link>
-        <Link to="/events" className="quick-action">
-          <CalendarDays />
-          <span>活動中心</span>
-        </Link>
-        <Link to="/fortune" className="quick-action">
-          <Sparkles />
-          <span>文化抽籤</span>
-        </Link>
-        <Link to="/stickers" className="quick-action">
-          <Gift />
-          <span>貼圖小舖</span>
-        </Link>
-        <Link to="/tour/main-hall" className="quick-action">
-          <Map />
-          <span>宮廟導覽</span>
-        </Link>
-        <Link to="/support" className="quick-action">
-          <MessageCircle />
-          <span>客服中心</span>
-        </Link>
+      <section className="service-hub" aria-label="常用服務入口">
+        <div className="service-hub-heading">
+          <span className="tag">常用入口</span>
+          <h2>今天想做什麼？</h2>
+          <p>把最常用的服務放在第一層，進入 LINE 後不用反覆點選才找得到。</p>
+        </div>
+        <div className="service-hub-grid">
+          {primaryActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <Link
+                className={`service-hub-card${action.featured ? " featured" : ""}`}
+                key={action.to}
+                to={action.to}
+              >
+                <Icon size={22} />
+                <strong>{action.title}</strong>
+                <p>{action.body}</p>
+                <span>
+                  {action.label}
+                  <ChevronRight size={16} />
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+        <div className="secondary-link-row" aria-label="更多服務">
+          {secondaryActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <Link key={action.to} to={action.to}>
+                <Icon size={17} />
+                <span>{action.label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </section>
 
       <section className="tool-panel">
@@ -189,7 +250,7 @@ export function HomePage() {
         </button>
         {reply ? (
           <div className="answer">
-            <strong>{reply.intent}</strong>
+            <strong>回覆</strong>
             <p>{reply.reply}</p>
             <small>{reply.demo_notice}</small>
           </div>

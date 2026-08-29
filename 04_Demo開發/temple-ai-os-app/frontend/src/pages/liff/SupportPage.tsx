@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { MessageCircle } from "lucide-react";
 import { Shell } from "../../components/Shell";
 import { apiFetch } from "../../lib/api";
 import { getLiffSession } from "../../lib/session";
@@ -9,9 +10,9 @@ export function SupportPage() {
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     category: "general",
-    subject: "活動報名問題",
+    subject: "",
     message: "",
-    contact_name: "小安",
+    contact_name: "",
     phone: ""
   });
 
@@ -38,10 +39,17 @@ export function SupportPage() {
       {done ? (
         <section className="success-panel">
           <h2>工單已建立</h2>
-          <p>正式案件需由廟方人工確認；Demo 不處理真實付款或個資案件。</p>
+          <p>已收到你的問題。正式案件仍需由廟方或服務人員人工確認。</p>
         </section>
       ) : (
         <form className="form-panel" onSubmit={submit}>
+          <div className="form-intro">
+            <MessageCircle size={22} />
+            <div>
+              <h2>留下問題</h2>
+              <p>找不到活動、導覽或參拜資訊時，可以在這裡留下要詢問的內容。</p>
+            </div>
+          </div>
           <label>
             類型
             <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
@@ -53,23 +61,41 @@ export function SupportPage() {
           </label>
           <label>
             主旨
-            <input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} />
+            <input
+              value={form.subject}
+              onChange={(e) => setForm({ ...form, subject: e.target.value })}
+              placeholder="例如：想詢問活動報名"
+              required
+            />
           </label>
           <label>
             內容
-            <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
+            <textarea
+              value={form.message}
+              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              placeholder="請簡單描述你的問題"
+              required
+            />
           </label>
           <label>
             聯絡人
-            <input value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
+            <input
+              value={form.contact_name}
+              onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
+              placeholder="姓名或稱呼"
+            />
           </label>
           <label>
             電話
-            <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <input
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              placeholder="選填"
+            />
           </label>
           {error && <p className="error-text">{error}</p>}
           <button className="button primary" disabled={saving} type="submit">
-            {saving ? "建立中" : "建立工單"}
+            {saving ? "送出中" : "送出問題"}
           </button>
         </form>
       )}

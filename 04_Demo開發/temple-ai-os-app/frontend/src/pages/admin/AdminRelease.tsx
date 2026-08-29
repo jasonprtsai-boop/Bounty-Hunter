@@ -162,7 +162,7 @@ const releaseChecklist = [
   "LINE 大頭貼已換成 line-oa-profile-v2.png",
   "LINE 背景圖已換成 line-oa-profile-background-v1.png",
   "Messaging API Webhook 驗證成功",
-  "Rich Menu 已發布且貼圖小舖入口可開啟",
+  "Rich Menu 已發布，活動、導覽、抽籤、紀錄與客服入口可開啟",
   "至少一篇 LINE VOOM Demo 貼文已建立草稿或排程",
   "手機 LINE 實測可開 LIFF 與活動頁",
   "貼圖素材已確認，等待 LINE Creators Market 送審或審核",
@@ -284,7 +284,7 @@ export function AdminRelease() {
               <span>人工設定完成</span>
             </div>
             <div>
-              <strong>53</strong>
+              <strong>54</strong>
               <span>後端測試通過</span>
             </div>
             <div>
@@ -304,7 +304,7 @@ export function AdminRelease() {
             <Rocket size={20} />
             <h2>Rich Menu</h2>
           </div>
-          <p>目前版本已連到貼圖小舖，發布後 LINE 底部選單會更新為正式展示版。</p>
+          <p>目前版本採用民眾常用服務入口，發布後 LINE 底部選單會更新為新版活動、導覽、紀錄與客服動線。</p>
           <button className="button primary" type="button" disabled={publishing} onClick={publishRichMenu}>
             <Rocket size={18} />
             {publishing ? "發布中" : "發布 Rich Menu"}
