@@ -59,7 +59,7 @@ VITE_API_BASE_URL=
 VITE_LIFF_ID=
 ```
 
-正式環境第一次登入可使用 `ADMIN_TOKENS` 的 `管理者:密碼` 格式，或改用 `ADMIN_ACCOUNTS` / `ADMIN_USERNAME` / `ADMIN_PASSWORD`。例如 Render 設為 `ADMIN_TOKENS=temple-staff:xxxx` 時，後台帳號填 `temple-staff`，密碼填 `xxxx`。Demo 模式另外保留一組雜湊後的第一位最高權限帳號，避免部署 Secret 尚未完成時鎖在後台外；正式上線前應以 Render Secret 或資料庫帳號取代。登入後可到 `/admin/accounts` 建立正式管理員帳號；資料庫模式會將密碼雜湊後存入 `admin_accounts`，不保存明文密碼。成功的後台新增、修改、刪除會寫入 `audit_logs`，並以後端驗證出的管理者名稱作為操作人。
+正式環境第一次登入可使用 `ADMIN_TOKENS` 的 `管理者:密碼` 格式，或改用 `ADMIN_ACCOUNTS` / `ADMIN_USERNAME` / `ADMIN_PASSWORD`。例如 Render 設為 `ADMIN_TOKENS=temple-staff:xxxx` 時，後台帳號填 `temple-staff`，密碼填 `xxxx`。登入後可到 `/admin/accounts` 建立正式管理員帳號；資料庫模式會將密碼雜湊後存入 `admin_accounts`，不保存明文密碼。成功的後台新增、修改、刪除會寫入 `audit_logs`，並以後端驗證出的管理者名稱作為操作人。
 
 ## LINE Console 設定摘要
 
