@@ -63,7 +63,7 @@ export function AdminGate({ children }: AdminGateProps) {
       password: draftPassword.trim()
     };
     if (!normalized.username || !normalized.password) {
-      setError("請輸入後台帳號與密碼");
+      setError("請輸入帳號或 Email 與密碼");
       return;
     }
     setLoggingIn(true);
@@ -110,13 +110,13 @@ export function AdminGate({ children }: AdminGateProps) {
           <p>登入後可管理活動、問答內容、客服回覆與推播排程。</p>
         </div>
         <label>
-          後台帳號
+          帳號或 Email
           <input
             autoComplete="username"
             autoFocus
             value={draftUsername}
             onChange={(event) => setDraftUsername(event.target.value)}
-            placeholder="輸入帳號"
+            placeholder="輸入帳號或 Email"
           />
         </label>
         <label>
@@ -128,7 +128,7 @@ export function AdminGate({ children }: AdminGateProps) {
             onChange={(event) => setDraftPassword(event.target.value)}
             placeholder="輸入密碼"
           />
-          <small>忘記帳號或密碼時，請聯絡系統管理員協助重設。</small>
+          <small>忘記帳號、Email 或密碼時，請聯絡系統管理員協助重設。</small>
         </label>
         <button className="button primary" disabled={checking || loggingIn} type="submit">
           <LockKeyhole size={18} />

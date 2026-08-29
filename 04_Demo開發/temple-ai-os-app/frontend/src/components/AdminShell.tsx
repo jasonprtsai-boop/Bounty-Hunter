@@ -38,7 +38,7 @@ const adminLinks: NavItem[] = [
 ];
 
 const adminSetupLinks: NavItem[] = [
-  { path: "/admin/accounts", icon: UserCog, label: "權限", hint: "帳號與身分" },
+  { path: "/admin/accounts", icon: UserCog, label: "權限", hint: "帳號 / Email" },
   { path: "/admin/release", icon: Settings, label: "設定", hint: "LINE 與發布" }
 ];
 
@@ -48,7 +48,7 @@ const adminPageDescriptions: Record<string, string> = {
   "/admin/knowledge": "維護問答依據與安全提醒，避免回覆內容過時或不完整。",
   "/admin/support": "集中處理民眾留下的問題，依狀態安排下一步。",
   "/admin/notifications": "管理 LINE 提醒任務、補發訊息與到期通知。",
-  "/admin/accounts": "建立後台帳號、設定身分角色，並停用不再使用的帳號。",
+  "/admin/accounts": "建立後台帳號或 Email 登入、設定身分角色，並停用不再使用的帳號。",
   "/admin/release": "整理 LINE 帳號設定、公開連結、Rich Menu 與上線檢查。"
 };
 

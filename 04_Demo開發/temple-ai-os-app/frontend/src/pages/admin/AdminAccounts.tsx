@@ -42,6 +42,15 @@ const statusOptions: Array<{ value: AdminAccountStatus; label: string }> = [
   { value: "disabled", label: "停用" }
 ];
 
+function accountPath(username: string) {
+  return encodeURIComponent(username);
+}
+
+function normalizeAccountId(username: string) {
+  const value = username.trim();
+  return value.includes("@") ? value.toLowerCase() : value;
+}
+
 function roleLabel(role: string) {
   return roleOptions.find((option) => option.value === role)?.label || role;
 }
@@ -146,7 +155,7 @@ export function AdminAccounts() {
       }
       const saved = editingUsername
         ? await apiFetch<AdminAccount>(
-            `/api/admin/accounts/${editingUsername}`,
+            `/api/admin/accounts/${accountPath(editingUsername)}`,
             { method: "PUT", body: JSON.stringify(payload) },
             true
           )
@@ -171,7 +180,7 @@ export function AdminAccounts() {
   }
 
   async function deleteAccount(username: string) {
-    if (username === currentActor) {
+    if (normalizeAccountId(username) === normalizeAccountId(currentActor)) {
       setError("不能刪除目前登入中的帳號");
       return;
     }
@@ -181,7 +190,7 @@ export function AdminAccounts() {
     setMessage("");
     setError("");
     try {
-      await apiFetch<{ deleted: boolean }>(`/api/admin/accounts/${username}`, { method: "DELETE" }, true);
+      await apiFetch<{ deleted: boolean }>(`/api/admin/accounts/${accountPath(username)}`, { method: "DELETE" }, true);
       setAccounts((current) => current.filter((account) => account.username !== username));
       if (editingUsername === username) {
         resetForm();
@@ -265,16 +274,16 @@ export function AdminAccounts() {
                 <strong>登入資訊</strong>
               </div>
               <label>
-                帳號
+                登入帳號或 Email
                 <input
                   autoComplete="username"
                   disabled={Boolean(editingUsername)}
                   value={form.username}
                   onChange={(event) => updateForm("username", event.target.value)}
-                  placeholder="例如 temple-admin"
+                  placeholder="例如 temple-admin 或 staff@example.com"
                   required
                 />
-                <small>可使用英文、數字、底線、連字號與小數點；建立後不可更改帳號名稱。</small>
+                <small>可使用一般帳號，或使用 Email 作為登入帳號；建立後不可更改。</small>
               </label>
               <label>
                 密碼
@@ -375,7 +384,7 @@ export function AdminAccounts() {
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="帳號、名稱、身分或狀態"
+                    placeholder="帳號、Email、名稱、身分或狀態"
                   />
                 </div>
               </label>
@@ -403,7 +412,7 @@ export function AdminAccounts() {
                       </div>
                       <p>
                         {account.username}
-                        {account.username === currentActor ? " · 目前登入" : ""}
+                        {normalizeAccountId(account.username) === normalizeAccountId(currentActor) ? " · 目前登入" : ""}
                       </p>
                       <small>最近登入：{formatDateTime(account.last_login_at)}</small>
                     </div>
@@ -418,7 +427,7 @@ export function AdminAccounts() {
                       <button
                         className="button icon-button danger"
                         type="button"
-                        disabled={account.username === currentActor}
+                        disabled={normalizeAccountId(account.username) === normalizeAccountId(currentActor)}
                         onClick={() => deleteAccount(account.username)}
                       >
                         <Trash2 size={17} />

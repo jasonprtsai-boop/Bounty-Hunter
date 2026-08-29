@@ -5,6 +5,7 @@ from pathlib import Path
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.core.admin_identity import normalize_admin_login_id
 from app.core.config import get_settings
 from app.core.security import (
     AdminPrincipal,
@@ -171,7 +172,8 @@ async def admin_update_account(
     principal: AdminPrincipal = Depends(require_admin_token),
 ) -> ApiResponse[AdminAccount]:
     _require_owner(principal)
-    if username == principal.actor and payload.status == "disabled":
+    is_current_account = normalize_admin_login_id(username) == normalize_admin_login_id(principal.actor)
+    if is_current_account and payload.status == "disabled":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="cannot_disable_current_account")
     try:
         account = get_repository().update_admin_account(username, payload)
@@ -189,7 +191,7 @@ async def admin_delete_account(
     principal: AdminPrincipal = Depends(require_admin_token),
 ) -> ApiResponse[dict[str, bool]]:
     _require_owner(principal)
-    if username == principal.actor:
+    if normalize_admin_login_id(username) == normalize_admin_login_id(principal.actor):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="cannot_delete_current_account")
     try:
         deleted = get_repository().delete_admin_account(username)

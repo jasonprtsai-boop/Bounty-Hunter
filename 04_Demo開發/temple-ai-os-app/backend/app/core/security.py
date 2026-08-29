@@ -9,6 +9,7 @@ from typing import Annotated
 
 from fastapi import Header, HTTPException, status
 
+from app.core.admin_identity import normalize_admin_login_id
 from app.core.config import Settings, get_settings
 
 
@@ -119,7 +120,7 @@ def authenticate_admin_credentials(
             detail="admin_password_not_configured",
         )
 
-    normalized_username = username.strip()[:80]
+    normalized_username = normalize_admin_login_id(username)
     normalized_password = password.strip()
     expected_password = credentials.get(normalized_username)
     if expected_password and hmac.compare_digest(normalized_password, expected_password):
@@ -137,9 +138,9 @@ def create_admin_session(
     issued_at = int(time.time())
     expires_at = issued_at + settings.admin_session_ttl_seconds
     payload = {
-        "actor": actor.strip()[:80] or "admin",
+        "actor": normalize_admin_login_id(actor) or "admin",
         "role": role if role in {"owner", "manager", "staff"} else "manager",
-        "display_name": (display_name or actor).strip()[:80] or actor.strip()[:80] or "admin",
+        "display_name": (display_name or actor).strip()[:80] or normalize_admin_login_id(actor) or "admin",
         "iat": issued_at,
         "exp": expires_at,
     }
@@ -172,7 +173,7 @@ def _resolve_admin_session(token: str, settings: Settings) -> AdminPrincipal | N
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid admin session")
     if int(payload.get("exp") or 0) < int(time.time()):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin session expired")
-    actor = str(payload.get("actor") or "admin").strip()[:80] or "admin"
+    actor = normalize_admin_login_id(str(payload.get("actor") or "admin")) or "admin"
     role = str(payload.get("role") or "owner")
     if role not in {"owner", "manager", "staff"}:
         role = "manager"

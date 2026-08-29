@@ -894,7 +894,13 @@ create table if not exists admin_accounts (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint admin_accounts_username_valid
-    check (username ~ '^[A-Za-z0-9_.-]{1,80}$'),
+    check (
+      username ~ '^[A-Za-z0-9_.-]{1,80}$'
+      or (
+        char_length(username) <= 120
+        and username ~ '^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,253}\.[A-Za-z]{2,}$'
+      )
+    ),
   constraint admin_accounts_role_valid
     check (role in ('owner', 'manager', 'staff')),
   constraint admin_accounts_status_valid

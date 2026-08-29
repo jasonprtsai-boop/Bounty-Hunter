@@ -8,6 +8,7 @@ from typing import Any
 
 import httpx
 
+from app.core.admin_identity import normalize_admin_login_id
 from app.core.config import get_settings
 from app.core.passwords import hash_admin_password, verify_admin_password
 from app.schemas.common import (
@@ -127,7 +128,7 @@ class DemoRepository:
         )
 
     def _admin_account_record(self, username: str) -> dict[str, Any] | None:
-        normalized = username.strip()[:80]
+        normalized = normalize_admin_login_id(username)
         return next((account for account in self.admin_accounts if account["username"] == normalized), None)
 
     def _active_owner_count(self) -> int:
@@ -215,7 +216,8 @@ class DemoRepository:
             return False
         if account["role"] == "owner" and account["status"] == "active" and self._active_owner_count() <= 1:
             raise ValueError("last_owner_account")
-        self.admin_accounts = [item for item in self.admin_accounts if item["username"] != username]
+        normalized_username = normalize_admin_login_id(username)
+        self.admin_accounts = [item for item in self.admin_accounts if item["username"] != normalized_username]
         return True
 
     def _build_fortune_slips(self) -> list[FortuneSlip]:
@@ -603,7 +605,7 @@ class SupabaseRepository:
 
     def get_admin_account(self, username: str) -> AdminAccount | None:
         try:
-            row = self._single("admin_accounts", "username", username.strip()[:80])
+            row = self._single("admin_accounts", "username", normalize_admin_login_id(username))
         except RuntimeError as exc:
             if self._admin_accounts_table_missing(exc):
                 return None
@@ -612,7 +614,7 @@ class SupabaseRepository:
 
     def authenticate_admin_account(self, username: str, password: str) -> AdminAccount | None:
         try:
-            row = self._single("admin_accounts", "username", username.strip()[:80])
+            row = self._single("admin_accounts", "username", normalize_admin_login_id(username))
         except RuntimeError as exc:
             if self._admin_accounts_table_missing(exc):
                 return None
@@ -624,7 +626,7 @@ class SupabaseRepository:
         self._patch_returning(
             "admin_accounts",
             "username",
-            username.strip()[:80],
+            normalize_admin_login_id(username),
             {"last_login_at": datetime.now(timezone.utc).isoformat()},
         )
         return self._admin_account_from_row(row)
@@ -656,7 +658,8 @@ class SupabaseRepository:
         username: str,
         payload: AdminAccountUpdate,
     ) -> AdminAccount | None:
-        current = self._single("admin_accounts", "username", username.strip()[:80])
+        normalized_username = normalize_admin_login_id(username)
+        current = self._single("admin_accounts", "username", normalized_username)
         if not current:
             return None
         updates = payload.model_dump(exclude_unset=True)
@@ -678,16 +681,17 @@ class SupabaseRepository:
             row_updates["password_hash"] = hash_admin_password(updates["password"])
         if not row_updates:
             return self._admin_account_from_row(current)
-        row = self._patch_returning("admin_accounts", "username", username.strip()[:80], row_updates)
+        row = self._patch_returning("admin_accounts", "username", normalized_username, row_updates)
         return self._admin_account_from_row(row) if row else None
 
     def delete_admin_account(self, username: str) -> bool:
-        current = self._single("admin_accounts", "username", username.strip()[:80])
+        normalized_username = normalize_admin_login_id(username)
+        current = self._single("admin_accounts", "username", normalized_username)
         if not current:
             return False
         if current["role"] == "owner" and current["status"] == "active" and self._active_owner_count() <= 1:
             raise ValueError("last_owner_account")
-        return self._delete_returning("admin_accounts", "username", username.strip()[:80])
+        return self._delete_returning("admin_accounts", "username", normalized_username)
 
     def _insert_returning(self, table: str, row: dict[str, Any]) -> dict[str, Any]:
         rows = self._request("POST", table, json_body=row, prefer="return=representation")

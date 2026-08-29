@@ -50,7 +50,7 @@ Sensitive values are intentionally not recorded here:
 
 - Backend is deployed at `https://temple-ai-os-api.onrender.com`; keep using this URL unless the Render service is replaced.
 - Render is configured for `DEMO_MODE=false` with LINE, Supabase, and admin secrets stored in Render.
-- Admin login uses the username/password credentials stored in Render. For `ADMIN_TOKENS=temple-staff:xxxx`, enter username `temple-staff` and password `xxxx` in `/admin`.
+- Admin login uses the account/email + password credentials stored in Render. For `ADMIN_TOKENS=temple-staff:xxxx`, enter username `temple-staff` and password `xxxx` in `/admin`; for `ADMIN_USERNAME=staff@example.com`, enter the Email and password.
 - Messaging API webhook URL is `https://temple-ai-os-api.onrender.com/api/line/webhook`; webhook, redelivery, and verification are enabled.
 - Rich Menu has been published through the admin API.
 - New Rich Menu source now includes a `貼圖小舖` entry that opens `/stickers`; republish after the frontend deployment.

@@ -17,7 +17,7 @@ database/supabase_full_setup.sql
 - 原子報名 RPC：`register_for_event` 會鎖定活動列，避免容量超賣。
 - 報名一致性：同一使用者同一活動只能保留一筆有效報名，並自動同步活動報名人數。
 - LINE webhook 去重表：避免同一 webhook event 重複處理。
-- 後台帳號表：`admin_accounts` 保存帳號、身分、狀態與雜湊後的密碼，支援後台權限管理頁。
+- 後台帳號表：`admin_accounts` 保存帳號或 Email、身分、狀態與雜湊後的密碼，支援後台權限管理頁。
 - 營運補強：常用索引、資料狀態限制、後台狀態值對齊、`updated_at` 自動更新。
 - Demo seed：萬春宮示範資料、活動、FAQ、Dashboard 樣本資料。
 
@@ -31,12 +31,12 @@ SUPABASE_URL=<你的 Supabase project URL>
 SUPABASE_SERVICE_ROLE_KEY=<你的 service role key>
 SUPABASE_ANON_KEY=<你的 anon key>
 ADMIN_SESSION_SECRET=<隨機長字串>
-ADMIN_TOKENS=<初始 owner 帳號:密碼>
+ADMIN_TOKENS=<初始 owner 帳號或 Email:密碼>
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` 只能放在後端或部署平台 Secret，不能放前端，也不能提交到 Git。
 
-第一次登入後，請到 `/admin/accounts` 建立正式後台帳號。正式資料庫只保存密碼雜湊；忘記密碼時需由最高權限帳號重設。
+第一次登入後，請到 `/admin/accounts` 建立正式後台帳號或 Email 登入。正式資料庫只保存密碼雜湊；忘記密碼時需由最高權限帳號重設。
 
 ## 驗收
 

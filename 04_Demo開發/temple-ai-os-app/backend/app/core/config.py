@@ -4,6 +4,8 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.core.admin_identity import normalize_admin_login_id
+
 
 DEFAULT_ALLOWED_SITE_ORIGINS = (
     "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site",
@@ -76,7 +78,7 @@ class Settings(BaseSettings):
         for item in self.admin_tokens.split(","):
             actor, separator, token = item.partition(":")
             if separator and actor.strip() and token.strip():
-                tokens[actor.strip()[:80]] = token.strip()
+                tokens[normalize_admin_login_id(actor)] = token.strip()
         return tokens
 
     @property
@@ -85,9 +87,9 @@ class Settings(BaseSettings):
         for item in self.admin_accounts.split(","):
             username, separator, password = item.partition(":")
             if separator and username.strip() and password.strip():
-                accounts[username.strip()[:80]] = password.strip()
+                accounts[normalize_admin_login_id(username)] = password.strip()
         if self.admin_username.strip() and self.admin_password.strip():
-            accounts[self.admin_username.strip()[:80]] = self.admin_password.strip()
+            accounts[normalize_admin_login_id(self.admin_username)] = self.admin_password.strip()
         return accounts
 
     @property

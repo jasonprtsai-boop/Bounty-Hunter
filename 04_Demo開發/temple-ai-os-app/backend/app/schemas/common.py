@@ -3,6 +3,12 @@ from typing import Any, Generic, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.admin_identity import (
+    ADMIN_LOGIN_ID_MAX_LENGTH,
+    is_valid_admin_login_id,
+    normalize_admin_login_id,
+)
+
 T = TypeVar("T")
 
 
@@ -278,7 +284,7 @@ class NotificationJobUpdate(BaseModel):
 
 
 class AdminLoginRequest(BaseModel):
-    username: str = Field(min_length=1, max_length=80)
+    username: str = Field(min_length=1, max_length=ADMIN_LOGIN_ID_MAX_LENGTH)
     password: str = Field(min_length=1, max_length=256)
 
     @field_validator("username", "password")
@@ -305,12 +311,12 @@ AdminAccountStatus = Literal["active", "disabled"]
 
 
 def _normalize_admin_username(value: str) -> str:
-    normalized = value.strip()
+    normalized = normalize_admin_login_id(value)
     if not normalized:
         raise ValueError("username_empty")
-    if not all(char.isalnum() or char in {"_", "-", "."} for char in normalized):
+    if not is_valid_admin_login_id(normalized):
         raise ValueError("username_invalid")
-    return normalized[:80]
+    return normalized
 
 
 class AdminCurrentUser(BaseModel):
@@ -332,7 +338,7 @@ class AdminAccount(BaseModel):
 
 
 class AdminAccountCreate(BaseModel):
-    username: str = Field(min_length=1, max_length=80)
+    username: str = Field(min_length=1, max_length=ADMIN_LOGIN_ID_MAX_LENGTH)
     display_name: str = Field(min_length=1, max_length=80)
     role: AdminRole = "manager"
     status: AdminAccountStatus = "active"

@@ -300,7 +300,7 @@ def test_admin_login_returns_session_for_named_credentials(monkeypatch) -> None:
 
 
 def test_admin_account_management_flow() -> None:
-    username = "pytest-staff"
+    username = "pytest-staff@example.com"
     delete_existing = client.delete(f"/api/admin/accounts/{username}", headers=ADMIN_HEADERS)
     assert delete_existing.status_code in {200, 404}
 
@@ -323,7 +323,7 @@ def test_admin_account_management_flow() -> None:
 
     login_response = client.post(
         "/api/admin/auth/login",
-        json={"username": username, "password": "staff-secret-123"},
+        json={"username": "PYTEST-STAFF@EXAMPLE.COM", "password": "staff-secret-123"},
     )
     assert login_response.status_code == 200
     staff_session = login_response.json()["data"]["access_token"]

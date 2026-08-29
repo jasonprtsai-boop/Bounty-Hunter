@@ -7,7 +7,7 @@ Last updated: 2026-08-15
 P1 means the demo is safe enough to show to reviewers:
 
 - Backend, frontend, and production build pass local validation.
-- Admin login uses server-verified username/password credentials, not a public bundled token.
+- Admin login uses server-verified account or Email + password credentials, not a public bundled token.
 - Public demo URLs respond before the presentation.
 - LINE/LIFF/Supabase paths have a clear manual acceptance checklist.
 - The 3-minute presentation follows a fixed sequence that does not depend on improvising.
@@ -69,7 +69,7 @@ Use a real LINE mobile app account for these checks:
 4. Send `近期有什麼活動？` to the official account.
 5. Confirm the backend replies with an event Flex Message.
 6. Open one event and submit a registration.
-7. Confirm `/admin` requires username/password login.
+7. Confirm `/admin` requires account or Email + password login.
 8. Log in with the Render-configured admin username and password.
 9. Confirm dashboard metrics, registrations, support tickets, knowledge documents, and notification jobs are visible.
 10. Open `/admin/release` and confirm account settings, business profile copy, public links, LINE VOOM post examples, and broadcast examples are available.
@@ -100,7 +100,7 @@ Open an event from the Flex Message, submit a demo registration, and show the co
 
 ### 1:55-2:25 Admin operation
 
-Open `/admin`, log in with the server-configured username/password, then show dashboard metrics, registrations, knowledge documents, support tickets, and notification jobs.
+Open `/admin`, log in with the server-configured account or Email + password, then show dashboard metrics, registrations, knowledge documents, support tickets, and notification jobs.
 
 ### 2:25-2:45 Public and cultural extensions
 
