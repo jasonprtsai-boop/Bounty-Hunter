@@ -156,27 +156,16 @@ def _registration_notice_bubble(
 
 def event_bubble(event: Event) -> dict[str, Any]:
     status_label = "可報名" if event.requires_registration and event.status == "open" else "查看資訊"
+    primary_label = "詳情與報名" if event.requires_registration else "查看詳情"
     detail_uri = _liff_url(f"/events/{event.event_id}")
     buttons: list[dict[str, Any]] = [
         {
             "type": "button",
             "style": "primary",
             "color": LINE_GREEN,
-            "action": {"type": "uri", "label": "查看詳情", "uri": detail_uri},
+            "action": {"type": "uri", "label": primary_label, "uri": detail_uri},
         }
     ]
-    if event.requires_registration:
-        buttons.append(
-            {
-                "type": "button",
-                "style": "secondary",
-                "action": {
-                    "type": "uri",
-                    "label": "示範報名",
-                    "uri": _liff_url(f"/register/{event.event_id}"),
-                },
-            }
-        )
 
     return {
         "type": "bubble",

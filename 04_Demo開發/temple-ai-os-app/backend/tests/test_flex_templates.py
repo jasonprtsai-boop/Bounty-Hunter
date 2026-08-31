@@ -20,13 +20,26 @@ def _texts(node: Any) -> list[str]:
     return []
 
 
+def _actions(node: Any) -> list[dict[str, Any]]:
+    if isinstance(node, dict):
+        own = [node["action"]] if isinstance(node.get("action"), dict) else []
+        return own + [action for value in node.values() for action in _actions(value)]
+    if isinstance(node, list):
+        return [action for value in node for action in _actions(value)]
+    return []
+
+
 def test_events_carousel_uses_swipeable_flex_cards() -> None:
     repo = DemoRepository()
+    events = repo.list_events()
 
-    message = events_carousel(repo.list_events())
+    message = events_carousel(events)
     carousel = message["contents"]
     first_bubble = carousel["contents"][0]
     first_texts = _texts(first_bubble)
+    actions = _actions(carousel)
+    registerable_index = next(index for index, event in enumerate(events[:12]) if event.requires_registration)
+    registerable_bubble = carousel["contents"][registerable_index]
 
     assert message["type"] == "flex"
     assert "左右滑動" in message["altText"]
@@ -36,7 +49,9 @@ def test_events_carousel_uses_swipeable_flex_cards() -> None:
     assert first_bubble["hero"]["url"].endswith("/assets/flex/event-card.png")
     assert "日期" in first_texts
     assert "地點" in first_texts
-    assert first_bubble["footer"]["contents"][0]["action"]["label"] == "查看詳情"
+    assert registerable_bubble["footer"]["contents"][0]["action"]["label"] == "詳情與報名"
+    assert all("/events/" in action["uri"] for action in actions if action.get("type") == "uri")
+    assert not any("/register/" in action["uri"] for action in actions if action.get("type") == "uri")
 
 
 def test_registration_confirmation_is_notice_card_with_detail_actions() -> None:
