@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Shell } from "../../components/Shell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type EventItem, type Registration } from "../../lib/api";
 import { getLiffSession } from "../../lib/session";
 
@@ -8,6 +9,8 @@ export function RegistrationPage() {
   const { eventId } = useParams();
   const [event, setEvent] = useState<EventItem | null>(null);
   const [created, setCreated] = useState<Registration | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -21,22 +24,59 @@ export function RegistrationPage() {
   useEffect(() => {
     getLiffSession()
       .then((session) => setForm((current) => ({ ...current, contact_name: session.display_name })))
-      .catch(console.error);
-    if (eventId) {
-      apiFetch<EventItem>(`/api/events/${eventId}`).then(setEvent).catch(console.error);
-    }
+      .catch(() => undefined);
+    loadEvent();
   }, [eventId]);
+
+  async function loadEvent() {
+    if (!eventId) {
+      setLoadError("找不到活動代號");
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setLoadError("");
+    try {
+      setEvent(await apiFetch<EventItem>(`/api/events/${eventId}`));
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "讀取活動失敗");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function submit(eventSubmit: FormEvent) {
     eventSubmit.preventDefault();
-    if (!eventId || !canRegister) return;
+    if (!eventId || !event || !canRegister) return;
+    const contactName = form.contact_name.trim();
+    const phone = form.phone.trim();
+    const partySize = Number(form.party_size);
+    if (!contactName) {
+      setError("請填寫姓名或稱呼");
+      return;
+    }
+    if (!Number.isInteger(partySize) || partySize < 1 || partySize > 10) {
+      setError("參加人數需為 1 到 10 人");
+      return;
+    }
+    if (phone && !/^[0-9+\-\s()]{6,20}$/.test(phone)) {
+      setError("手機格式不易辨識，請只輸入數字、空格或 + - 符號");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
       const session = await getLiffSession();
       const result = await apiFetch<Registration>(`/api/events/${eventId}/registrations`, {
         method: "POST",
-        body: JSON.stringify({ ...form, user_id: session.user_id })
+        body: JSON.stringify({
+          ...form,
+          contact_name: contactName,
+          phone: phone || undefined,
+          party_size: partySize,
+          note: form.note.trim(),
+          user_id: session.user_id
+        })
       });
       setCreated(result);
     } catch (err) {
@@ -53,7 +93,25 @@ export function RegistrationPage() {
 
   return (
     <Shell title="活動報名">
-      {event ? (
+      {loading ? (
+        <StatePanel variant="loading" title="正在確認活動" body="請稍候，系統正在確認活動是否仍可報名。" />
+      ) : loadError ? (
+        <StatePanel
+          variant="error"
+          title="活動報名資料暫時無法讀取"
+          body={loadError}
+          actions={
+            <>
+              <button className="button primary" type="button" onClick={loadEvent}>
+                重新讀取
+              </button>
+              <Link className="button" to="/events">
+                回活動中心
+              </Link>
+            </>
+          }
+        />
+      ) : event ? (
         <section className="detail-panel">
           <h2>{event.title}</h2>
           <p>{event.summary}</p>
@@ -77,6 +135,8 @@ export function RegistrationPage() {
           <p>報名編號：{created.registration_id}</p>
           <p className="notice">這是示範報名紀錄，不代表萬春宮官方報名資料。</p>
         </section>
+      ) : loading || loadError ? null : !event ? (
+        <StatePanel variant="empty" title="找不到活動" body="目前無法確認這筆活動，請回到活動中心重新選擇。" />
       ) : event && !canRegister ? (
         <section className="form-panel">
           <h2>目前不開放報名</h2>
@@ -94,7 +154,13 @@ export function RegistrationPage() {
           </label>
           <label>
             手機（選填）
-            <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <input
+              type="tel"
+              inputMode="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              placeholder="例如 0912-345-678"
+            />
           </label>
           <label>
             參加人數
@@ -119,7 +185,7 @@ export function RegistrationPage() {
             <textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
           </label>
           {error && <p className="error-text">{error}</p>}
-          <button className="button primary" disabled={saving || !event} type="submit">
+          <button className="button primary" disabled={saving || !event || !canRegister} type="submit">
             {saving ? "送出中" : "送出示範報名"}
           </button>
         </form>

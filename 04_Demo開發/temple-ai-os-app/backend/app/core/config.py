@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     demo_mode: bool = True
     api_base_url: str = "http://localhost:8000"
     frontend_base_url: str = "http://localhost:5173"
-    allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174"
 
     line_channel_id: str | None = None
     line_channel_secret: str | None = None

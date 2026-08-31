@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Bell, Clock3, FileSpreadsheet, Pencil, Plus, Save, Search, Send, Trash2, X } from "lucide-react";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch } from "../../lib/api";
+import { canManageOperations, getStoredAdminRole } from "../../lib/adminPermissions";
 import { exportRowsToExcel } from "../../lib/excelExport";
 
 type NotificationJob = {
@@ -68,15 +71,36 @@ export function AdminNotifications() {
   const [jobs, setJobs] = useState<NotificationJob[]>([]);
   const [form, setForm] = useState<NotificationForm>(emptyNotificationForm);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState("active");
   const [query, setQuery] = useState("");
+  const currentRole = getStoredAdminRole();
+  const canManageNotifications = canManageOperations(currentRole);
+  const { requestConfirmation, confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
-    apiFetch<NotificationJob[]>("/api/admin/notification-jobs", {}, true).then(setJobs).catch(console.error);
-  }, []);
+    if (canManageNotifications) {
+      loadJobs();
+    } else {
+      setLoading(false);
+    }
+  }, [canManageNotifications]);
+
+  async function loadJobs() {
+    setLoading(true);
+    setLoadError("");
+    try {
+      setJobs(await apiFetch<NotificationJob[]>("/api/admin/notification-jobs", {}, true));
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "讀取推播任務失敗");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function resetForm() {
     setEditingId(null);
@@ -105,6 +129,10 @@ export function AdminNotifications() {
 
   async function saveJob(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManageNotifications) {
+      setError("目前帳號不能管理推播任務");
+      return;
+    }
     setSaving(true);
     setMessage("");
     setError("");
@@ -150,6 +178,10 @@ export function AdminNotifications() {
   }
 
   async function sendTest(jobId: string) {
+    if (!canManageNotifications) {
+      setError("目前帳號不能補發推播");
+      return;
+    }
     setError("");
     setMessage("");
     try {
@@ -165,6 +197,10 @@ export function AdminNotifications() {
   }
 
   async function sendDueJobs() {
+    if (!canManageNotifications) {
+      setError("目前帳號不能送出到期推播");
+      return;
+    }
     setError("");
     setMessage("");
     try {
@@ -174,14 +210,24 @@ export function AdminNotifications() {
         true
       );
       setMessage(`已處理 ${result.processed} 筆到期任務`);
-      apiFetch<NotificationJob[]>("/api/admin/notification-jobs", {}, true).then(setJobs).catch(console.error);
+      await loadJobs();
     } catch (err) {
       setError(err instanceof Error ? err.message : "送出到期任務失敗");
     }
   }
 
   async function deleteJob(jobId: string) {
-    if (!window.confirm("確定刪除此 Demo 推播任務？")) {
+    if (!canManageNotifications) {
+      setError("目前帳號不能刪除推播任務");
+      return;
+    }
+    if (
+      !(await requestConfirmation({
+        title: "刪除推播任務",
+        body: "刪除後這筆通知任務不會再出現在待送或補發清單，請先確認它不是展示流程需要的訊息。",
+        confirmLabel: "刪除任務"
+      }))
+    ) {
       return;
     }
     setError("");
@@ -239,6 +285,14 @@ export function AdminNotifications() {
 
   return (
     <Shell title="推播管理" mode="admin">
+      {!canManageNotifications ? (
+        <StatePanel
+          variant="error"
+          title="權限不足"
+          body="推播任務會影響 LINE 使用者通知，需管理員以上權限。請改用客服或活動查看功能，或請最高權限帳號協助。"
+        />
+      ) : (
+      <>
       <section className="admin-summary-strip" aria-label="推播摘要">
         <div>
           <Bell size={20} />
@@ -431,7 +485,20 @@ export function AdminNotifications() {
             會匯出目前搜尋與狀態篩選後的推播任務。
           </div>
           <div className="knowledge-list">
-            {filteredJobs.map((job) => (
+            {loading ? (
+              <StatePanel variant="loading" title="正在讀取推播任務" body="系統正在整理待送、草稿與已送出的通知。" />
+            ) : loadError ? (
+              <StatePanel
+                variant="error"
+                title="推播任務暫時無法讀取"
+                body={loadError}
+                actions={
+                  <button className="button primary" type="button" onClick={loadJobs}>
+                    重新讀取
+                  </button>
+                }
+              />
+            ) : filteredJobs.map((job) => (
               <div className="knowledge-doc-card" key={job.job_id}>
                 <div>
                   <div className="card-row">
@@ -460,11 +527,14 @@ export function AdminNotifications() {
                 </div>
               </div>
             ))}
-            {filteredJobs.length === 0 && <div className="empty-state">目前沒有符合條件的通知任務。</div>}
+            {!loading && !loadError && filteredJobs.length === 0 && <div className="empty-state">目前沒有符合條件的通知任務。</div>}
           </div>
         </section>
       </div>
       <p className="notice">大量主動推播需控管 LINE 訊息用量與使用者同意。</p>
+      </>
+      )}
+      {confirmDialog}
     </Shell>
   );
 }

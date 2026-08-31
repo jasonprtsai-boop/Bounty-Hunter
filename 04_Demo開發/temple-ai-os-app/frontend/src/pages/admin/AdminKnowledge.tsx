@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { FileSpreadsheet, FileText, Pencil, Plus, Save, Search, ShieldCheck, Trash2, X } from "lucide-react";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch } from "../../lib/api";
+import { canManageOperations, getStoredAdminRole } from "../../lib/adminPermissions";
 import { exportRowsToExcel } from "../../lib/excelExport";
 
 type KnowledgeDoc = {
@@ -41,15 +44,32 @@ export function AdminKnowledge() {
   const [docs, setDocs] = useState<KnowledgeDoc[]>([]);
   const [form, setForm] = useState<KnowledgeForm>(emptyKnowledgeForm);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [query, setQuery] = useState("");
+  const currentRole = getStoredAdminRole();
+  const canEditKnowledge = canManageOperations(currentRole);
+  const { requestConfirmation, confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
-    apiFetch<KnowledgeDoc[]>("/api/admin/knowledge-documents", {}, true).then(setDocs).catch(console.error);
+    loadDocs();
   }, []);
+
+  async function loadDocs() {
+    setLoading(true);
+    setLoadError("");
+    try {
+      setDocs(await apiFetch<KnowledgeDoc[]>("/api/admin/knowledge-documents", {}, true));
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "讀取知識庫失敗");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function resetForm() {
     setEditingId(null);
@@ -73,6 +93,10 @@ export function AdminKnowledge() {
 
   async function saveDoc(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canEditKnowledge) {
+      setError("目前帳號只能查看知識庫，不能變更文件");
+      return;
+    }
     setSaving(true);
     setError("");
     setMessage("");
@@ -118,7 +142,17 @@ export function AdminKnowledge() {
   }
 
   async function deleteDoc(documentId: string) {
-    if (!window.confirm("確定刪除此 Demo 知識文件？")) {
+    if (!canEditKnowledge) {
+      setError("目前帳號只能查看知識庫，不能刪除文件");
+      return;
+    }
+    if (
+      !(await requestConfirmation({
+        title: "刪除知識文件",
+        body: "刪除後 AI 回覆依據會少一筆資料，相關示範問題可能無法再引用這份內容。",
+        confirmLabel: "刪除文件"
+      }))
+    ) {
       return;
     }
     setError("");
@@ -190,7 +224,8 @@ export function AdminKnowledge() {
         </div>
       </section>
 
-      <div className="admin-event-grid">
+      <div className={`admin-event-grid${canEditKnowledge ? "" : " read-only-admin-grid"}`}>
+        {canEditKnowledge ? (
         <form className="form-panel admin-editor-panel" onSubmit={saveDoc}>
           <div className="admin-actions">
             <div>
@@ -222,7 +257,7 @@ export function AdminKnowledge() {
               <input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required />
             </label>
             <div className="form-grid">
-              <label>
+              <label className="wide-field">
                 來源類型
                 <input value={form.source_type} onChange={(event) => setForm({ ...form, source_type: event.target.value })} required />
               </label>
@@ -266,6 +301,13 @@ export function AdminKnowledge() {
           {message && <p className="notice">{message}</p>}
           {error && <p className="error-text">{error}</p>}
         </form>
+        ) : (
+          <StatePanel
+            variant="info"
+            title="目前是查看模式"
+            body="服務人員可以查閱知識文件；新增、編輯與刪除 AI 回覆依據需要管理員以上權限。"
+          />
+        )}
 
         <section className="tool-panel">
           <div className="panel-header">
@@ -306,7 +348,20 @@ export function AdminKnowledge() {
             會匯出目前搜尋與狀態篩選後的知識文件。
           </div>
           <div className="knowledge-list">
-            {filteredDocs.map((doc) => (
+            {loading ? (
+              <StatePanel variant="loading" title="正在讀取知識庫" body="系統正在載入 AI 回覆依據與文件狀態。" />
+            ) : loadError ? (
+              <StatePanel
+                variant="error"
+                title="知識庫暫時無法讀取"
+                body={loadError}
+                actions={
+                  <button className="button primary" type="button" onClick={loadDocs}>
+                    重新讀取
+                  </button>
+                }
+              />
+            ) : filteredDocs.map((doc) => (
               <div className="knowledge-doc-card" key={doc.document_id}>
                 <div>
                   <div className="card-row">
@@ -319,21 +374,26 @@ export function AdminKnowledge() {
                   <p className="list-preview">{doc.body.slice(0, 118)}{doc.body.length > 118 ? "..." : ""}</p>
                 </div>
                 <div className="inline-actions">
-                  <button className="button icon-button" type="button" onClick={() => editDoc(doc)}>
-                    <Pencil size={17} />
-                    <span>編輯</span>
-                  </button>
-                  <button className="button icon-button danger" type="button" onClick={() => deleteDoc(doc.document_id)}>
-                    <Trash2 size={17} />
-                    <span>刪除</span>
-                  </button>
+                  {canEditKnowledge ? (
+                    <>
+                      <button className="button icon-button" type="button" onClick={() => editDoc(doc)}>
+                        <Pencil size={17} />
+                        <span>編輯</span>
+                      </button>
+                      <button className="button icon-button danger" type="button" onClick={() => deleteDoc(doc.document_id)}>
+                        <Trash2 size={17} />
+                        <span>刪除</span>
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
             ))}
-            {filteredDocs.length === 0 && <div className="empty-state">沒有符合條件的知識文件。</div>}
+            {!loading && !loadError && filteredDocs.length === 0 && <div className="empty-state">沒有符合條件的知識文件。</div>}
           </div>
         </section>
       </div>
+      {confirmDialog}
     </Shell>
   );
 }

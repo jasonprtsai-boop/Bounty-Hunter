@@ -18,6 +18,33 @@ ADMIN_HEADERS = {
 }
 
 
+def admin_headers_for_role(role: str, actor: str) -> dict[str, str]:
+    password = f"{actor}-secret-123"
+    delete_existing = client.delete(f"/api/admin/accounts/{actor}", headers=ADMIN_HEADERS)
+    assert delete_existing.status_code in {200, 404}
+    create_response = client.post(
+        "/api/admin/accounts",
+        headers=ADMIN_HEADERS,
+        json={
+            "username": actor,
+            "display_name": actor,
+            "role": role,
+            "password": password,
+        },
+    )
+    assert create_response.status_code == 201
+    login_response = client.post(
+        "/api/admin/auth/login",
+        json={"username": actor, "password": password},
+    )
+    assert login_response.status_code == 200
+    token = login_response.json()["data"]["access_token"]
+    return {
+        "Authorization": f"Bearer {token}",
+        "X-Admin-Actor": actor,
+    }
+
+
 def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
@@ -373,8 +400,54 @@ def test_admin_account_management_flow() -> None:
     )
     assert disabled_login.status_code == 403
 
+    disabled_session_response = client.get(
+        "/api/admin/dashboard/summary",
+        headers={"Authorization": f"Bearer {new_password_login.json()['data']['access_token']}"},
+    )
+    assert disabled_session_response.status_code == 401
+
     delete_response = client.delete(f"/api/admin/accounts/{username}", headers=ADMIN_HEADERS)
     assert delete_response.status_code == 200
+
+
+def test_deleted_admin_account_session_is_revoked() -> None:
+    username = "pytest-revoked@example.com"
+    delete_existing = client.delete(f"/api/admin/accounts/{username}", headers=ADMIN_HEADERS)
+    assert delete_existing.status_code in {200, 404}
+
+    create_response = client.post(
+        "/api/admin/accounts",
+        headers=ADMIN_HEADERS,
+        json={
+            "username": username,
+            "display_name": "待撤銷帳號",
+            "role": "manager",
+            "password": "revoked-secret-123",
+        },
+    )
+    assert create_response.status_code == 201
+
+    login_response = client.post(
+        "/api/admin/auth/login",
+        json={"username": username, "password": "revoked-secret-123"},
+    )
+    assert login_response.status_code == 200
+    session_token = login_response.json()["data"]["access_token"]
+
+    allowed_response = client.get(
+        "/api/admin/dashboard/summary",
+        headers={"Authorization": f"Bearer {session_token}"},
+    )
+    assert allowed_response.status_code == 200
+
+    delete_response = client.delete(f"/api/admin/accounts/{username}", headers=ADMIN_HEADERS)
+    assert delete_response.status_code == 200
+
+    revoked_response = client.get(
+        "/api/admin/dashboard/summary",
+        headers={"Authorization": f"Bearer {session_token}"},
+    )
+    assert revoked_response.status_code == 401
 
 
 def test_admin_cannot_disable_or_delete_current_owner_account() -> None:
@@ -436,6 +509,43 @@ def test_admin_event_capacity_cannot_drop_below_registrations() -> None:
     )
     assert response.status_code == 422
     assert response.json()["detail"] == "event_capacity_below_registrations"
+
+
+def test_staff_cannot_mutate_events_or_manage_notifications() -> None:
+    staff_headers = admin_headers_for_role("staff", "pytest-staff")
+
+    create_event = client.post(
+        "/api/admin/events",
+        headers=staff_headers,
+        json={
+            "event_id": "evt_staff_forbidden",
+            "title": "服務人員不可建立活動",
+            "category": "測試",
+            "date": "2026-10-02",
+            "start_time": "10:00",
+            "end_time": "11:00",
+            "location": "萬春宮",
+            "address": "臺中市中區成功路212號",
+            "summary": "用於驗證服務人員不能異動活動。",
+            "requires_registration": False,
+            "registration_fields": [],
+        },
+    )
+    assert create_event.status_code == 403
+    assert create_event.json()["detail"] == "manager_role_required"
+
+    notifications = client.get("/api/admin/notification-jobs", headers=staff_headers)
+    assert notifications.status_code == 403
+    assert notifications.json()["detail"] == "manager_role_required"
+
+
+def test_manager_cannot_publish_rich_menu() -> None:
+    manager_headers = admin_headers_for_role("manager", "pytest-manager")
+
+    response = client.post("/api/admin/rich-menu/publish", headers=manager_headers)
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "owner_role_required"
 
 
 def test_admin_mutation_records_audit_log() -> None:
@@ -543,6 +653,39 @@ def test_support_ticket_admin_flow() -> None:
     )
     assert delete_response.status_code == 200
     assert delete_response.json()["data"]["deleted"] is True
+
+
+def test_staff_can_triage_support_ticket_but_cannot_delete_it() -> None:
+    staff_headers = admin_headers_for_role("staff", "pytest-support-staff")
+    create_response = client.post(
+        "/api/support/tickets",
+        json={
+            "user_id": "demo_u001",
+            "category": "general",
+            "subject": "服務人員權限測試",
+            "message": "用於驗證服務人員可處理狀態但不可刪除工單。",
+        },
+    )
+    assert create_response.status_code == 200
+    ticket_id = create_response.json()["data"]["ticket_id"]
+
+    update_response = client.patch(
+        f"/api/admin/support-tickets/{ticket_id}",
+        headers=staff_headers,
+        json={"status": "triaged", "priority": "general"},
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["data"]["status"] == "triaged"
+
+    forbidden_delete = client.delete(
+        f"/api/admin/support-tickets/{ticket_id}",
+        headers=staff_headers,
+    )
+    assert forbidden_delete.status_code == 403
+    assert forbidden_delete.json()["detail"] == "manager_role_required"
+
+    cleanup = client.delete(f"/api/admin/support-tickets/{ticket_id}", headers=ADMIN_HEADERS)
+    assert cleanup.status_code == 200
 
 
 def test_admin_knowledge_document_crud() -> None:

@@ -48,6 +48,11 @@ def _require_owner(principal: AdminPrincipal) -> None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="owner_role_required")
 
 
+def _require_operations_manager(principal: AdminPrincipal) -> None:
+    if principal.role not in {"owner", "manager"}:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="manager_role_required")
+
+
 def _admin_account_error_status(detail: str) -> int:
     if detail == "admin_account_exists":
         return status.HTTP_409_CONFLICT
@@ -214,7 +219,11 @@ async def admin_list_events() -> ApiResponse[list[Event]]:
 
 
 @router.post("/events", response_model=ApiResponse[Event], status_code=status.HTTP_201_CREATED)
-async def admin_create_event(payload: EventCreate) -> ApiResponse[Event]:
+async def admin_create_event(
+    payload: EventCreate,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[Event]:
+    _require_operations_manager(principal)
     try:
         event = get_repository().create_event(payload)
     except ValueError as exc:
@@ -229,7 +238,12 @@ async def admin_create_event(payload: EventCreate) -> ApiResponse[Event]:
 
 
 @router.put("/events/{event_id}", response_model=ApiResponse[Event])
-async def admin_update_event(event_id: str, payload: EventUpdate) -> ApiResponse[Event]:
+async def admin_update_event(
+    event_id: str,
+    payload: EventUpdate,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[Event]:
+    _require_operations_manager(principal)
     try:
         event = get_repository().update_event(event_id, payload)
     except ValueError as exc:
@@ -240,7 +254,11 @@ async def admin_update_event(event_id: str, payload: EventUpdate) -> ApiResponse
 
 
 @router.delete("/events/{event_id}", response_model=ApiResponse[dict[str, bool]])
-async def admin_delete_event(event_id: str) -> ApiResponse[dict[str, bool]]:
+async def admin_delete_event(
+    event_id: str,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, bool]]:
+    _require_operations_manager(principal)
     deleted = get_repository().delete_event(event_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="event_not_found")
@@ -263,7 +281,11 @@ async def admin_update_support_ticket(
 
 
 @router.delete("/support-tickets/{ticket_id}", response_model=ApiResponse[dict[str, bool]])
-async def admin_delete_support_ticket(ticket_id: str) -> ApiResponse[dict[str, bool]]:
+async def admin_delete_support_ticket(
+    ticket_id: str,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, bool]]:
+    _require_operations_manager(principal)
     deleted = get_repository().delete_support_ticket(ticket_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="support_ticket_not_found")
@@ -292,7 +314,9 @@ async def admin_get_knowledge_document(document_id: str) -> ApiResponse[Knowledg
 )
 async def admin_create_knowledge_document(
     payload: KnowledgeDocumentCreate,
+    principal: AdminPrincipal = Depends(require_admin_token),
 ) -> ApiResponse[KnowledgeDocument]:
+    _require_operations_manager(principal)
     document_id = payload.document_id or _document_id_from_title(payload.title)
     path = _knowledge_path(document_id)
     if path.exists():
@@ -303,8 +327,11 @@ async def admin_create_knowledge_document(
 
 @router.put("/knowledge-documents/{document_id}", response_model=ApiResponse[KnowledgeDocument])
 async def admin_update_knowledge_document(
-    document_id: str, payload: KnowledgeDocumentUpdate
+    document_id: str,
+    payload: KnowledgeDocumentUpdate,
+    principal: AdminPrincipal = Depends(require_admin_token),
 ) -> ApiResponse[KnowledgeDocument]:
+    _require_operations_manager(principal)
     path = _knowledge_path(document_id)
     if not path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="knowledge_document_not_found")
@@ -318,7 +345,11 @@ async def admin_update_knowledge_document(
 
 
 @router.delete("/knowledge-documents/{document_id}", response_model=ApiResponse[dict[str, bool]])
-async def admin_delete_knowledge_document(document_id: str) -> ApiResponse[dict[str, bool]]:
+async def admin_delete_knowledge_document(
+    document_id: str,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, bool]]:
+    _require_operations_manager(principal)
     path = _knowledge_path(document_id)
     if not path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="knowledge_document_not_found")
@@ -327,7 +358,10 @@ async def admin_delete_knowledge_document(document_id: str) -> ApiResponse[dict[
 
 
 @router.get("/notification-jobs", response_model=ApiResponse[list[NotificationJob]])
-async def admin_notification_jobs() -> ApiResponse[list[NotificationJob]]:
+async def admin_notification_jobs(
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[list[NotificationJob]]:
+    _require_operations_manager(principal)
     return ApiResponse(data=get_repository().list_notification_jobs())
 
 
@@ -336,7 +370,11 @@ async def admin_notification_jobs() -> ApiResponse[list[NotificationJob]]:
     response_model=ApiResponse[NotificationJob],
     status_code=status.HTTP_201_CREATED,
 )
-async def admin_create_notification_job(payload: NotificationJobCreate) -> ApiResponse[NotificationJob]:
+async def admin_create_notification_job(
+    payload: NotificationJobCreate,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[NotificationJob]:
+    _require_operations_manager(principal)
     try:
         job = get_repository().create_notification_job(payload)
     except ValueError as exc:
@@ -346,8 +384,11 @@ async def admin_create_notification_job(payload: NotificationJobCreate) -> ApiRe
 
 @router.put("/notification-jobs/{job_id}", response_model=ApiResponse[NotificationJob])
 async def admin_update_notification_job(
-    job_id: str, payload: NotificationJobUpdate
+    job_id: str,
+    payload: NotificationJobUpdate,
+    principal: AdminPrincipal = Depends(require_admin_token),
 ) -> ApiResponse[NotificationJob]:
+    _require_operations_manager(principal)
     job = get_repository().update_notification_job(job_id, payload)
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="notification_job_not_found")
@@ -355,7 +396,11 @@ async def admin_update_notification_job(
 
 
 @router.delete("/notification-jobs/{job_id}", response_model=ApiResponse[dict[str, bool]])
-async def admin_delete_notification_job(job_id: str) -> ApiResponse[dict[str, bool]]:
+async def admin_delete_notification_job(
+    job_id: str,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, bool]]:
+    _require_operations_manager(principal)
     deleted = get_repository().delete_notification_job(job_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="notification_job_not_found")
@@ -363,7 +408,11 @@ async def admin_delete_notification_job(job_id: str) -> ApiResponse[dict[str, bo
 
 
 @router.post("/notification-jobs/{job_id}/send-test", response_model=ApiResponse[dict[str, object]])
-async def admin_send_notification_job_test(job_id: str) -> ApiResponse[dict[str, object]]:
+async def admin_send_notification_job_test(
+    job_id: str,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, object]]:
+    _require_operations_manager(principal)
     repo = get_repository()
     job = repo.get_notification_job(job_id)
     if not job:
@@ -373,13 +422,19 @@ async def admin_send_notification_job_test(job_id: str) -> ApiResponse[dict[str,
 
 
 @router.post("/notification-jobs/send-due", response_model=ApiResponse[dict[str, object]])
-async def admin_send_due_notification_jobs() -> ApiResponse[dict[str, object]]:
+async def admin_send_due_notification_jobs(
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, object]]:
+    _require_operations_manager(principal)
     result = await NotificationService(get_repository()).send_due_notification_jobs()
     return ApiResponse(data=result)
 
 
 @router.post("/rich-menu/publish", response_model=ApiResponse[dict[str, object]])
-async def publish_rich_menu_payload() -> ApiResponse[dict[str, object]]:
+async def publish_rich_menu_payload(
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, object]]:
+    _require_owner(principal)
     try:
         result = await RichMenuService().publish_main_menu()
     except httpx.HTTPStatusError as exc:
@@ -402,7 +457,11 @@ async def publish_rich_menu_payload() -> ApiResponse[dict[str, object]]:
 
 
 @router.post("/notifications/{user_id}/send-test", response_model=ApiResponse[dict[str, object]])
-async def send_test_notification(user_id: str) -> ApiResponse[dict[str, object]]:
+async def send_test_notification(
+    user_id: str,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, object]]:
+    _require_operations_manager(principal)
     result = await NotificationService(get_repository()).send_test_notification(
         user_id,
         "Temple AI OS 測試推播：這是 Demo 訊息。",

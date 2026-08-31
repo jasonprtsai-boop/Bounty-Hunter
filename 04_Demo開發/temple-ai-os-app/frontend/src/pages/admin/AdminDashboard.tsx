@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { MetricCard } from "../../components/MetricCard";
 import { Shell } from "../../components/AdminShell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type DashboardSummary } from "../../lib/api";
 
 const labels: Record<string, string> = {
@@ -33,14 +34,45 @@ const operatingFlow = [
 
 export function AdminDashboard() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    apiFetch<DashboardSummary>("/api/admin/dashboard/summary", {}, true).then(setSummary).catch(console.error);
+    loadSummary();
   }, []);
+
+  async function loadSummary() {
+    setLoading(true);
+    setLoadError("");
+    try {
+      setSummary(await apiFetch<DashboardSummary>("/api/admin/dashboard/summary", {}, true));
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "讀取營運總覽失敗");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <Shell title="營運總覽" mode="admin">
-      {summary ? (
+      {loading ? (
+        <StatePanel
+          variant="loading"
+          title="正在讀取營運總覽"
+          body="系統正在整理活動、客服、問答與通知摘要。"
+        />
+      ) : loadError ? (
+        <StatePanel
+          variant="error"
+          title="營運總覽暫時無法讀取"
+          body={loadError}
+          actions={
+            <button className="button primary" type="button" onClick={loadSummary}>
+              重新讀取
+            </button>
+          }
+        />
+      ) : summary ? (
         <>
           <section className="admin-command-center">
             <div className="command-copy">
@@ -165,9 +197,7 @@ export function AdminDashboard() {
           </section>
           <p className="notice">{summary.notice}</p>
         </>
-      ) : (
-        "載入中"
-      )}
+      ) : null}
     </Shell>
   );
 }

@@ -18,13 +18,33 @@ export function SupportPage() {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (form.subject.trim().length < 2) {
+      setError("請填寫較清楚的主旨");
+      return;
+    }
+    if (form.message.trim().length < 6) {
+      setError("請至少簡單描述問題內容");
+      return;
+    }
+    const phone = form.phone.trim();
+    if (phone && !/^[0-9+\-\s()]{6,20}$/.test(phone)) {
+      setError("電話格式不易辨識，請只輸入數字、空格或 + - 符號");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
       const session = await getLiffSession();
       await apiFetch("/api/support/tickets", {
         method: "POST",
-        body: JSON.stringify({ ...form, user_id: session.user_id })
+        body: JSON.stringify({
+          ...form,
+          subject: form.subject.trim(),
+          message: form.message.trim(),
+          contact_name: form.contact_name.trim(),
+          phone: phone || undefined,
+          user_id: session.user_id
+        })
       });
       setDone(true);
     } catch (err) {
@@ -65,6 +85,7 @@ export function SupportPage() {
               value={form.subject}
               onChange={(e) => setForm({ ...form, subject: e.target.value })}
               placeholder="例如：想詢問活動報名"
+              minLength={2}
               required
             />
           </label>
@@ -74,6 +95,7 @@ export function SupportPage() {
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
               placeholder="請簡單描述你的問題"
+              minLength={6}
               required
             />
           </label>
@@ -88,6 +110,8 @@ export function SupportPage() {
           <label>
             電話
             <input
+              type="tel"
+              inputMode="tel"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
               placeholder="選填"

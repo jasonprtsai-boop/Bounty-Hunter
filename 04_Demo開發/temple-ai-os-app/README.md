@@ -31,7 +31,13 @@ uvicorn app.main:app --reload --port 8000
 ```powershell
 cd 04_Demo開發\temple-ai-os-app\frontend
 npm install
-npm run dev
+npm run dev:public
+```
+
+後台前端請使用獨立模式：
+
+```powershell
+npm run dev:admin
 ```
 
 預設 API URL：
@@ -57,6 +63,7 @@ ADMIN_ACCOUNTS=
 ADMIN_SESSION_SECRET=
 VITE_API_BASE_URL=
 VITE_LIFF_ID=
+VITE_PUBLIC_SITE_BASE_URL=
 ```
 
 正式環境第一次登入可使用 `ADMIN_TOKENS` 的 `帳號或 Email:密碼` 格式，或改用 `ADMIN_ACCOUNTS` / `ADMIN_USERNAME` / `ADMIN_PASSWORD`。例如 Render 設為 `ADMIN_TOKENS=temple-staff:xxxx` 時，後台帳號填 `temple-staff`，密碼填 `xxxx`；若設為 `ADMIN_USERNAME=staff@example.com`，登入欄位可直接填 Email。登入後可到 `/admin/accounts` 建立正式管理員帳號；資料庫模式會將密碼雜湊後存入 `admin_accounts`，不保存明文密碼。成功的後台新增、修改、刪除會寫入 `audit_logs`，並以後端驗證出的管理者名稱作為操作人。

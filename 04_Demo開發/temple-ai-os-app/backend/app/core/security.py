@@ -71,7 +71,11 @@ def _repository_admin_principal(username: str, password: str) -> AdminPrincipal 
     )
 
 
-def _refresh_repository_principal(principal: AdminPrincipal) -> AdminPrincipal:
+def _is_configured_admin_actor(actor: str, settings: Settings) -> bool:
+    return normalize_admin_login_id(actor) in _configured_admin_credentials(settings)
+
+
+def _refresh_repository_principal(principal: AdminPrincipal, settings: Settings) -> AdminPrincipal:
     try:
         from app.db.supabase import get_repository
 
@@ -80,10 +84,14 @@ def _refresh_repository_principal(principal: AdminPrincipal) -> AdminPrincipal:
         if not get_account:
             return principal
         account = get_account(principal.actor)
+    except HTTPException:
+        raise
     except Exception:
         return principal
     if not account:
-        return principal
+        if _is_configured_admin_actor(principal.actor, settings):
+            return principal
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin account revoked")
     if account.status != "active":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin account disabled")
     return AdminPrincipal(
@@ -179,7 +187,8 @@ def _resolve_admin_session(token: str, settings: Settings) -> AdminPrincipal | N
         role = "manager"
     display_name = str(payload.get("display_name") or actor).strip()[:80] or actor
     return _refresh_repository_principal(
-        AdminPrincipal(actor=actor, role=role, display_name=display_name)
+        AdminPrincipal(actor=actor, role=role, display_name=display_name),
+        settings,
     )
 
 

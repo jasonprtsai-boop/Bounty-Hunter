@@ -172,9 +172,12 @@ export async function apiFetch<T>(
     headers.set("X-LIFF-ID-Token", liffIdToken);
   }
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
-  const payload = (await response.json()) as ApiResponse<T> & { detail?: string };
-  if (!response.ok || payload.error) {
-    throw new Error(payload.error?.message || payload.detail || response.statusText);
+  const payload = (await response.json().catch(() => null)) as (ApiResponse<T> & { detail?: unknown }) | null;
+  if (!response.ok || payload?.error) {
+    throw new Error(errorMessageFromPayload(payload, response.statusText || "服務暫時無法使用"));
+  }
+  if (!payload) {
+    throw new Error("服務回應格式不正確");
   }
   return payload.data as T;
 }

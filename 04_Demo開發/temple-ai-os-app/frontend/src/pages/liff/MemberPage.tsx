@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CalendarDays, MessageCircle } from "lucide-react";
 import { Shell } from "../../components/Shell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type Registration } from "../../lib/api";
 import { getLiffSession } from "../../lib/session";
 
@@ -15,22 +16,47 @@ type MemberProfile = {
 export function MemberPage() {
   const [profile, setProfile] = useState<MemberProfile | null>(null);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    getLiffSession()
-      .then(async () => {
-        const [profileResult, registrationsResult] = await Promise.all([
-          apiFetch<MemberProfile>("/api/member/profile"),
-          apiFetch<Registration[]>("/api/member/registrations")
-        ]);
-        setProfile(profileResult);
-        setRegistrations(registrationsResult);
-      })
-      .catch(console.error);
+    loadMember();
   }, []);
+
+  async function loadMember() {
+    setLoading(true);
+    setLoadError("");
+    try {
+      await getLiffSession();
+      const [profileResult, registrationsResult] = await Promise.all([
+        apiFetch<MemberProfile>("/api/member/profile"),
+        apiFetch<Registration[]>("/api/member/registrations")
+      ]);
+      setProfile(profileResult);
+      setRegistrations(registrationsResult);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "讀取會員資料失敗");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <Shell title="會員中心">
+      {loading ? (
+        <StatePanel variant="loading" title="正在讀取會員資料" body="系統正在確認你的個人資料與報名紀錄。" />
+      ) : loadError ? (
+        <StatePanel
+          variant="error"
+          title="會員資料暫時無法讀取"
+          body={loadError}
+          actions={
+            <button className="button primary" type="button" onClick={loadMember}>
+              重新讀取
+            </button>
+          }
+        />
+      ) : null}
       {profile ? (
         <section className="detail-panel">
           <h2>{profile.line_display_name}</h2>
@@ -39,7 +65,7 @@ export function MemberPage() {
       ) : null}
       <section className="tool-panel">
         <h2>報名紀錄</h2>
-        {registrations.length ? (
+        {loading || loadError ? null : registrations.length ? (
           <div className="stack">
             {registrations.map((item) => (
               <div className="list-row" key={item.registration_id}>

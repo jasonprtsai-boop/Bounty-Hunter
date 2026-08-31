@@ -81,6 +81,13 @@ def test_settings_include_published_site_origins(monkeypatch: pytest.MonkeyPatch
     assert "https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site" in settings.origins
 
 
+def test_settings_include_local_admin_frontend_origin() -> None:
+    settings = Settings()
+
+    assert "http://localhost:5174" in settings.origins
+    assert "http://127.0.0.1:5174" in settings.origins
+
+
 def test_default_admin_token_stays_rejected_when_password_login_is_configured(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

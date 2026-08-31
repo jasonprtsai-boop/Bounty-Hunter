@@ -15,6 +15,13 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { PUBLIC_SITE_BASE_URL } from "../lib/siteLinks";
+import {
+  adminRoleLabel,
+  canManageAccounts,
+  canManageOperations,
+  canPublishRelease,
+  getStoredAdminRole
+} from "../lib/adminPermissions";
 
 type ShellProps = {
   title: string;
@@ -63,8 +70,18 @@ export function Shell({ title, children }: ShellProps) {
   const adminActor = typeof window !== "undefined" ? localStorage.getItem("adminActor") || "管理員" : "管理員";
   const adminDisplayName =
     typeof window !== "undefined" ? localStorage.getItem("adminDisplayName") || adminActor : adminActor;
-  const adminRole = typeof window !== "undefined" ? localStorage.getItem("adminRole") || "owner" : "owner";
+  const adminRole = getStoredAdminRole();
   const pageDescription = adminPageDescriptions[location.pathname] || "管理資料、服務與發布狀態。";
+  const visibleDailyLinks = adminLinks.filter((item) => item.path !== "/admin/notifications" || canManageOperations(adminRole));
+  const visibleSetupLinks = adminSetupLinks.filter((item) => {
+    if (item.path === "/admin/accounts") {
+      return canManageAccounts(adminRole);
+    }
+    if (item.path === "/admin/release") {
+      return canPublishRelease(adminRole);
+    }
+    return true;
+  });
 
   const renderAdminNavLink = (item: NavItem) => {
     const Icon = item.icon;
@@ -105,7 +122,7 @@ export function Shell({ title, children }: ShellProps) {
             <User size={16} />
             <span>
               {adminDisplayName}
-              <small>{roleLabels[adminRole] || adminRole}</small>
+              <small>{adminRoleLabel(adminRole) || roleLabels[adminRole] || adminRole}</small>
             </span>
           </span>
           <button
@@ -133,9 +150,9 @@ export function Shell({ title, children }: ShellProps) {
         </div>
         <div className="side-nav-list">
           <span className="side-nav-label">日常作業</span>
-          {adminLinks.map(renderAdminNavLink)}
-          <span className="side-nav-label">設定與發布</span>
-          {adminSetupLinks.map(renderAdminNavLink)}
+          {visibleDailyLinks.map(renderAdminNavLink)}
+          {visibleSetupLinks.length > 0 ? <span className="side-nav-label">設定與發布</span> : null}
+          {visibleSetupLinks.map(renderAdminNavLink)}
         </div>
         <a className="side-nav-public-link" href={`${PUBLIC_SITE_BASE_URL}/site`} target="_blank" rel="noreferrer">
           <ShieldCheck size={18} />

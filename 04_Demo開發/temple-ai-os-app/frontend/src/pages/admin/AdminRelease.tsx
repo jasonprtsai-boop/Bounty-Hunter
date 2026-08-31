@@ -11,8 +11,11 @@ import {
   Store
 } from "lucide-react";
 import { useState } from "react";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch } from "../../lib/api";
+import { canPublishRelease, getStoredAdminRole } from "../../lib/adminPermissions";
 import { PUBLIC_SITE_BASE_URL } from "../../lib/siteLinks";
 
 type RichMenuPublishResult = {
@@ -185,11 +188,14 @@ function readChecklistState() {
 }
 
 export function AdminRelease() {
+  const currentRole = getStoredAdminRole();
+  const canPublish = canPublishRelease(currentRole);
   const [publishing, setPublishing] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>(readChecklistState);
+  const { requestConfirmation, confirmDialog } = useConfirmDialog();
 
   async function copyText(label: string, value: string) {
     try {
@@ -220,7 +226,14 @@ export function AdminRelease() {
   }
 
   async function publishRichMenu() {
-    if (!window.confirm("發布後會更新 LINE 官方帳號所有好友看到的 Rich Menu。確認發布？")) {
+    if (
+      !(await requestConfirmation({
+        title: "發布 Rich Menu",
+        body: "發布後 LINE 官方帳號所有好友看到的底部選單會更新，請確認公開網址、LIFF 入口與 Demo 聲明已完成檢查。",
+        confirmLabel: "發布選單",
+        tone: "primary"
+      }))
+    ) {
       return;
     }
     setPublishing(true);
@@ -247,6 +260,14 @@ export function AdminRelease() {
 
   return (
     <Shell title="設定與發布中心" mode="admin">
+      {!canPublish ? (
+        <StatePanel
+          variant="error"
+          title="權限不足"
+          body="LINE 帳號設定與 Rich Menu 發布會影響所有使用者，只有最高權限帳號可以操作。"
+        />
+      ) : (
+      <>
       <section className="admin-setup-flow" aria-label="設定順序">
         {setupSequence.map(([step, title, body]) => (
           <article key={title}>
@@ -284,7 +305,7 @@ export function AdminRelease() {
               <span>人工設定完成</span>
             </div>
             <div>
-              <strong>54</strong>
+              <strong>已驗證</strong>
               <span>後端測試通過</span>
             </div>
             <div>
@@ -507,6 +528,9 @@ export function AdminRelease() {
           </a>
         </article>
       </section>
+      </>
+      )}
+      {confirmDialog}
     </Shell>
   );
 }

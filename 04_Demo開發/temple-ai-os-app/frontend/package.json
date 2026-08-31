@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "dev:public": "vite --host 0.0.0.0 --mode public",
+    "dev:admin": "vite --host 0.0.0.0 --mode admin",
     "build": "npm run build:public",
     "build:public": "tsc -b && vite build --mode public",
     "build:admin": "tsc -b && vite build --mode admin",

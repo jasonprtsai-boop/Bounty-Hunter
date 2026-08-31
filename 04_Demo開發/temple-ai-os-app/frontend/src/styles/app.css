@@ -2848,7 +2848,12 @@ body {
   min-height: 38px;
   padding: 0;
   border: 0;
-  outline: 0;
+  outline: none;
+}
+
+.search-field:focus-within {
+  border-color: rgba(180, 35, 24, 0.5);
+  box-shadow: 0 0 0 3px rgba(216, 168, 61, 0.24);
 }
 
 .admin-editor-panel {
@@ -3252,6 +3257,342 @@ body {
   .event-page-hero .button,
   .primary-route-row .button,
   .state-actions .button {
+    width: 100%;
+  }
+}
+
+/* Final page review refinements */
+.state-panel {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  min-height: 190px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f7faf7 100%),
+    #fff;
+  box-shadow: var(--shadow-tight);
+}
+
+.state-panel h2 {
+  margin: 0;
+  color: var(--temple-green);
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.state-panel p {
+  max-width: 720px;
+  margin: 8px 0 0;
+  color: #4f625b;
+}
+
+.state-panel-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 8px;
+  border-radius: 8px;
+  background: #fff4d6;
+  color: var(--temple-red);
+}
+
+.state-panel.loading .state-panel-icon {
+  animation: state-spin 1.2s linear infinite;
+  background: #e9f7ef;
+  color: #0f7a43;
+}
+
+.state-panel.error {
+  border-color: #f0c8c1;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fff7f4 100%),
+    #fff;
+}
+
+.state-panel.empty {
+  border-color: #dce5e0;
+}
+
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(21, 32, 28, 0.48);
+  backdrop-filter: blur(6px);
+}
+
+.confirm-dialog {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 14px;
+  width: min(100%, 480px);
+  padding: 22px;
+  border: 1px solid #f0c8c1;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(30, 20, 16, 0.24);
+}
+
+.confirm-dialog.primary {
+  border-color: #cfe2d9;
+}
+
+.confirm-dialog-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 8px;
+  background: #fff4d6;
+  color: var(--temple-red);
+}
+
+.confirm-dialog.primary .confirm-dialog-icon {
+  background: #e9f7ef;
+  color: #0f7a43;
+}
+
+.confirm-dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #63736d;
+  cursor: pointer;
+}
+
+.confirm-dialog-close:hover,
+.confirm-dialog-close:focus-visible {
+  border-color: #dce5e0;
+  background: #f6faf8;
+  color: var(--temple-green);
+}
+
+.confirm-dialog-copy {
+  min-width: 0;
+  padding-right: 34px;
+}
+
+.confirm-dialog-copy h2 {
+  margin: 0;
+  color: var(--temple-green);
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.confirm-dialog-copy p {
+  margin: 8px 0 0;
+  color: #52635d;
+  line-height: 1.65;
+}
+
+.confirm-dialog-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.confirm-dialog-actions .button.danger {
+  border-color: #b42318;
+  background: #b42318;
+  color: #fff;
+}
+
+@keyframes state-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.read-only-admin-grid {
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+}
+
+.read-only-admin-grid > .state-panel {
+  position: sticky;
+  top: 92px;
+  align-content: start;
+  min-height: 220px;
+}
+
+.event-list > .state-panel,
+.knowledge-list > .state-panel,
+.support-list > .state-panel,
+.account-list > .state-panel {
+  min-height: 220px;
+}
+
+.event-admin-card,
+.knowledge-doc-card,
+.support-ticket,
+.account-card {
+  border-color: #dce5e0;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fbfdfb 100%),
+    #fff;
+}
+
+.event-admin-card:hover,
+.knowledge-doc-card:hover,
+.support-ticket:hover,
+.account-card:hover {
+  border-color: rgba(180, 35, 24, 0.24);
+  box-shadow: var(--shadow-soft);
+}
+
+.card-row {
+  gap: 8px;
+  min-width: 0;
+}
+
+.card-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.inline-actions {
+  align-items: center;
+}
+
+.inline-actions .button,
+.panel-actions .button,
+.admin-actions .button {
+  white-space: nowrap;
+}
+
+.button:disabled,
+.button.muted {
+  transform: none;
+  box-shadow: none;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.release-check-row input:focus-visible {
+  outline: 3px solid rgba(216, 168, 61, 0.48);
+  outline-offset: 2px;
+  border-color: rgba(180, 35, 24, 0.5);
+}
+
+.admin-filter-bar label,
+.form-panel label {
+  min-width: 0;
+}
+
+.form-grid .wide-field {
+  grid-column: 1 / -1;
+}
+
+.admin-page-heading {
+  padding-bottom: 4px;
+}
+
+.admin-summary-strip div {
+  overflow: hidden;
+}
+
+.admin-summary-strip strong,
+.priority-card strong {
+  overflow-wrap: anywhere;
+}
+
+.fortune-stage {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 223, 0.96)),
+    #fff;
+}
+
+.fortune-stage::after {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  width: 70px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--temple-gold);
+  content: "";
+}
+
+.detail-panel,
+.tool-panel,
+.form-panel,
+.success-panel {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .read-only-admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .read-only-admin-grid > .state-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .state-panel {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .state-panel-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .inline-actions {
+    width: 100%;
+  }
+
+  .inline-actions .button,
+  .inline-actions select,
+  .panel-actions .button,
+  .admin-actions .button {
+    flex: 1 1 150px;
+  }
+
+  .support-ticket,
+  .knowledge-doc-card,
+  .event-admin-card {
+    gap: 14px;
+  }
+
+  .confirm-dialog {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .confirm-dialog-copy {
+    padding-right: 30px;
+  }
+
+  .confirm-dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .confirm-dialog-actions .button {
     width: 100%;
   }
 }

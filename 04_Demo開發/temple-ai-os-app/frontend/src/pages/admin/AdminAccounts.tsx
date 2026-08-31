@@ -12,8 +12,11 @@ import {
   UsersRound,
   X
 } from "lucide-react";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type AdminAccount, type AdminAccountStatus, type AdminRole } from "../../lib/api";
+import { canManageAccounts, getStoredAdminRole } from "../../lib/adminPermissions";
 
 type AccountForm = {
   username: string;
@@ -91,12 +94,14 @@ export function AdminAccounts() {
   const [editingUsername, setEditingUsername] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const currentActor = typeof window !== "undefined" ? localStorage.getItem("adminActor") || "" : "";
-  const currentRole = typeof window !== "undefined" ? localStorage.getItem("adminRole") || "" : "";
+  const currentRole = getStoredAdminRole();
+  const { requestConfirmation, confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
     loadAccounts();
@@ -104,11 +109,11 @@ export function AdminAccounts() {
 
   async function loadAccounts() {
     setLoading(true);
-    setError("");
+    setLoadError("");
     try {
       setAccounts(await apiFetch<AdminAccount[]>("/api/admin/accounts", {}, true));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "讀取帳號失敗");
+      setLoadError(err instanceof Error ? err.message : "讀取帳號失敗");
     } finally {
       setLoading(false);
     }
@@ -184,7 +189,13 @@ export function AdminAccounts() {
       setError("不能刪除目前登入中的帳號");
       return;
     }
-    if (!window.confirm(`確定刪除 ${username}？刪除後此帳號無法再登入。`)) {
+    if (
+      !(await requestConfirmation({
+        title: "刪除後台帳號",
+        body: `${username} 刪除後將無法再登入後台；這項操作適合離職、停用或誤建帳號時使用。`,
+        confirmLabel: "刪除帳號"
+      }))
+    ) {
       return;
     }
     setMessage("");
@@ -218,7 +229,7 @@ export function AdminAccounts() {
   const activeCount = accounts.filter((account) => account.status === "active").length;
   const disabledCount = accounts.filter((account) => account.status === "disabled").length;
   const passwordCount = accounts.filter((account) => account.password_set).length;
-  const isOwner = currentRole === "owner";
+  const isOwner = canManageAccounts(currentRole);
 
   return (
     <Shell title="權限管理" mode="admin">
@@ -395,11 +406,21 @@ export function AdminAccounts() {
               這裡只顯示帳號狀態，不會顯示任何人的密碼。
             </div>
 
-            {loading ? <div className="empty-state">讀取帳號中</div> : null}
-            {!loading && filteredAccounts.length === 0 ? <div className="empty-state">沒有符合條件的帳號。</div> : null}
-
             <div className="account-list">
-              {filteredAccounts.map((account) => (
+              {loading ? (
+                <StatePanel variant="loading" title="正在讀取帳號" body="系統正在確認後台人員與權限狀態。" />
+              ) : loadError ? (
+                <StatePanel
+                  variant="error"
+                  title="帳號列表暫時無法讀取"
+                  body={loadError}
+                  actions={
+                    <button className="button primary" type="button" onClick={loadAccounts}>
+                      重新讀取
+                    </button>
+                  }
+                />
+              ) : filteredAccounts.map((account) => (
                 <article className="account-card" key={account.account_id}>
                   <div className="account-card-main">
                     <div className="account-avatar" aria-hidden="true">
@@ -437,10 +458,12 @@ export function AdminAccounts() {
                   </div>
                 </article>
               ))}
+              {!loading && !loadError && filteredAccounts.length === 0 ? <div className="empty-state">沒有符合條件的帳號。</div> : null}
             </div>
           </section>
         </div>
       )}
+      {confirmDialog}
     </Shell>
   );
 }

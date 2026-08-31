@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { CalendarCheck, ClipboardList, FileSpreadsheet, Pencil, Plus, Save, Search, Trash2, X } from "lucide-react";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type EventItem } from "../../lib/api";
+import { canManageOperations, getStoredAdminRole } from "../../lib/adminPermissions";
 import { exportRowsToExcel } from "../../lib/excelExport";
 
 type EventForm = {
@@ -98,15 +101,32 @@ export function AdminEvents() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [form, setForm] = useState<EventForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [query, setQuery] = useState("");
+  const currentRole = getStoredAdminRole();
+  const canEditEvents = canManageOperations(currentRole);
+  const { requestConfirmation, confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
-    apiFetch<EventItem[]>("/api/admin/events", {}, true).then(setEvents).catch(console.error);
+    loadEvents();
   }, []);
+
+  async function loadEvents() {
+    setLoading(true);
+    setLoadError("");
+    try {
+      setEvents(await apiFetch<EventItem[]>("/api/admin/events", {}, true));
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "讀取活動失敗");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function updateForm<K extends keyof EventForm>(key: K, value: EventForm[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -121,6 +141,10 @@ export function AdminEvents() {
 
   async function saveEvent(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canEditEvents) {
+      setError("目前帳號只能查看活動，不能變更活動資料");
+      return;
+    }
     setSaving(true);
     setError("");
     setMessage("");
@@ -153,7 +177,17 @@ export function AdminEvents() {
   }
 
   async function deleteEvent(eventId: string) {
-    if (!window.confirm("確定刪除此 Demo 活動？")) {
+    if (!canEditEvents) {
+      setError("目前帳號只能查看活動，不能刪除活動");
+      return;
+    }
+    if (
+      !(await requestConfirmation({
+        title: "刪除 Demo 活動",
+        body: "刪除後活動會從後台列表移除，已連動的示範報名資料也不應再用這筆活動作為入口。",
+        confirmLabel: "刪除活動"
+      }))
+    ) {
       return;
     }
     setError("");
@@ -237,7 +271,8 @@ export function AdminEvents() {
         </div>
       </section>
 
-      <div className="admin-event-grid">
+      <div className={`admin-event-grid${canEditEvents ? "" : " read-only-admin-grid"}`}>
+        {canEditEvents ? (
         <form className="form-panel admin-editor-panel" onSubmit={saveEvent}>
           <div className="admin-actions">
             <div>
@@ -360,6 +395,13 @@ export function AdminEvents() {
           {message && <p className="notice">{message}</p>}
           {error && <p className="error-text">{error}</p>}
         </form>
+        ) : (
+          <StatePanel
+            variant="info"
+            title="目前是查看模式"
+            body="服務人員可以查看活動與報名概況；新增、編輯與刪除活動需要管理員以上權限。"
+          />
+        )}
 
         <section className="tool-panel">
           <div className="panel-header">
@@ -400,7 +442,20 @@ export function AdminEvents() {
             會匯出目前搜尋與狀態篩選後的活動清單。
           </div>
           <div className="event-list">
-            {filteredEvents.map((event) => {
+            {loading ? (
+              <StatePanel variant="loading" title="正在讀取活動" body="系統正在整理活動列表與報名狀態。" />
+            ) : loadError ? (
+              <StatePanel
+                variant="error"
+                title="活動列表暫時無法讀取"
+                body={loadError}
+                actions={
+                  <button className="button primary" type="button" onClick={loadEvents}>
+                    重新讀取
+                  </button>
+                }
+              />
+            ) : filteredEvents.map((event) => {
               const capacityPercent = event.capacity
                 ? Math.min(100, Math.round((event.registered_count / event.capacity) * 100))
                 : 0;
@@ -438,32 +493,37 @@ export function AdminEvents() {
                       )}
                     </div>
                     <div className="inline-actions">
-                      <button
-                        className="button icon-button"
-                        type="button"
-                        onClick={() => {
-                          setEditingId(event.event_id);
-                          setForm(toForm(event));
-                          setError("");
-                          setMessage("");
-                        }}
-                      >
-                        <Pencil size={17} />
-                        <span>編輯</span>
-                      </button>
-                      <button className="button icon-button danger" type="button" onClick={() => deleteEvent(event.event_id)}>
-                        <Trash2 size={17} />
-                        <span>刪除</span>
-                      </button>
+                      {canEditEvents ? (
+                        <>
+                          <button
+                            className="button icon-button"
+                            type="button"
+                            onClick={() => {
+                              setEditingId(event.event_id);
+                              setForm(toForm(event));
+                              setError("");
+                              setMessage("");
+                            }}
+                          >
+                            <Pencil size={17} />
+                            <span>編輯</span>
+                          </button>
+                          <button className="button icon-button danger" type="button" onClick={() => deleteEvent(event.event_id)}>
+                            <Trash2 size={17} />
+                            <span>刪除</span>
+                          </button>
+                        </>
+                      ) : null}
                     </div>
                   </div>
                 </article>
               );
             })}
-            {filteredEvents.length === 0 && <div className="empty-state">沒有符合條件的活動。</div>}
+            {!loading && !loadError && filteredEvents.length === 0 && <div className="empty-state">沒有符合條件的活動。</div>}
           </div>
         </section>
       </div>
+      {confirmDialog}
     </Shell>
   );
 }

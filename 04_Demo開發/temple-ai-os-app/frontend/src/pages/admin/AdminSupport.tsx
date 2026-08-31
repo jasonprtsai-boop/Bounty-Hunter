@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Clock3, FileSpreadsheet, Headphones, Search, Trash2 } from "lucide-react";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch } from "../../lib/api";
+import { canDeleteSupportTickets, getStoredAdminRole } from "../../lib/adminPermissions";
 import { exportRowsToExcel } from "../../lib/excelExport";
 
 type Ticket = {
@@ -28,14 +31,31 @@ function ticketStatusLabel(status: string) {
 
 export function AdminSupport() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
   const [query, setQuery] = useState("");
+  const currentRole = getStoredAdminRole();
+  const canDeleteTickets = canDeleteSupportTickets(currentRole);
+  const { requestConfirmation, confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
-    apiFetch<Ticket[]>("/api/admin/support-tickets", {}, true).then(setTickets).catch(console.error);
+    loadTickets();
   }, []);
+
+  async function loadTickets() {
+    setLoading(true);
+    setLoadError("");
+    try {
+      setTickets(await apiFetch<Ticket[]>("/api/admin/support-tickets", {}, true));
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "讀取客服工單失敗");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function updateStatus(ticketId: string, status: string) {
     setError("");
@@ -54,7 +74,17 @@ export function AdminSupport() {
   }
 
   async function deleteTicket(ticketId: string) {
-    if (!window.confirm("確定刪除此 Demo 工單？")) {
+    if (!canDeleteTickets) {
+      setError("目前帳號可以處理工單狀態，但不能刪除工單");
+      return;
+    }
+    if (
+      !(await requestConfirmation({
+        title: "刪除客服工單",
+        body: "刪除後這筆客服紀錄會從後台移除，請確認它不再需要用於展示、追蹤或稽核。",
+        confirmLabel: "刪除工單"
+      }))
+    ) {
       return;
     }
     setError("");
@@ -171,9 +201,21 @@ export function AdminSupport() {
         </div>
         {message && <p className="notice">{message}</p>}
         {error && <p className="error-text">{error}</p>}
-        {filteredTickets.length === 0 ? <div className="empty-state">目前沒有符合條件的工單。</div> : null}
         <div className="support-list">
-          {filteredTickets.map((ticket) => (
+          {loading ? (
+            <StatePanel variant="loading" title="正在讀取客服工單" body="系統正在整理待處理與已完成的問題。" />
+          ) : loadError ? (
+            <StatePanel
+              variant="error"
+              title="客服工單暫時無法讀取"
+              body={loadError}
+              actions={
+                <button className="button primary" type="button" onClick={loadTickets}>
+                  重新讀取
+                </button>
+              }
+            />
+          ) : filteredTickets.map((ticket) => (
           <div className="support-ticket" key={ticket.ticket_id}>
             <div>
               <div className="card-row">
@@ -201,15 +243,19 @@ export function AdminSupport() {
                 <CheckCircle2 size={17} />
                 <span>完成</span>
               </button>
-              <button className="button icon-button danger" type="button" onClick={() => deleteTicket(ticket.ticket_id)}>
-                <Trash2 size={17} />
-                <span>刪除</span>
-              </button>
+              {canDeleteTickets ? (
+                <button className="button icon-button danger" type="button" onClick={() => deleteTicket(ticket.ticket_id)}>
+                  <Trash2 size={17} />
+                  <span>刪除</span>
+                </button>
+              ) : null}
             </div>
           </div>
           ))}
+          {!loading && !loadError && filteredTickets.length === 0 ? <div className="empty-state">目前沒有符合條件的工單。</div> : null}
         </div>
       </section>
+      {confirmDialog}
     </Shell>
   );
 }
