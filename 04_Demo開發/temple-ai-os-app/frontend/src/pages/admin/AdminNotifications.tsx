@@ -33,14 +33,14 @@ type NotificationForm = {
 const emptyNotificationForm: NotificationForm = {
   job_id: "",
   job_type: "event_reminder_day_before",
-  target_user_id: "demo_u001",
-  event_id: "evt_demo_worship_intro",
+  target_user_id: "",
+  event_id: "",
   status: "draft",
   scheduled_at: "",
-  registration_id: "reg_0002",
+  registration_id: "",
   reminder_type: "day_before",
   party_size: "1",
-  text: "萬春宮智慧服務示範：這是一則測試推播。"
+  text: "萬春宮活動提醒：請依廟方公告確認活動時間與參加方式。"
 };
 
 const notificationTypeOptions = [
@@ -192,7 +192,7 @@ export function AdminNotifications() {
       );
       setMessage(result.sent ? "已送出通知" : `${result.message_type || "通知"}：${result.reason || "未送出"}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "送測試失敗");
+      setError(err instanceof Error ? err.message : "送出通知失敗");
     }
   }
 
@@ -224,7 +224,7 @@ export function AdminNotifications() {
     if (
       !(await requestConfirmation({
         title: "刪除推播任務",
-        body: "刪除後這筆通知任務不會再出現在待送或補發清單，請先確認它不是展示流程需要的訊息。",
+        body: "刪除後這筆通知任務不會再出現在待送或補發清單，請先確認它不是服務流程需要的訊息。",
         confirmLabel: "刪除任務"
       }))
     ) {
@@ -369,7 +369,7 @@ export function AdminNotifications() {
                 onChange={(event) => setForm({ ...form, scheduled_at: event.target.value })}
                 placeholder="例如 2026-09-01 18:00"
               />
-              <small>立即測試或草稿可以留空；正式排程再填送出時間。</small>
+              <small>立即補發或草稿可以留空；正式排程再填送出時間。</small>
             </label>
           </div>
 
@@ -442,7 +442,7 @@ export function AdminNotifications() {
             )}
           </div>
           {message && <p className="notice">{message}</p>}
-          {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text" role="alert">{error}</p>}
         </form>
 
         <section className="tool-panel">

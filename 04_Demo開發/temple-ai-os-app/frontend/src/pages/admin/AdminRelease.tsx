@@ -35,12 +35,12 @@ const releaseChecklistStorageKey = "templeReleaseChecklist";
 const businessProfileFields = [
   {
     label: "商業簡介短標",
-    value: "Temple AI OS示範｜LINE × AI 智慧宮廟服務入口"
+    value: "萬春宮線上服務｜LINE 宮廟服務入口"
   },
   {
     label: "商業簡介",
     value:
-      "Temple AI OS 是智慧宮廟服務 Demo，示範如何把 LINE 官方帳號、AI 問答、活動報名、會員服務與管理後台整合為一個入口。本帳號以萬春宮公開資料建立展示場景，用於競賽與系統測試，不代表萬春宮官方正式營運。正式活動、開放時間與服務內容請以廟方公告為準。"
+      "萬春宮線上服務把 LINE 帳號、參拜問答、活動報名、報名進度查詢與管理後台整合為一個入口。本帳號以萬春宮公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。"
   },
   {
     label: "網站",
@@ -55,7 +55,7 @@ const businessProfileFields = [
     value: `${publicSiteBaseUrl}/terms`
   },
   {
-    label: "示範場景地址",
+    label: "萬春宮地址",
     value: "臺中市中區成功路212號"
   },
   {
@@ -64,7 +64,7 @@ const businessProfileFields = [
   },
   {
     label: "營業時間說明",
-    value: "此帳號為競賽 Demo，不提供正式營業時間；參拜與活動資訊請以廟方公告為準。"
+    value: "參拜與活動資訊請以廟方公告為準；重要廟務建議再向正式窗口確認。"
   }
 ];
 
@@ -72,31 +72,31 @@ const businessProfileChecklist = [
   "進入 LINE 後台的 Profile / 商業簡介頁面設定。",
   "先上傳大頭貼與背景圖，再編輯商業簡介文字。",
   "網站、隱私權政策、服務條款填入已部署的公開網址。",
-  "電話與地址屬於萬春宮公開資料；若未取得廟方正式授權，建議只放在簡介文字中作為示範說明，不要讓帳號看起來像正式客服入口。",
+  "電話與地址屬於萬春宮公開資料；若未取得廟方正式授權，建議在簡介文字中清楚保留「正式資訊以廟方公告為準」的提醒。",
   "完成後按下 Publish changes / 發布變更。"
 ];
 
 const accountSettingFields = [
   {
     label: "帳號名稱",
-    value: "Temple AI OS示範"
+    value: "萬春宮線上服務"
   },
   {
     label: "狀態訊息",
-    value: "競賽 Demo｜LINE × AI 智慧宮廟服務入口"
+    value: "LINE 宮廟服務入口｜參拜・活動・客服"
   },
   {
     label: "歡迎訊息",
     value:
-      "歡迎加入 Temple AI OS 示範帳號。本帳號用於競賽 Demo 與系統測試，不代表萬春宮官方正式營運。你可以點選下方選單體驗 AI 問答、活動報名、文化抽籤、導覽與客服流程。"
+      "歡迎加入萬春宮線上服務。你可以點選下方選單詢問參拜方式、查看活動報名、抽文化籤、看主殿導覽、查報名進度或聯絡客服。正式活動、開放時間與服務內容請以廟方公告為準。"
   },
   {
     label: "聊天回覆模式",
-    value: "Webhook 啟用；自動回應保持關閉或只保留 Demo 聲明，避免和 AI webhook 重複回覆。"
+    value: "Webhook 啟用；自動回應保持關閉或只保留服務提醒，避免和問答 webhook 重複回覆。"
   },
   {
     label: "LINE VOOM 互動",
-    value: "Demo 期間可開放按讚；留言建議先關閉或每日人工檢查，避免未授權服務詢問被誤認為正式客服。"
+    value: "可開放按讚；留言建議先關閉或每日人工檢查，避免未授權服務詢問被誤認為正式客服。"
   },
   {
     label: "禁止放入內容",
@@ -116,28 +116,28 @@ const publicLinks = [
 
 const voomPostExamples = [
   {
-    title: "Demo 上線介紹",
+    title: "線上服務介紹",
     asset: "assets/banners/home.png",
     value:
-      `Temple AI OS 示範帳號上線。\n\n這是一個以 LINE 為入口的智慧宮廟服務 Demo，示範 AI 問答、活動報名、會員紀錄、文化抽籤與後台管理如何整合在同一個流程。\n\n本帳號以公開資料建立展示場景，用於競賽與系統測試，不代表萬春宮官方正式營運。正式活動、開放時間與服務內容請以廟方公告為準。\n\n體驗入口：${publicSiteBaseUrl}/site\n\n#TempleAIOS #LINE智慧服務 #宮廟數位轉型 #競賽Demo`
+      `萬春宮線上服務入口整理完成。\n\n這是一個以 LINE 為入口的宮廟服務流程，將參拜問答、活動報名、報名進度查詢、文化抽籤與後台管理整合在同一個入口。\n\n本帳號以公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。\n\n服務入口：${publicSiteBaseUrl}/site\n\n#萬春宮服務 #LINE服務 #宮廟線上服務 #廟埕入口`
   },
   {
-    title: "活動報名示範",
+    title: "活動報名服務",
     asset: "assets/banners/events.png",
     value:
-      `活動報名也可以從 LINE 開始。\n\nTemple AI OS Demo 示範使用者在 LINE 收到活動卡片後，直接開啟 LIFF 表單完成報名，後台同步看到報名狀態與提醒任務。\n\n提醒：這是示範流程，不代表萬春宮正式活動報名。正式名額、時間與參加規則仍以廟方公告為準。\n\n活動入口：${publicSiteBaseUrl}/events\n\n#活動報名 #LIFF #LINE官方帳號 #TempleAIOS`
+      `活動報名也可以從 LINE 開始。\n\n使用者在 LINE 收到活動卡片後，可直接開啟 LIFF 表單完成報名，後台同步看到報名狀態與提醒任務。\n\n提醒：正式名額、時間與參加規則仍以廟方公告為準。\n\n活動入口：${publicSiteBaseUrl}/events\n\n#活動報名 #LIFF #LINE服務 #萬春宮服務`
   },
   {
     title: "貼圖小舖預告",
     asset: "assets/flex/fortune-card.png",
     value:
-      `春福小使貼圖準備中。\n\nTemple AI OS Demo 的第一套靜態貼圖以「日常祝福、收到、感謝、平安、已報名」為核心語境，讓宮廟服務不只提供資訊，也能保留一點溫度。\n\n貼圖展示：${publicSiteBaseUrl}/stickers\n\n貼圖正式上架需等待 LINE Creators Market 審核，頁面目前為展示用途。\n\n#LINE貼圖 #春福小使 #TempleAIOS #文化服務`
+      `春福小使貼圖準備中。\n\n第一套靜態貼圖以「日常祝福、收到、感謝、平安、已報名」為核心語境，讓宮廟服務不只提供資訊，也能保留一點溫度。\n\n貼圖小舖：${publicSiteBaseUrl}/stickers\n\n貼圖正式上架需等待 LINE Creators Market 審核。\n\n#LINE貼圖 #春福小使 #萬春宮服務 #文化服務`
   },
   {
-    title: "文化導覽示範",
+    title: "文化導覽服務",
     asset: "assets/banners/tour.png",
     value:
-      `從 LINE 開始的文化導覽。\n\nTemple AI OS Demo 示範使用者掃描 QR 或點選 Rich Menu 後，可開啟導覽頁，閱讀宮廟歷史、參拜提醒與文化脈絡。未來可延伸到現場 QR/NFC 點位。\n\n導覽入口：${publicSiteBaseUrl}/tour/main-hall\n\n本內容為 Demo 展示，正式導覽文字仍需廟方審稿。\n\n#文化導覽 #QR導覽 #宮廟文化 #TempleAIOS`
+      `從 LINE 開始的文化導覽。\n\n使用者掃描 QR 或點選 Rich Menu 後，可開啟導覽頁，閱讀宮廟歷史、參拜提醒與文化脈絡。未來可延伸到現場 QR/NFC 點位。\n\n導覽入口：${publicSiteBaseUrl}/tour/main-hall\n\n正式導覽文字仍需廟方審稿。\n\n#文化導覽 #QR導覽 #宮廟文化 #萬春宮服務`
   }
 ];
 
@@ -145,38 +145,38 @@ const broadcastExamples = [
   {
     title: "活動前一天提醒",
     value:
-      "【Temple AI OS Demo 活動提醒】\n你報名的示範活動將於明天開始。\n\n地點：萬春宮示範場景\n請以活動頁與廟方公告為準。\n\n查看報名紀錄：\nhttps://liff.line.me/2010938588-VJXpaoyH/member\n\n此訊息為競賽 Demo 測試，不代表萬春宮官方正式通知。"
+      "【萬春宮活動提醒】\n你報名的活動將於明天開始。\n\n地點：萬春宮\n請以活動頁與廟方公告為準。\n\n查詢報名進度：\nhttps://liff.line.me/2010938588-VJXpaoyH/events?lookup=1\n\n正式活動、時間與服務內容請以廟方公告為準。"
   },
   {
     title: "客服回覆追蹤",
     value:
-      "【Temple AI OS Demo 客服回覆】\n你先前留下的問題已有示範回覆。\n\n請開啟客服頁查看：\nhttps://liff.line.me/2010938588-VJXpaoyH/support\n\n正式廟務、活動與捐款問題仍請以廟方公告或正式窗口為準。"
+      "【萬春宮客服回覆】\n你先前留下的問題已有回覆。\n\n請開啟客服頁查看：\nhttps://liff.line.me/2010938588-VJXpaoyH/support\n\n正式廟務、活動與捐款問題仍請以廟方公告或正式窗口為準。"
   },
   {
-    title: "Demo 展示前暖場",
+    title: "服務發布前檢查",
     value:
-      `Temple AI OS Demo 今日展示重點：\n1. LINE Rich Menu 服務入口\n2. AI 安全問答與活動卡片\n3. LIFF 活動報名\n4. 後台管理與通知任務\n\n公開展示頁：\n${publicSiteBaseUrl}/site`
+      `萬春宮線上服務今日檢查重點：\n1. LINE Rich Menu 服務入口\n2. 參拜問答與活動卡片\n3. LIFF 活動報名\n4. 後台管理與通知任務\n\n公開服務頁：\n${publicSiteBaseUrl}/site`
   }
 ];
 
 const releaseChecklist = [
-  "LINE 商業簡介已貼上 Demo 聲明與公開網址",
+  "LINE 商業簡介已貼上服務提醒與公開網址",
   "帳號名稱、狀態訊息、歡迎訊息與 VOOM 互動設定已確認",
   "LINE 大頭貼已換成 line-oa-profile-v2.png",
   "LINE 背景圖已換成 line-oa-profile-background-v1.png",
   "Messaging API Webhook 驗證成功",
-  "Rich Menu 已發布，活動、導覽、抽籤、紀錄與客服入口可開啟",
-  "至少一篇 LINE VOOM Demo 貼文已建立草稿或排程",
+  "Rich Menu 已發布，詢問、活動、抽籤、導覽、查詢與客服入口可開啟",
+  "至少一篇 LINE VOOM 服務貼文已建立草稿或排程",
   "手機 LINE 實測可開 LIFF 與活動頁",
   "貼圖素材已確認，等待 LINE Creators Market 送審或審核",
-  "Demo 現場前已暖機 Render 後端"
+  "發布前已暖機 Render 後端"
 ];
 
 const setupSequence = [
   ["1", "公開頁面", "確認官網、活動、隱私權與條款都可正常開啟。"],
   ["2", "LINE 帳號", "更新大頭貼、背景圖、商業簡介與歡迎訊息。"],
-  ["3", "Rich Menu", "發布 LINE 底部選單，確認每個入口都能到正確頁面。"],
-  ["4", "實機驗收", "用手機 LINE 測試加入好友、活動、客服、推播與貼圖入口。"]
+  ["3", "Rich Menu", "發布 LINE 底部選單，確認每個入口的圖像、文案與實際動作一致。"],
+  ["4", "實機驗收", "用手機 LINE 確認加入好友、活動、客服、推播與貼圖入口。"]
 ];
 
 function readChecklistState() {
@@ -229,7 +229,7 @@ export function AdminRelease() {
     if (
       !(await requestConfirmation({
         title: "發布 Rich Menu",
-        body: "發布後 LINE 官方帳號所有好友看到的底部選單會更新，請確認公開網址、LIFF 入口與 Demo 聲明已完成檢查。",
+        body: "發布後 LINE 帳號所有好友看到的底部選單會更新，請確認公開網址、LIFF 入口與服務提醒已完成檢查。",
         confirmLabel: "發布選單",
         tone: "primary"
       }))
@@ -306,14 +306,14 @@ export function AdminRelease() {
             </div>
             <div>
               <strong>已驗證</strong>
-              <span>後端測試通過</span>
+              <span>後端檢查通過</span>
             </div>
             <div>
               <strong>已發布</strong>
               <span>公開網站狀態</span>
             </div>
             <div>
-              <strong>Demo</strong>
+              <strong>服務</strong>
               <span>商業簡介定位</span>
             </div>
           </div>
@@ -325,13 +325,13 @@ export function AdminRelease() {
             <Rocket size={20} />
             <h2>Rich Menu</h2>
           </div>
-          <p>目前版本採用民眾常用服務入口，發布後 LINE 底部選單會更新為新版活動、導覽、紀錄與客服動線。</p>
+          <p>目前版本採用民眾常用服務入口，發布後 LINE 底部選單會更新為新版活動、導覽、查詢與客服動線。</p>
           <button className="button primary" type="button" disabled={publishing} onClick={publishRichMenu}>
             <Rocket size={18} />
             {publishing ? "發布中" : "發布 Rich Menu"}
           </button>
           {message && <p className="notice">{message}</p>}
-          {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text" role="alert">{error}</p>}
         </article>
 
         <article className="tool-panel release-card release-media-card">
@@ -340,8 +340,8 @@ export function AdminRelease() {
             <h2>大頭貼與背景</h2>
           </div>
           <div className="release-media-preview">
-            <img className="release-avatar" src={profileImageUrl} alt="Temple AI OS LINE 官方帳號大頭貼" />
-            <img className="release-cover" src={profileBackgroundUrl} alt="Temple AI OS LINE 官方帳號背景圖" />
+            <img className="release-avatar" src={profileImageUrl} alt="萬春宮 LINE 帳號大頭貼" />
+            <img className="release-cover" src={profileBackgroundUrl} alt="萬春宮 LINE 帳號背景圖" />
           </div>
           <div className="inline-actions">
             <a className="button" href={profileImageUrl} target="_blank" rel="noreferrer">
@@ -365,7 +365,7 @@ export function AdminRelease() {
             <h2>商業簡介設定稿</h2>
           </div>
           <p>
-            這份文案用於 LINE Profile / 商業簡介頁面。帳號仍定位為 Demo，避免誤導使用者以為是萬春宮官方客服。
+            這份文案用於 LINE Profile / 商業簡介頁面。未取得正式授權前，仍需保留「正式資訊以廟方公告為準」的提醒。
           </p>
           <button className="button" type="button" onClick={() => copyText("全部商業簡介", copiedProfileText)}>
             <Copy size={17} />
@@ -463,7 +463,7 @@ export function AdminRelease() {
             <MessageSquareText size={20} />
             <h2>LINE VOOM 貼文範例</h2>
           </div>
-          <p>VOOM 可作為 Demo 展示前後的公開內容入口；每篇都保留 Demo 聲明，避免被理解成正式廟方公告。</p>
+          <p>VOOM 可作為公開內容入口；每篇都保留服務提醒，避免被理解成正式廟方公告。</p>
           <div className="post-template-grid">
             {voomPostExamples.map((post) => (
               <div className="post-template-card" key={post.title}>
@@ -486,7 +486,7 @@ export function AdminRelease() {
             <Megaphone size={20} />
             <h2>廣播訊息範例</h2>
           </div>
-          <p>這些文字用於少量人工測試或 Demo 補發；正式大量推播前要確認好友同意、訊息用量與內容審稿。</p>
+          <p>這些文字用於少量人工補發或核對；正式大量推播前要確認好友同意、訊息用量與內容審稿。</p>
           <div className="post-template-grid compact">
             {broadcastExamples.map((post) => (
               <div className="post-template-card" key={post.title}>

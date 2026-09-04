@@ -81,7 +81,7 @@ export function AdminSupport() {
     if (
       !(await requestConfirmation({
         title: "刪除客服工單",
-        body: "刪除後這筆客服紀錄會從後台移除，請確認它不再需要用於展示、追蹤或稽核。",
+        body: "刪除後這筆客服紀錄會從後台移除，請確認它不再需要用於追蹤或稽核。",
         confirmLabel: "刪除工單"
       }))
     ) {
@@ -200,7 +200,7 @@ export function AdminSupport() {
           會匯出目前搜尋與狀態篩選後的客服工單。
         </div>
         {message && <p className="notice">{message}</p>}
-        {error && <p className="error-text">{error}</p>}
+        {error && <p className="error-text" role="alert">{error}</p>}
         <div className="support-list">
           {loading ? (
             <StatePanel variant="loading" title="正在讀取客服工單" body="系統正在整理待處理與已完成的問題。" />

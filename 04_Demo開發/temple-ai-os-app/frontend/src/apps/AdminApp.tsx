@@ -4,6 +4,7 @@ import { AdminGate } from "../components/AdminGate";
 
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard").then((module) => ({ default: module.AdminDashboard })));
 const AdminAccounts = lazy(() => import("../pages/admin/AdminAccounts").then((module) => ({ default: module.AdminAccounts })));
+const AdminDeities = lazy(() => import("../pages/admin/AdminDeities").then((module) => ({ default: module.AdminDeities })));
 const AdminEvents = lazy(() => import("../pages/admin/AdminEvents").then((module) => ({ default: module.AdminEvents })));
 const AdminKnowledge = lazy(() => import("../pages/admin/AdminKnowledge").then((module) => ({ default: module.AdminKnowledge })));
 const AdminNotifications = lazy(() => import("../pages/admin/AdminNotifications").then((module) => ({ default: module.AdminNotifications })));
@@ -17,6 +18,7 @@ export default function AdminApp() {
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="/admin" element={<AdminGate><AdminDashboard /></AdminGate>} />
         <Route path="/admin/events" element={<AdminGate><AdminEvents /></AdminGate>} />
+        <Route path="/admin/deities" element={<AdminGate><AdminDeities /></AdminGate>} />
         <Route path="/admin/knowledge" element={<AdminGate><AdminKnowledge /></AdminGate>} />
         <Route path="/admin/support" element={<AdminGate><AdminSupport /></AdminGate>} />
         <Route path="/admin/notifications" element={<AdminGate><AdminNotifications /></AdminGate>} />

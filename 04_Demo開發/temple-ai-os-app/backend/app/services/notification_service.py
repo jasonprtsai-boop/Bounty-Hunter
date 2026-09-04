@@ -76,6 +76,16 @@ class NotificationService:
         event = self.repository.get_event(registration.event_id)
         if not event:
             return {"sent": False, "reason": "event_not_found"}
+        if registration.status == "waitlisted":
+            return await self._push_or_skip(
+                registration.user_id,
+                registration_waitlist_notice(
+                    event,
+                    user_id=registration.user_id,
+                    party_size=registration.party_size,
+                ),
+                message_type="registration_waitlist",
+            )
         return await self._push_or_skip(
             registration.user_id,
             registration_confirmation(event, registration),
@@ -152,7 +162,7 @@ class NotificationService:
             )
 
         target_user_id = job.target_user_id or "demo_u001"
-        text = str(job.payload.get("text") or "Temple AI OS 測試推播：這是 Demo 訊息。")
+        text = str(job.payload.get("text") or "萬春宮線上服務：這是一則測試推播。")
         result = await self.send_test_notification(target_user_id, text)
         return {**result, "message_type": "text"}
 

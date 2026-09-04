@@ -21,7 +21,7 @@ const labels: Record<string, string> = {
   active_users_7d: "7 日活躍",
   event_views_7d: "活動瀏覽",
   registrations_total: "報名數",
-  ai_questions_7d: "AI 問題",
+  ai_questions_7d: "問答次數",
   knowledge_gap_count: "知識缺口"
 };
 
@@ -89,6 +89,10 @@ export function AdminDashboard() {
               <Link className="button" to="/admin/support">
                 <Headphones size={18} />
                 處理客服
+              </Link>
+              <Link className="button" to="/admin/deities">
+                <ScrollText size={18} />
+                神佛資料
               </Link>
               <Link className="button" to="/admin/release">
                 <Settings size={18} />

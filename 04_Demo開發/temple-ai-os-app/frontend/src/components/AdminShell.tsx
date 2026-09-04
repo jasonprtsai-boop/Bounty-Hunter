@@ -1,6 +1,7 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import {
-  Bot,
+  BellRing,
+  BookOpen,
   CalendarDays,
   ChevronRight,
   Globe2,
@@ -39,9 +40,10 @@ type NavItem = {
 const adminLinks: NavItem[] = [
   { path: "/admin", icon: LayoutDashboard, label: "總覽", hint: "營運指標" },
   { path: "/admin/events", icon: CalendarDays, label: "活動", hint: "發布與報名" },
-  { path: "/admin/knowledge", icon: ScrollText, label: "知識庫", hint: "AI 回覆依據" },
+  { path: "/admin/deities", icon: BookOpen, label: "神佛資料", hint: "分類與介紹" },
+  { path: "/admin/knowledge", icon: ScrollText, label: "知識庫", hint: "問答依據" },
   { path: "/admin/support", icon: Headphones, label: "客服", hint: "服務單追蹤" },
-  { path: "/admin/notifications", icon: Bot, label: "推播", hint: "LINE 通知" }
+  { path: "/admin/notifications", icon: BellRing, label: "推播", hint: "LINE 通知" }
 ];
 
 const adminSetupLinks: NavItem[] = [
@@ -52,6 +54,7 @@ const adminSetupLinks: NavItem[] = [
 const adminPageDescriptions: Record<string, string> = {
   "/admin": "先看今日待處理事項，再進入活動、客服、內容與發布設定。",
   "/admin/events": "建立活動、控制報名狀態、確認名額與公開說明。",
+  "/admin/deities": "維護主配祀神、客座神明與護法神明的公開介紹。",
   "/admin/knowledge": "維護問答依據與安全提醒，避免回覆內容過時或不完整。",
   "/admin/support": "集中處理民眾留下的問題，依狀態安排下一步。",
   "/admin/notifications": "管理 LINE 提醒任務、補發訊息與到期通知。",
@@ -102,9 +105,9 @@ export function Shell({ title, children }: ShellProps) {
     <div className="app admin-app">
       <header className="topbar admin-topbar">
         <Link to="/admin" className="brand">
-          <span className="brand-mark">OS</span>
+          <span className="brand-mark">宮</span>
           <span className="brand-copy">
-            <strong>Temple AI OS</strong>
+            <strong>萬春宮後台</strong>
             <small>管理後台</small>
           </span>
         </Link>
@@ -113,7 +116,7 @@ export function Shell({ title, children }: ShellProps) {
           <strong>資料、活動與通知集中控管</strong>
         </div>
         <div className="topbar-actions">
-          <span className="demo-pill">Demo 營運</span>
+          <span className="service-pill">廟務管理</span>
           <a className="button icon-button admin-public-button" href={`${PUBLIC_SITE_BASE_URL}/site`} target="_blank" rel="noreferrer">
             <Globe2 size={17} />
             <span>公開站</span>
@@ -144,7 +147,7 @@ export function Shell({ title, children }: ShellProps) {
       </header>
       <nav className="side-nav" aria-label="管理後台導覽">
         <div className="side-nav-header">
-          <span>Temple Ops</span>
+          <span>萬春宮</span>
           <strong>營運控制台</strong>
           <small>日常作業與發布設定分層管理</small>
         </div>

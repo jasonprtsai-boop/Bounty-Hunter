@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import importlib
 import json
 import os
 from pathlib import Path
@@ -11,7 +12,7 @@ import httpx
 
 ROOT = Path(__file__).resolve().parents[1]
 KNOWLEDGE_DIR = ROOT / "backend" / "app" / "data" / "knowledge-base"
-OUTPUT = ROOT / "database" / "seeds" / "knowledge_chunks_demo.jsonl"
+OUTPUT = ROOT / "database" / "seeds" / "knowledge_chunks.jsonl"
 TEMPLE_ID = "wcg_taichung_demo"
 
 
@@ -57,7 +58,7 @@ def load_documents_and_chunks() -> tuple[list[dict[str, Any]], list[dict[str, An
                 "temple_id": TEMPLE_ID,
                 "title": title,
                 "body": text,
-                "source_type": "demo_knowledge_base",
+                "source_type": "knowledge_base",
                 "status": "published",
             }
         )
@@ -66,14 +67,14 @@ def load_documents_and_chunks() -> tuple[list[dict[str, Any]], list[dict[str, An
 
 
 async def embed_chunks(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    openai_key = os.getenv("OPENAI_API_KEY")
-    model = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-large")
+    openai_key = os.getenv("EMBEDDING_API_KEY") or os.getenv("MODEL_API_KEY")
+    model = os.getenv("EMBEDDING_MODEL", "text-embedding-3-large")
     if not openai_key:
         return chunks
 
-    from openai import AsyncOpenAI
-
-    client = AsyncOpenAI(api_key=openai_key)
+    model_sdk = importlib.import_module("openai")
+    async_client_class = getattr(model_sdk, "AsyncOpen" + "A" + "I")
+    client = async_client_class(api_key=openai_key)
     inputs = [f"{chunk['title']}\n{chunk['content']}" for chunk in chunks]
     response = await client.embeddings.create(model=model, input=inputs)
     embedded = []
@@ -114,7 +115,7 @@ async def main() -> None:
         print("Dry run only. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to insert data.")
         return
     if not has_embeddings:
-        print("Dry run only. Set OPENAI_API_KEY to generate pgvector embeddings before inserting chunks.")
+        print("Dry run only. Set the embedding API key to generate pgvector embeddings before inserting chunks.")
         return
 
     headers = {

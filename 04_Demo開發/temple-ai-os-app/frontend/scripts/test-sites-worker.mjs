@@ -52,13 +52,23 @@ const publicRoutes = [
   "/privacy",
   "/terms",
   "/events",
+  "/events/worship-intro",
+  "/register/worship-intro",
+  "/deities",
   "/fortune",
   "/member",
   "/stickers",
-  "/support"
+  "/support",
+  "/tour/main-hall"
 ];
 const adminRoutes = [
   "/admin",
+  "/admin/events",
+  "/admin/deities",
+  "/admin/knowledge",
+  "/admin/support",
+  "/admin/notifications",
+  "/admin/accounts",
   "/admin/release"
 ];
 const expectedRoutes = surface === "admin" ? adminRoutes : publicRoutes;

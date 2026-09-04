@@ -1,14 +1,14 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.core.admin_identity import normalize_admin_login_id
 
 
 DEFAULT_ALLOWED_SITE_ORIGINS = (
-    "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site",
+    "https://wanchun-gong-service.jasonprtsai.chatgpt.site",
     "https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site",
 )
 
@@ -16,6 +16,7 @@ DEFAULT_ALLOWED_SITE_ORIGINS = (
 class Settings(BaseSettings):
     app_env: str = "local"
     demo_mode: bool = True
+    wan_chun_gong_service_mode: str = ""
     api_base_url: str = "http://localhost:8000"
     frontend_base_url: str = "http://localhost:5173"
     allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174"
@@ -31,13 +32,19 @@ class Settings(BaseSettings):
     openai_line_model: str = "gpt-5-mini"
     openai_quality_model: str = "gpt-5"
     openai_embedding_model: str = "text-embedding-3-large"
+    model_api_key: str | None = None
+    line_reply_model: str = ""
+    quality_model: str = ""
+    embedding_model: str = ""
 
     supabase_url: str | None = None
     supabase_service_role_key: str | None = None
     supabase_anon_key: str | None = None
     supabase_fallback_to_demo: bool = True
+    supabase_fallback_to_local: bool | None = None
 
     admin_demo_token: str = "temple-ai-os-admin-demo"
+    admin_bootstrap_token: str = ""
     admin_tokens: str = ""
     admin_accounts: str = ""
     admin_username: str = "admin"
@@ -53,6 +60,35 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    @model_validator(mode="after")
+    def apply_service_mode_aliases(self) -> "Settings":
+        service_mode = self.wan_chun_gong_service_mode.strip().lower()
+        if service_mode:
+            database_modes = {"database", "supabase", "production", "live", "formal"}
+            local_modes = {"local", "fallback", "sample", "offline"}
+            if service_mode in database_modes:
+                self.demo_mode = False
+            elif service_mode in local_modes:
+                self.demo_mode = True
+            else:
+                raise ValueError(
+                    "WAN_CHUN_GONG_SERVICE_MODE must be one of: "
+                    "database, supabase, production, live, formal, local, fallback, sample, offline"
+                )
+        if self.admin_bootstrap_token.strip():
+            self.admin_demo_token = self.admin_bootstrap_token.strip()
+        if self.model_api_key and not self.openai_api_key:
+            self.openai_api_key = self.model_api_key
+        if self.line_reply_model.strip():
+            self.openai_line_model = self.line_reply_model.strip()
+        if self.quality_model.strip():
+            self.openai_quality_model = self.quality_model.strip()
+        if self.embedding_model.strip():
+            self.openai_embedding_model = self.embedding_model.strip()
+        if self.supabase_fallback_to_local is not None:
+            self.supabase_fallback_to_demo = self.supabase_fallback_to_local
+        return self
 
     @property
     def origins(self) -> list[str]:

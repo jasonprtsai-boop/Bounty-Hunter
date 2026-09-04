@@ -29,7 +29,7 @@ def test_verify_line_signature_rejects_invalid_signature() -> None:
 def test_default_admin_token_is_rejected_in_production(monkeypatch: pytest.MonkeyPatch) -> None:
     get_settings.cache_clear()
     monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("ADMIN_DEMO_TOKEN", "temple-ai-os-admin-demo")
+    monkeypatch.setenv("ADMIN_BOOTSTRAP_TOKEN", "temple-ai-os-admin-demo")
     monkeypatch.setenv("ADMIN_TOKENS", "")
     monkeypatch.setenv("ADMIN_ACCOUNTS", "")
     monkeypatch.setenv("ADMIN_USERNAME", "")
@@ -47,7 +47,7 @@ def test_default_admin_token_is_rejected_in_production(monkeypatch: pytest.Monke
 def test_named_admin_token_is_accepted_in_production(monkeypatch: pytest.MonkeyPatch) -> None:
     get_settings.cache_clear()
     monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("ADMIN_DEMO_TOKEN", "temple-ai-os-admin-demo")
+    monkeypatch.setenv("ADMIN_BOOTSTRAP_TOKEN", "temple-ai-os-admin-demo")
     monkeypatch.setenv("ADMIN_TOKENS", "temple-staff:prod-secret,reviewer:review-secret")
 
     principal = resolve_admin_principal("Bearer review-secret")
@@ -60,7 +60,7 @@ def test_named_admin_token_is_accepted_in_production(monkeypatch: pytest.MonkeyP
 def test_admin_password_session_is_accepted_in_production(monkeypatch: pytest.MonkeyPatch) -> None:
     get_settings.cache_clear()
     monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("ADMIN_DEMO_TOKEN", "temple-ai-os-admin-demo")
+    monkeypatch.setenv("ADMIN_BOOTSTRAP_TOKEN", "temple-ai-os-admin-demo")
     monkeypatch.setenv("ADMIN_TOKENS", "temple-staff:prod-secret")
 
     principal = authenticate_admin_credentials("temple-staff", "prod-secret")
@@ -77,7 +77,7 @@ def test_settings_include_published_site_origins(monkeypatch: pytest.MonkeyPatch
 
     settings = Settings()
 
-    assert "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site" in settings.origins
+    assert "https://wanchun-gong-service.jasonprtsai.chatgpt.site" in settings.origins
     assert "https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site" in settings.origins
 
 
@@ -93,7 +93,7 @@ def test_default_admin_token_stays_rejected_when_password_login_is_configured(
 ) -> None:
     get_settings.cache_clear()
     monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("ADMIN_DEMO_TOKEN", "temple-ai-os-admin-demo")
+    monkeypatch.setenv("ADMIN_BOOTSTRAP_TOKEN", "temple-ai-os-admin-demo")
     monkeypatch.setenv("ADMIN_ACCOUNTS", "temple-staff:prod-secret")
 
     with pytest.raises(HTTPException) as exc_info:

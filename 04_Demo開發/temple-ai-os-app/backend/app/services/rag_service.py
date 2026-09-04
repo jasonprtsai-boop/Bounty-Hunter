@@ -7,6 +7,7 @@ import time
 from app.core.config import get_settings
 from app.db.supabase import Repository
 from app.schemas.common import ChatReply, Event, FAQRule
+from app.services.event_visibility import public_events
 from app.services.flex_templates import events_carousel
 
 
@@ -25,7 +26,8 @@ class RuleMatch:
     score: int
 
 
-DEMO_NOTICE = "Temple AI OS 目前為示範系統，Demo 活動、報名與 Dashboard 非萬春宮官方營運資料。"
+SERVICE_NOTICE = "本服務依公開資料與後台資料提供回覆；正式活動、名額與廟務細節請以廟方公告為準。"
+NO_PUBLIC_EVENTS_REPLY = "目前沒有公開活動可查看。活動建立後，請在後台將狀態改為開放報名、已發布或即將舉行。"
 REQUIRED_RULE_INTENTS = {"safety_boundary", "event_query", "temple_location", "general"}
 _RAG_SERVICE_CACHE: dict[int, tuple[float, "RAGService"]] = {}
 _RAG_SERVICE_CACHE_LOCK = Lock()
@@ -157,7 +159,7 @@ class RAGService:
         now = time.monotonic()
         if self._events_cache is not None and now < self._events_cache_expires_at:
             return self._events_cache
-        events = self.repository.list_events()
+        events = public_events(self.repository.list_events())
         ttl = max(0, self.settings.event_cache_ttl_seconds)
         self._events_cache = events
         self._events_cache_expires_at = now + ttl
@@ -199,11 +201,11 @@ class RAGService:
             events = self._list_events()
             reply = ChatReply(
                 intent=rule.intent,
-                reply=rule.reply,
+                reply=rule.reply if events else NO_PUBLIC_EVENTS_REPLY,
                 sources=self._sources_for_rule(rule, message),
                 events=events,
-                flex_message=events_carousel(events),
-                demo_notice=DEMO_NOTICE,
+                flex_message=events_carousel(events) if events else None,
+                demo_notice=SERVICE_NOTICE,
             )
             if record:
                 self._record_reply(message, user_id, reply)
@@ -213,7 +215,7 @@ class RAGService:
             intent=rule.intent,
             reply=rule.reply,
             sources=self._sources_for_rule(rule, message),
-            demo_notice=DEMO_NOTICE,
+            demo_notice=SERVICE_NOTICE,
         )
         if record:
             self._record_reply(message, user_id, reply)

@@ -1,9 +1,10 @@
 from typing import Any
 
-from app.db.supabase import DemoRepository
+from app.db.supabase import LocalRepository
 from app.schemas.common import Registration
 from app.services.flex_templates import (
     events_carousel,
+    fortune_message,
     registration_cancellation,
     registration_confirmation,
     registration_reminder,
@@ -30,7 +31,7 @@ def _actions(node: Any) -> list[dict[str, Any]]:
 
 
 def test_events_carousel_uses_swipeable_flex_cards() -> None:
-    repo = DemoRepository()
+    repo = LocalRepository()
     events = repo.list_events()
 
     message = events_carousel(events)
@@ -40,22 +41,35 @@ def test_events_carousel_uses_swipeable_flex_cards() -> None:
     actions = _actions(carousel)
     registerable_index = next(index for index, event in enumerate(events[:12]) if event.requires_registration)
     registerable_bubble = carousel["contents"][registerable_index]
+    hero_urls = [bubble["hero"]["url"] for bubble in carousel["contents"] if "hero" in bubble]
+    body_colors = [
+        bubble["styles"]["body"]["backgroundColor"]
+        for bubble in carousel["contents"]
+        if bubble.get("styles", {}).get("body")
+    ]
 
     assert message["type"] == "flex"
     assert "左右滑動" in message["altText"]
     assert carousel["type"] == "carousel"
     assert 1 <= len(carousel["contents"]) <= 12
     assert {bubble["size"] for bubble in carousel["contents"]} == {"mega"}
-    assert first_bubble["hero"]["url"].endswith("/assets/flex/event-card.png")
-    assert "日期" in first_texts
-    assert "地點" in first_texts
-    assert registerable_bubble["footer"]["contents"][0]["action"]["label"] == "詳情與報名"
+    assert "body" not in first_bubble
+    assert first_bubble["hero"]["url"].endswith("/assets/flex/event-card-festival.png")
+    assert any(url.endswith("/assets/flex/event-card-ritual.png") for url in hero_urls)
+    assert any(url.endswith("/assets/flex/event-card-guide.png") for url in hero_urls)
+    assert any("hero" not in bubble for bubble in carousel["contents"])
+    assert len(set(hero_urls)) >= 3
+    assert len(set(body_colors)) >= 3
+    assert any("日期" in text for text in first_texts)
+    assert any("地點" in text for text in first_texts)
+    assert registerable_bubble["footer"]["contents"][0]["action"]["label"] == "前往活動報名"
+    assert not any(action.get("label") in {"查看資訊", "查看詳情", "詳情與報名"} for action in actions)
     assert all("/events/" in action["uri"] for action in actions if action.get("type") == "uri")
     assert not any("/register/" in action["uri"] for action in actions if action.get("type") == "uri")
 
 
 def test_registration_confirmation_is_notice_card_with_detail_actions() -> None:
-    repo = DemoRepository()
+    repo = LocalRepository()
     event = repo.get_event("evt_demo_worship_intro")
     assert event is not None
     registration = Registration(
@@ -79,13 +93,13 @@ def test_registration_confirmation_is_notice_card_with_detail_actions() -> None:
     assert event.title in texts
     assert "報名編號" in texts
     assert "reg_notice_test" in texts
-    assert footer_actions[0]["label"] == "查看報名紀錄"
-    assert footer_actions[0]["uri"].endswith("/member")
-    assert footer_actions[1]["label"] == "查看活動資訊"
+    assert footer_actions[0]["label"] == "查詢報名進度"
+    assert footer_actions[0]["uri"].endswith("/events?lookup=1")
+    assert footer_actions[1]["label"] == "查看活動詳情"
 
 
 def test_registration_reminder_waitlist_and_cancellation_cards() -> None:
-    repo = DemoRepository()
+    repo = LocalRepository()
     event = repo.get_event("evt_demo_worship_intro")
     assert event is not None
     registration = Registration(
@@ -107,3 +121,22 @@ def test_registration_reminder_waitlist_and_cancellation_cards() -> None:
     assert cancellation["contents"]["header"]["contents"][0]["text"] == "取消報名通知"
     assert "候補通知" in waitlist["altText"]
     assert "取消報名通知" in cancellation["altText"]
+    waitlist_texts = _texts(waitlist)
+    assert not any("line_user_notice" in text for text in waitlist_texts)
+    assert "提醒方式" in waitlist_texts
+    assert "LINE 訊息通知" in waitlist_texts
+
+
+def test_fortune_message_has_specific_chatroom_actions() -> None:
+    repo = LocalRepository()
+    slip = repo.draw_fortune()
+
+    message = fortune_message(slip)
+    actions = _actions(message)
+
+    assert message["type"] == "flex"
+    assert message["altText"].startswith("文化抽籤結果")
+    assert message["contents"]["size"] == "mega"
+    assert [action["label"] for action in actions] == ["再抽一支文化籤", "前往客服詢問"]
+    assert actions[0]["uri"].endswith("/fortune")
+    assert actions[1]["uri"].endswith("/support")

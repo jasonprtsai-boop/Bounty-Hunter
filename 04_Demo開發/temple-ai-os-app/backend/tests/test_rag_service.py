@@ -1,4 +1,4 @@
-from app.db.supabase import DemoRepository
+from app.db.supabase import LocalRepository
 from app.schemas.common import FAQRule
 from app.services.rag_service import (
     RAGService,
@@ -8,7 +8,7 @@ from app.services.rag_service import (
 )
 
 
-class IncompleteFAQRepository(DemoRepository):
+class IncompleteFAQRepository(LocalRepository):
     def list_faq_rules(self) -> list[FAQRule]:
         return [
             FAQRule(
@@ -32,7 +32,7 @@ def test_rag_service_uses_local_rules_when_remote_rules_are_incomplete() -> None
 
 
 def test_rag_service_can_skip_synchronous_message_logging() -> None:
-    repository = DemoRepository()
+    repository = LocalRepository()
     service = RAGService(repository)
 
     import asyncio
@@ -44,9 +44,24 @@ def test_rag_service_can_skip_synchronous_message_logging() -> None:
     assert len(repository.messages) == before_count
 
 
+def test_event_query_without_public_events_returns_text_only() -> None:
+    repository = LocalRepository()
+    repository.events = [event.model_copy(update={"status": "draft"}) for event in repository.events]
+    service = RAGService(repository)
+
+    import asyncio
+
+    reply = asyncio.run(service.answer("近期有什麼活動？", "line_user_no_public_events", record=False))
+
+    assert reply.intent == "event_query"
+    assert reply.events == []
+    assert reply.flex_message is None
+    assert "沒有公開活動" in reply.reply
+
+
 def test_get_rag_service_reuses_cached_instance() -> None:
     clear_rag_service_cache()
-    repository = DemoRepository()
+    repository = LocalRepository()
 
     first = get_rag_service(repository)
     second = get_rag_service(repository)
@@ -57,7 +72,7 @@ def test_get_rag_service_reuses_cached_instance() -> None:
 
 def test_warm_fast_reply_cache_preloads_cached_service() -> None:
     clear_rag_service_cache()
-    repository = DemoRepository()
+    repository = LocalRepository()
 
     warmed = warm_fast_reply_cache(repository)
     reused = get_rag_service(repository)

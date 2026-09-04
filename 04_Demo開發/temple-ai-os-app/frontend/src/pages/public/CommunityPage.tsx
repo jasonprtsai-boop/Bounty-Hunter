@@ -1,13 +1,10 @@
 import { Link } from "react-router-dom";
 import {
-  Bot,
   CalendarDays,
   CheckCircle2,
   ExternalLink,
-  MapPin,
   MessageCircle,
   ShieldCheck,
-  Sparkles,
   UsersRound
 } from "lucide-react";
 import "../../styles/public.css";
@@ -16,13 +13,13 @@ const lineAddFriendUrl = import.meta.env.VITE_LINE_ADD_FRIEND_URL || "https://li
 const lineOpenChatUrl = import.meta.env.VITE_LINE_OPENCHAT_URL || "";
 
 const communityFlows = [
-  ["加入好友", "加入 LINE 後，可查看活動、開啟導覽與找到客服入口。"],
-  ["查看活動", "法會、導覽與服務活動集中呈現，快速確認時間、地點與參加方式。"],
-  ["需要協助", "遇到問題時可以留下訊息，後續由服務人員接續處理。"]
+  ["加入好友", "加入 LINE 後，可詢問參拜方式、查看活動報名與打開導覽。"],
+  ["查看活動報名", "法會、導覽與服務活動集中呈現，快速確認時間、地點與參加方式。"],
+  ["查詢或客服", "用手機或報名編號查進度；遇到問題時可留下訊息接續處理。"]
 ];
 
 const guardrails = [
-  "此頁為智慧服務示範頁，正式公告請以廟方為準",
+  "此頁為萬春宮線上服務入口，正式公告請以廟方為準",
   "活動時間、名額與服務內容以正式公告為準",
   "不處理正式捐款、交易或敏感個資",
   "重要廟務問題請透過正式窗口再次確認"
@@ -46,7 +43,7 @@ export function CommunityPage() {
         <Link to="/site" className="brand">
           <span className="brand-mark">宮</span>
           <span>
-            <strong>萬春宮智慧服務</strong>
+            <strong>萬春宮線上服務</strong>
             <small>LINE 社群入口</small>
           </span>
         </Link>
@@ -83,40 +80,20 @@ export function CommunityPage() {
           <div className="community-phone" aria-label="LINE 對話示意">
             <div className="phone-bar" />
             <div className="chat-bubble bot">
-              <Bot size={16} />
-              歡迎使用萬春宮智慧服務
+              <MessageCircle size={16} />
+              歡迎使用萬春宮線上服務
             </div>
             <div className="chat-bubble user">最近有什麼活動？</div>
             <div className="chat-bubble bot">
               <CalendarDays size={16} />
-              可查看近期活動、報名狀態與參拜資訊
+              可先查看活動卡片，也可以查報名進度
             </div>
-            <div className="phone-rich-menu" aria-label="LINE 底部選單示意">
-              <Link to="/">
-                <Bot size={16} />
-                AI 問答
-              </Link>
-              <Link to="/events">
-                <CalendarDays size={16} />
-                活動
-              </Link>
-              <Link to="/tour/main-hall">
-                <MapPin size={16} />
-                導覽
-              </Link>
-              <Link to="/fortune">
-                <Sparkles size={16} />
-                抽籤
-              </Link>
-              <Link to="/member">
-                <CheckCircle2 size={16} />
-                紀錄
-              </Link>
-              <Link to="/support">
-                <MessageCircle size={16} />
-                客服
-              </Link>
-            </div>
+            <figure className="phone-rich-menu-preview">
+              <img
+                src="/assets/rich-menu/main-2500x1686.png"
+                alt="LINE 底部選單示意：詢問參拜方式、查看活動報名、抽文化籤、看主殿導覽、查報名進度、聯絡客服。"
+              />
+            </figure>
           </div>
         </section>
 
@@ -137,7 +114,7 @@ export function CommunityPage() {
         <section className="public-section community-guardrails">
           <div>
             <div className="section-kicker">使用提醒</div>
-            <h2>示範頁仍需保留清楚界線</h2>
+            <h2>線上服務仍需保留清楚界線</h2>
           </div>
           <div className="guardrail-list">
             {guardrails.map((item) => (
@@ -154,7 +131,7 @@ export function CommunityPage() {
             <div className="section-kicker">開始使用</div>
             <h2>加入 LINE 後，活動與客服都能接著查</h2>
             <p>
-              先從活動列表、客服中心或個人紀錄開始；需要回到官網時，也能再查看參拜導覽與聯絡資訊。
+              先從活動列表、報名查詢或客服中心開始；需要回到官網時，也能再查看參拜導覽與聯絡資訊。
             </p>
           </div>
           <div className="band-actions">
@@ -164,15 +141,15 @@ export function CommunityPage() {
             <Link className="button" to="/support">
               客服中心 <MessageCircle size={18} />
             </Link>
-            <Link className="button" to="/member">
-              我的紀錄 <CheckCircle2 size={18} />
+            <Link className="button" to="/events?lookup=1">
+              報名查詢 <CheckCircle2 size={18} />
             </Link>
           </div>
         </section>
       </main>
 
       <footer className="public-footer">
-        <span>LINE 帳號：@983zhzni（示範）</span>
+        <span>LINE 帳號：@983zhzni</span>
         <nav aria-label="頁尾連結">
           <Link to="/privacy">隱私權政策</Link>
           <Link to="/terms">使用條款</Link>

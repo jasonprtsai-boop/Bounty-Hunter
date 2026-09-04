@@ -1,7 +1,7 @@
 {
   "snapshot_date": "2026-08-05",
   "temple_id": "wcg_taichung_demo",
-  "notice": "All metrics are demo sample data, not official Wan Chun Gong operating data.",
+  "notice": "Dashboard 指標供服務檢查使用；正式活動、名額與營運數據仍以廟方確認為準。",
   "headline_metrics": {
     "line_friends": 1268,
     "active_users_7d": 342,
@@ -13,7 +13,7 @@
   "event_metrics": [
     {
       "event_id": "evt_20260827_zhongyuan",
-      "title": "中元普度法會示範報名",
+      "title": "中元普度法會線上報名",
       "views": 328,
       "registrations": 78,
       "reminder_opt_ins": 65,

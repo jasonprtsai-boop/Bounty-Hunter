@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Shell } from "../../components/Shell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type EventItem, type Registration } from "../../lib/api";
+import { eventPath } from "../../lib/eventLinks";
 import { getLiffSession } from "../../lib/session";
 
 export function RegistrationPage() {
@@ -55,8 +56,8 @@ export function RegistrationPage() {
       setError("請填寫姓名或稱呼");
       return;
     }
-    if (!Number.isInteger(partySize) || partySize < 1 || partySize > 10) {
-      setError("參加人數需為 1 到 10 人");
+    if (!Number.isInteger(partySize) || partySize < 1 || partySize > (event.max_party_size || 10)) {
+      setError(`參加人數需為 1 到 ${event.max_party_size || 10} 人`);
       return;
     }
     if (phone && !/^[0-9+\-\s()]{6,20}$/.test(phone)) {
@@ -89,7 +90,9 @@ export function RegistrationPage() {
   const canRegister =
     Boolean(event?.requires_registration) &&
     ["open", "published"].includes(event?.status || "") &&
-    !(event?.capacity && event.registered_count >= event.capacity);
+    !(event?.capacity && event.registered_count >= event.capacity && !event.waitlist_enabled) &&
+    (!event?.registration_open_at || new Date(event.registration_open_at).getTime() <= Date.now()) &&
+    (!event?.registration_close_at || new Date(event.registration_close_at).getTime() >= Date.now());
 
   return (
     <Shell title="活動報名">
@@ -118,7 +121,7 @@ export function RegistrationPage() {
           <div className="event-info-grid">
             <div>
               <span>報名狀態</span>
-              <strong>{canRegister ? "開放示範報名" : "目前不開放"}</strong>
+                <strong>{event.waitlist_enabled && event.capacity && event.registered_count >= event.capacity ? "可登記候補" : canRegister ? "開放線上報名" : "目前不開放"}</strong>
             </div>
             <div>
               <span>目前名額</span>
@@ -131,9 +134,17 @@ export function RegistrationPage() {
       ) : null}
       {created ? (
         <section className="success-panel">
-          <h2>報名成功</h2>
+          <h2>{created.status === "waitlisted" ? "已登記候補" : "報名成功"}</h2>
           <p>報名編號：{created.registration_id}</p>
-          <p className="notice">這是示範報名紀錄，不代表萬春宮官方報名資料。</p>
+          <p className="notice">報名紀錄已建立；正式活動資訊仍以廟方公告為準。</p>
+          <div className="state-actions">
+            <Link className="button primary" to="/events?lookup=1">
+              查詢報名進度
+            </Link>
+            <Link className="button" to={eventPath(created.event_id)}>
+              回活動詳情
+            </Link>
+          </div>
         </section>
       ) : loading || loadError ? null : !event ? (
         <StatePanel variant="empty" title="找不到活動" body="目前無法確認這筆活動，請回到活動中心重新選擇。" />
@@ -167,7 +178,7 @@ export function RegistrationPage() {
             <input
               type="number"
               min={1}
-              max={10}
+                max={event.max_party_size || 10}
               value={form.party_size}
               onChange={(e) => setForm({ ...form, party_size: Number(e.target.value) })}
             />
@@ -184,9 +195,9 @@ export function RegistrationPage() {
             備註
             <textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
           </label>
-          {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text" role="alert">{error}</p>}
           <button className="button primary" disabled={saving || !event || !canRegister} type="submit">
-            {saving ? "送出中" : "送出示範報名"}
+            {saving ? "送出中" : "送出報名"}
           </button>
         </form>
       )}

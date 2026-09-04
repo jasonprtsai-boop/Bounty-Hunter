@@ -5,9 +5,11 @@ import json
 
 from fastapi.testclient import TestClient
 
+from app.api.routes.line import _line_reply_messages
 from app.core.config import get_settings
 from app.db.supabase import get_repository
 from app.main import app
+from app.schemas.common import ChatReply
 from app.services.rich_menu_service import RichMenuService
 
 
@@ -74,12 +76,79 @@ def test_line_webhook_acknowledges_valid_empty_event_payload(monkeypatch) -> Non
     get_settings.cache_clear()
 
 
+def test_line_reply_keeps_text_context_before_flex_card() -> None:
+    flex_message = {
+        "type": "flex",
+        "altText": "萬春宮近期活動，共 1 筆。",
+        "contents": {"type": "carousel", "contents": []},
+    }
+    reply = ChatReply(
+        intent="event_query",
+        reply="我可以幫你查看近期公開活動與報名狀態。",
+        flex_message=flex_message,
+        demo_notice="service",
+    )
+
+    messages = _line_reply_messages(reply)
+
+    assert [message["type"] for message in messages] == ["text", "flex"]
+    assert messages[0]["text"] == "我可以幫你查看近期公開活動與報名狀態。"
+    assert messages[1] == flex_message
+
+
 def test_events_are_loaded_from_demo_data() -> None:
     response = client.get("/api/events")
     assert response.status_code == 200
     events = response.json()["data"]
     assert len(events) >= 5
     assert any(event["event_id"] == "evt_20260827_zhongyuan" for event in events)
+
+
+def test_public_events_hide_admin_drafts_and_block_registration() -> None:
+    event_id = "evt_test_hidden_draft"
+    client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
+
+    create_response = client.post(
+        "/api/admin/events",
+        headers=ADMIN_HEADERS,
+        json={
+            "event_id": event_id,
+            "title": "後台草稿活動",
+            "category": "文化教育",
+            "date": "2026-11-01",
+            "start_time": "10:00",
+            "end_time": "11:00",
+            "location": "萬春宮",
+            "address": "臺中市中區成功路212號",
+            "summary": "這筆資料應該留在後台草稿，不出現在公開活動頁。",
+            "requires_registration": True,
+            "capacity": 20,
+            "status": "draft",
+            "registration_fields": ["姓名", "手機"],
+        },
+    )
+    assert create_response.status_code == 201
+
+    public_response = client.get("/api/events")
+    public_events = public_response.json()["data"]
+    assert public_response.status_code == 200
+    assert all(event["event_id"] != event_id for event in public_events)
+
+    detail_response = client.get(f"/api/events/{event_id}")
+    assert detail_response.status_code == 404
+
+    registration_response = client.post(
+        f"/api/events/{event_id}/registrations",
+        json={"user_id": "draft_registration_user", "contact_name": "小安", "party_size": 1},
+    )
+    assert registration_response.status_code == 409
+    assert registration_response.json()["detail"] == "registration_not_open"
+
+    admin_response = client.get("/api/admin/events", headers=ADMIN_HEADERS)
+    assert any(event["event_id"] == event_id for event in admin_response.json()["data"])
+
+    delete_response = client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
+    assert delete_response.status_code == 200
 
 
 def test_create_demo_registration() -> None:
@@ -96,6 +165,32 @@ def test_create_demo_registration() -> None:
     payload = response.json()
     assert payload["data"]["event_id"] == "evt_demo_culture_talk"
     assert payload["meta"]["demo_notice"]
+
+
+def test_lookup_registration_progress_by_phone_or_registration_id() -> None:
+    phone_response = client.get("/api/events/registrations/lookup?phone=0912345678")
+    assert phone_response.status_code == 200
+    phone_results = phone_response.json()["data"]
+
+    assert len(phone_results) >= 2
+    assert {item["masked_phone"] for item in phone_results} == {"0912***678"}
+    assert all("event_title" in item for item in phone_results)
+    assert all("phone" not in item for item in phone_results)
+
+    id_response = client.get("/api/events/registrations/lookup?registration_id=reg_0004")
+    assert id_response.status_code == 200
+    id_results = id_response.json()["data"]
+
+    assert len(id_results) == 1
+    assert id_results[0]["registration_id"] == "reg_0004"
+    assert id_results[0]["status"] == "pending_review"
+
+
+def test_lookup_registration_progress_requires_a_lookup_key() -> None:
+    response = client.get("/api/events/registrations/lookup")
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "lookup_key_required"
 
 
 def test_liff_token_overrides_client_user_id_for_registration() -> None:
@@ -159,7 +254,7 @@ def test_duplicate_active_registration_is_rejected() -> None:
     assert delete_response.status_code == 200
 
 
-def test_registration_capacity_exceeded_returns_waitlist_notification_meta() -> None:
+def test_capacity_exceeded_with_waitlist_creates_waitlisted_registration() -> None:
     event_id = "evt_test_full_capacity"
     delete_existing = client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
     assert delete_existing.status_code in {200, 404}
@@ -183,6 +278,7 @@ def test_registration_capacity_exceeded_returns_waitlist_notification_meta() -> 
             "registered_count": 0,
             "status": "open",
             "registration_fields": ["姓名", "參加人數"],
+            "waitlist_enabled": True,
             "demo_note": "測試活動。",
         },
     )
@@ -198,9 +294,10 @@ def test_registration_capacity_exceeded_returns_waitlist_notification_meta() -> 
         },
     )
 
-    assert response.status_code == 409
-    assert response.json()["detail"]["reason"] == "event_capacity_exceeded"
-    assert response.json()["detail"]["notification"]["message_type"] == "registration_waitlist"
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["data"]["status"] == "waitlisted"
+    assert payload["meta"]["notification"]["message_type"] == "registration_waitlist"
 
     delete_response = client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
     assert delete_response.status_code == 200
@@ -224,7 +321,7 @@ def test_event_query_returns_flex_with_hero_image() -> None:
     flex = response.json()["data"]["flex_message"]
     first_bubble = flex["contents"]["contents"][0]
     assert first_bubble["hero"]["type"] == "image"
-    assert first_bubble["hero"]["url"].endswith("/assets/flex/event-card.png")
+    assert first_bubble["hero"]["url"].endswith("/assets/flex/event-card-festival.png")
 
 
 def test_chat_retrieves_relevant_knowledge_for_location() -> None:
@@ -304,7 +401,7 @@ def test_admin_events_require_token() -> None:
 def test_admin_login_returns_session_for_named_credentials(monkeypatch) -> None:
     get_settings.cache_clear()
     monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("ADMIN_DEMO_TOKEN", "temple-ai-os-admin-demo")
+    monkeypatch.setenv("ADMIN_BOOTSTRAP_TOKEN", "temple-ai-os-admin-demo")
     monkeypatch.setenv("ADMIN_TOKENS", "temple-staff:prod-secret")
 
     response = client.post(
@@ -501,6 +598,79 @@ def test_admin_event_crud() -> None:
     assert delete_response.json()["data"]["deleted"] is True
 
 
+def test_admin_registration_roster_and_status_controls() -> None:
+    event_id = "evt_test_registration_admin_controls"
+    client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
+
+    create_event = client.post(
+        "/api/admin/events",
+        headers=ADMIN_HEADERS,
+        json={
+            "event_id": event_id,
+            "title": "報名名冊測試活動",
+            "category": "法會服務",
+            "date": "2026-10-05",
+            "start_time": "10:00",
+            "end_time": "11:30",
+            "location": "萬春宮",
+            "address": "臺中市中區成功路212號",
+            "summary": "用於驗證後台報名名冊與狀態控制。",
+            "requires_registration": True,
+            "capacity": 8,
+            "registered_count": 0,
+            "status": "open",
+            "registration_fields": ["姓名", "手機", "參加人數"],
+        },
+    )
+    assert create_event.status_code == 201
+
+    create_registration = client.post(
+        f"/api/events/{event_id}/registrations",
+        json={
+            "user_id": "admin_roster_test_user",
+            "contact_name": "王小安",
+            "phone": "0912000999",
+            "party_size": 2,
+            "reminder_opt_in": True,
+            "note": "需要無障礙動線提醒",
+        },
+    )
+    assert create_registration.status_code == 200
+    registration_id = create_registration.json()["data"]["registration_id"]
+
+    roster = client.get(f"/api/admin/registrations?event_id={event_id}", headers=ADMIN_HEADERS)
+    assert roster.status_code == 200
+    rows = roster.json()["data"]
+    assert len(rows) == 1
+    assert rows[0]["registration_id"] == registration_id
+    assert rows[0]["event_title"] == "報名名冊測試活動"
+    assert rows[0]["contact_name"] == "王小安"
+    assert rows[0]["phone"] == "0912000999"
+
+    checked_in = client.patch(
+        f"/api/admin/registrations/{registration_id}",
+        headers=ADMIN_HEADERS,
+        json={"status": "checked_in"},
+    )
+    assert checked_in.status_code == 200
+    assert checked_in.json()["data"]["status"] == "checked_in"
+
+    cancelled = client.patch(
+        f"/api/admin/registrations/{registration_id}",
+        headers=ADMIN_HEADERS,
+        json={"status": "cancelled"},
+    )
+    assert cancelled.status_code == 200
+    assert cancelled.json()["data"]["status"] == "cancelled"
+
+    event_after_cancel = client.get("/api/admin/events", headers=ADMIN_HEADERS).json()["data"]
+    target_event = next(event for event in event_after_cancel if event["event_id"] == event_id)
+    assert target_event["registered_count"] == 0
+
+    delete_response = client.delete(f"/api/admin/events/{event_id}", headers=ADMIN_HEADERS)
+    assert delete_response.status_code == 200
+
+
 def test_admin_event_capacity_cannot_drop_below_registrations() -> None:
     response = client.put(
         "/api/admin/events/evt_20260827_zhongyuan",
@@ -593,14 +763,14 @@ def test_admin_rich_menu_publish(monkeypatch) -> None:
     assert response.json()["data"] == {"published": True, "rich_menu_id": "richmenu-test"}
 
 
-def test_rich_menu_payload_links_to_member_records() -> None:
+def test_rich_menu_payload_links_to_registration_lookup() -> None:
     payload = RichMenuService().main_menu_payload()
     actions = [area["action"] for area in payload["areas"]]
 
     assert any(
         action["type"] == "uri"
-        and action["label"] == "我的紀錄"
-        and action["uri"].endswith("/member")
+        and action["label"] == "查報名進度"
+        and action["uri"].endswith("/events?lookup=1")
         for action in actions
     )
 
@@ -608,9 +778,13 @@ def test_rich_menu_payload_links_to_member_records() -> None:
 def test_rich_menu_payload_uses_current_image_card_bounds() -> None:
     payload = RichMenuService().main_menu_payload()
     bounds = [area["bounds"] for area in payload["areas"]]
+    labels = [area["action"]["label"] for area in payload["areas"]]
 
     assert payload["size"] == {"width": 2500, "height": 1686}
-    assert payload["chatBarText"] == "開啟服務選單"
+    assert payload["chatBarText"] == "服務選單"
+    assert len(payload["chatBarText"]) <= 14
+    assert len(payload["areas"]) <= 20
+    assert labels == ["詢問參拜方式", "查看活動報名", "抽文化籤", "看主殿導覽", "查報名進度", "聯絡客服"]
     assert bounds == [
         {"x": 86, "y": 310, "width": 1130, "height": 560},
         {"x": 1284, "y": 310, "width": 1130, "height": 560},
@@ -702,7 +876,7 @@ def test_admin_knowledge_document_crud() -> None:
         json={
             "document_id": document_id,
             "title": "後台測試知識文件",
-            "body": "這是用於驗證知識庫 CRUD 的 Demo 文件。",
+            "body": "這是用於驗證知識庫 CRUD 的服務文件。",
             "source_type": "admin_test",
         },
     )
@@ -712,7 +886,7 @@ def test_admin_knowledge_document_crud() -> None:
     update_response = client.put(
         f"/api/admin/knowledge-documents/{document_id}",
         headers=ADMIN_HEADERS,
-        json={"body": "更新後的 Demo 知識內容。"},
+        json={"body": "更新後的服務知識內容。"},
     )
     assert update_response.status_code == 200
     assert "更新後" in update_response.json()["data"]["body"]
@@ -750,7 +924,7 @@ def test_admin_notification_job_flow() -> None:
             "target_user_id": "demo_u001",
             "event_id": "evt_demo_worship_intro",
             "status": "draft",
-            "payload": {"text": "Demo 測試推播"},
+            "payload": {"text": "服務測試推播"},
         },
     )
     assert create_response.status_code == 201

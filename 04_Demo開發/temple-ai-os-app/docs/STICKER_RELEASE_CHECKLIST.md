@@ -26,10 +26,10 @@ Last updated: 2026-08-14
    Upload `main.png`, `tab.png`, and the 8 `sticker_*.png` files. Do not upload `preview-sheet.png`.
 
 4. Use metadata draft.
-   - Creator: `Temple AI OS Demo`
+   - Creator: `萬春宮線上服務`
    - Sticker Title: `春福小使日常貼圖`
-   - Description: `原創春福小使帶來日常問候、回覆與平安祝福，適合宮廟文化服務 Demo 的聊天情境。`
-   - Copyright: `TempleAIOSDemo`
+   - Description: `原創春福小使帶來日常問候、回覆與平安祝福，適合宮廟文化服務的聊天情境。`
+   - Copyright: `WanChunGongService`
 
 5. Request review.
    After review is requested, LINE may prevent changing the sticker count. Recheck all images before submission.
@@ -51,7 +51,7 @@ Last updated: 2026-08-14
    Upload `assets/brand/line-oa-profile-background-v1.png` as the profile page background image.
 
 9. Edit LINE business profile.
-   Use `docs/LINE_BUSINESS_PROFILE_SETUP.md` or `/admin/release` for the exact business profile copy, public links, and release checklist. Keep the Demo disclaimer visible unless the temple has provided written authorization for official use.
+   Use `docs/LINE_BUSINESS_PROFILE_SETUP.md` or `/admin/release` for the exact business profile copy, public links, and release checklist. Keep the formal-information reminder visible unless the temple has provided written authorization for official use.
 
 ## Official spec notes
 

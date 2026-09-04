@@ -54,13 +54,19 @@ class Event(BaseModel):
     registration_fields: list[str] = Field(default_factory=list)
     payment_policy: str | None = None
     demo_note: str
+    registration_open_at: str | None = None
+    registration_close_at: str | None = None
+    countdown_target_at: str | None = None
+    countdown_label: str | None = None
+    max_party_size: int = Field(default=10, ge=1, le=10)
+    waitlist_enabled: bool = False
 
 
 class EventCreate(BaseModel):
     event_id: str | None = None
     title: str
     category: str
-    source_type: str = "team_demo_sample"
+    source_type: str = "temple_service"
     date: str
     start_time: str
     end_time: str
@@ -73,7 +79,13 @@ class EventCreate(BaseModel):
     status: str = "draft"
     registration_fields: list[str] = Field(default_factory=list)
     payment_policy: str | None = None
-    demo_note: str = "後台建立的 Demo 活動，不代表萬春宮官方活動。"
+    demo_note: str = "後台建立的活動，活動內容與報名規則請以廟方公告為準。"
+    registration_open_at: str | None = None
+    registration_close_at: str | None = None
+    countdown_target_at: str | None = None
+    countdown_label: str | None = None
+    max_party_size: int = Field(default=10, ge=1, le=10)
+    waitlist_enabled: bool = False
 
 
 class EventUpdate(BaseModel):
@@ -93,6 +105,12 @@ class EventUpdate(BaseModel):
     registration_fields: list[str] | None = None
     payment_policy: str | None = None
     demo_note: str | None = None
+    registration_open_at: str | None = None
+    registration_close_at: str | None = None
+    countdown_target_at: str | None = None
+    countdown_label: str | None = None
+    max_party_size: int | None = Field(default=None, ge=1, le=10)
+    waitlist_enabled: bool | None = None
 
 
 class LineUser(BaseModel):
@@ -124,6 +142,86 @@ class RegistrationCreate(BaseModel):
     party_size: int = Field(default=1, ge=1, le=10)
     reminder_opt_in: bool = True
     note: str | None = None
+
+
+class RegistrationUpdate(BaseModel):
+    status: str | None = None
+    party_size: int | None = Field(default=None, ge=1, le=10)
+    reminder_opt_in: bool | None = None
+    contact_name: str | None = None
+    phone: str | None = None
+    note: str | None = None
+
+
+class RegistrationLookupResult(BaseModel):
+    registration_id: str
+    event_id: str
+    event_title: str
+    event_date: str
+    event_time: str
+    event_location: str
+    status: str
+    party_size: int
+    reminder_opt_in: bool
+    masked_phone: str | None = None
+    created_at: str | None = None
+
+
+class AdminRegistrationRecord(Registration):
+    event_title: str
+    event_category: str
+    event_date: str
+    event_time: str
+    event_location: str
+
+
+class AdminRegistrationSummary(BaseModel):
+    total_registrations: int = 0
+    total_party_size: int = 0
+    confirmed: int = 0
+    pending_review: int = 0
+    checked_in: int = 0
+    cancelled: int = 0
+    waitlisted: int = 0
+    events_with_registrations: int = 0
+
+
+class Deity(BaseModel):
+    deity_id: str
+    name: str
+    category: str
+    enshrined_area: str
+    description: str
+    birthday_lunar: str | None = None
+    service_notes: str | None = None
+    source_url: str | None = None
+    status: str = "published"
+    sort_order: int = 0
+
+
+class DeityCreate(BaseModel):
+    deity_id: str | None = None
+    name: str
+    category: str = "配祀神佛"
+    enshrined_area: str = ""
+    description: str
+    birthday_lunar: str | None = None
+    service_notes: str | None = None
+    source_url: str | None = None
+    status: str = "published"
+    sort_order: int = 0
+
+
+class DeityUpdate(BaseModel):
+    name: str | None = None
+    category: str | None = None
+    enshrined_area: str | None = None
+    description: str | None = None
+    birthday_lunar: str | None = None
+    service_notes: str | None = None
+    source_url: str | None = None
+    status: str | None = None
+    sort_order: int | None = None
 
 
 class ChatRequest(BaseModel):
@@ -218,7 +316,7 @@ class TourSpot(BaseModel):
     summary: str
     cultural_note: str
     image_url: str | None = None
-    source_type: str = "demo_sample"
+    source_type: str = "temple_service"
 
 
 class DashboardSummary(BaseModel):
@@ -235,7 +333,7 @@ class KnowledgeDocument(BaseModel):
     document_id: str
     title: str
     body: str
-    source_type: str = "demo_knowledge_base"
+    source_type: str = "knowledge_base"
     status: str = "published"
 
 
@@ -243,7 +341,7 @@ class KnowledgeDocumentCreate(BaseModel):
     document_id: str | None = None
     title: str
     body: str
-    source_type: str = "admin_demo_knowledge"
+    source_type: str = "admin_knowledge"
     status: str = "published"
 
 

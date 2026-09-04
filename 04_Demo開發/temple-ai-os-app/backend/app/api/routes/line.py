@@ -6,12 +6,19 @@ from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request, 
 from app.core.config import get_settings
 from app.core.security import verify_line_signature
 from app.db.supabase import get_repository
-from app.schemas.common import ApiResponse
+from app.schemas.common import ApiResponse, ChatReply
 from app.services.line_client import LineClient, text_message
 from app.services.rag_service import get_rag_service, record_chat_activity
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+def _line_reply_messages(reply: ChatReply) -> list[dict[str, Any]]:
+    messages = [text_message(reply.reply)]
+    if reply.flex_message:
+        messages.append(reply.flex_message)
+    return messages
 
 
 async def _process_line_webhook_events(payload: dict[str, Any]) -> None:
@@ -36,9 +43,7 @@ async def _process_line_webhook_events(payload: dict[str, Any]) -> None:
             user_id = event.get("source", {}).get("userId", "demo_line_user")
             user_text = event["message"]["text"]
             reply = await rag.answer(user_text, user_id, record=False)
-            messages = [text_message(reply.reply)]
-            if reply.flex_message:
-                messages = [reply.flex_message]
+            messages = _line_reply_messages(reply)
             reply_token = event.get("replyToken")
             if reply_token:
                 await line_client.reply_message(reply_token, messages)

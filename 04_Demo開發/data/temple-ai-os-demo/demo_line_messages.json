@@ -1,22 +1,21 @@
 {
   "rich_menu": {
-    "title": "Temple AI OS Demo Rich Menu",
+    "title": "萬春宮服務選單",
     "areas": [
-      { "label": "AI導覽", "action": "message", "text": "我第一次來萬春宮，怎麼參拜？" },
-      { "label": "活動中心", "action": "uri", "uri": "https://demo.example.com/liff/events" },
+      { "label": "參拜問答", "action": "message", "text": "我第一次來萬春宮，怎麼參拜？" },
+      { "label": "活動中心", "action": "uri", "uri": "https://liff.line.me/2010938588-VJXpaoyH/events" },
       { "label": "宮廟資訊", "action": "message", "text": "介紹萬春宮" },
-      { "label": "報名紀錄", "action": "uri", "uri": "https://demo.example.com/liff/member/registrations" },
+      { "label": "報名查詢", "action": "uri", "uri": "https://liff.line.me/2010938588-VJXpaoyH/events?lookup=1" },
       { "label": "交通位置", "action": "message", "text": "萬春宮在哪裡？" },
       { "label": "客服協助", "action": "message", "text": "我要聯絡廟方或詢問服務" }
     ]
   },
   "flex_event_card_example": {
-    "title": "中元普度法會示範報名",
+    "title": "中元普度法會線上報名",
     "subtitle": "2026/08/27 14:00-17:00｜萬春宮",
-    "body": "Demo 展示登記需求、提醒通知與後台統計；正式服務需由廟方確認。",
+    "body": "提供登記需求、提醒通知與後台統計；正式服務需由廟方確認。",
     "buttons": [
-      { "label": "查看詳情", "action": "uri", "uri": "https://demo.example.com/liff/events/evt_20260827_zhongyuan" },
-      { "label": "示範報名", "action": "uri", "uri": "https://demo.example.com/liff/register/evt_20260827_zhongyuan" }
+      { "label": "詳情與報名", "action": "uri", "uri": "https://liff.line.me/2010938588-VJXpaoyH/events/evt_20260827_zhongyuan" }
     ]
   },
   "reply_examples": [
@@ -26,11 +25,11 @@
     },
     {
       "user": "最近有什麼活動？",
-      "bot": "我可以幫你查看近期公開活動與 Demo 活動中心。目前可展示的活動包含關聖帝君聖誕佳辰、開基媽祖來台305週年宮慶，以及中元普度法會示範報名。"
+      "bot": "我可以幫你查看近期公開活動與活動中心。目前可查看的活動包含關聖帝君聖誕佳辰、開基媽祖來台305週年宮慶，以及中元普度法會線上報名。"
     },
     {
       "user": "幫我報名中元普度",
-      "bot": "可以，我會開啟 LIFF 示範報名頁。提醒你：這是 Temple AI OS Demo 流程，不代表萬春宮正式報名系統。"
+      "bot": "可以，我會先開啟活動詳情頁，確認時間、地點與名額後再進入線上報名。正式名額、時間與參加規則仍以廟方公告為準。"
     }
   ],
   "push_message_examples": [

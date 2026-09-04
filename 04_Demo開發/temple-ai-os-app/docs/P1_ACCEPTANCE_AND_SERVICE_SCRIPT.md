@@ -1,34 +1,34 @@
-# P1 acceptance and demo script
+# P1 acceptance and service script
 
 Last updated: 2026-08-15
 
 ## P1 scope
 
-P1 means the demo is safe enough to show to reviewers:
+P1 means the service flow is safe enough to review:
 
 - Backend, frontend, and production build pass local validation.
 - Admin login uses server-verified account or Email + password credentials, not a public bundled token.
-- Public demo URLs respond before the presentation.
+- Public service URLs respond before the walkthrough.
 - LINE/LIFF/Supabase paths have a clear manual acceptance checklist.
-- The 3-minute presentation follows a fixed sequence that does not depend on improvising.
+- The 3-minute walkthrough follows a fixed sequence that does not depend on improvising.
 
 ## Automated checks
 
-Run these before a demo rehearsal:
+Run these before a service rehearsal:
 
 ```powershell
-cd 04_Demo開發\temple-ai-os-app\backend
+cd <專案資料夾>\temple-ai-os-app\backend
 .\.venv\Scripts\python.exe -m pytest
 ```
 
 Expected result:
 
 ```text
-49 passed
+Backend tests pass
 ```
 
 ```powershell
-cd 04_Demo開發\temple-ai-os-app\frontend
+cd <專案資料夾>\temple-ai-os-app\frontend
 .\node_modules\.bin\tsc.cmd -b
 .\node_modules\.bin\vite.cmd build
 ```
@@ -42,8 +42,8 @@ TypeScript passes and Vite produces dist/client
 For public smoke testing:
 
 ```powershell
-cd 04_Demo開發\temple-ai-os-app
-backend\.venv\Scripts\python.exe scripts\smoke_public_demo.py
+cd <專案資料夾>\temple-ai-os-app
+backend\.venv\Scripts\python.exe scripts\smoke_public_check.py
 ```
 
 This verifies:
@@ -80,23 +80,23 @@ Use `scripts/verify_database.py` only when Supabase secrets are available locall
 
 For account settings and content examples, use `docs/LINE_CONTENT_PLAYBOOK.md` or `/admin/release`.
 
-## Three-minute demo script
+## Three-minute service walkthrough
 
 ### 0:00-0:25 Problem
 
-Small temples often use LINE as the real service entrance, but activity registration, visitor questions, reminders, and staff follow-up are split across manual messages, posts, and spreadsheets. The demo shows how those flows can become one LINE-first operating system.
+Small temples often use LINE as the real service entrance, but activity registration, visitor questions, reminders, and staff follow-up are split across manual messages, posts, and spreadsheets. This walkthrough shows how those flows can become one LINE-first operating system.
 
 ### 0:25-0:55 LINE entry
 
 Open the LINE Official Account, show the Rich Menu, and tap the main service entry. Point out that visitors do not need to install a separate app.
 
-### 0:55-1:25 AI question
+### 0:55-1:25 Service question
 
-Ask `近期有什麼活動？`. Show the AI answer and event Flex Message. Emphasize that the reply is based on reviewed FAQ rules and temple knowledge, with safety boundaries instead of free-form guessing.
+Ask `近期有什麼活動？`. Show the service reply and event Flex Message. Emphasize that the reply is based on reviewed FAQ rules and temple knowledge, with safety boundaries instead of free-form guessing.
 
 ### 1:25-1:55 LIFF registration
 
-Open an event from the Flex Message, submit a demo registration, and show the confirmation path. Explain that production registration uses the database RPC to prevent over-capacity race conditions.
+Open an event from the Flex Message, submit a registration, and show the confirmation path. Explain that production registration uses the database RPC to prevent over-capacity race conditions.
 
 ### 1:55-2:25 Admin operation
 
@@ -108,11 +108,11 @@ Show `/site`, `/community`, `/stickers`, or `/tour/main-hall`. Keep this short: 
 
 ### 2:45-3:00 Close
 
-Close with the operating value: one LINE entrance for visitors, one dashboard for staff, safe AI answers, structured registration, and measurable follow-up.
+Close with the operating value: one LINE entrance for visitors, one dashboard for staff, safe reviewed answers, structured registration, and measurable follow-up.
 
-## Demo safety notes
+## Service safety notes
 
-- Keep the demo disclaimer visible. This is not Wan Chun Gong official operation unless written authorization exists.
-- Do not demonstrate donations, LINE Pay, or official temple service claims.
+- Keep the formal-information reminder visible. This is not Wan Chun Gong official operation unless written authorization exists.
+- Do not run through donations, LINE Pay, or official temple service claims.
 - Warm up Render at least five minutes before presenting.
 - Keep a fallback browser tab open to `/site`, `/events`, `/admin`, and `/stickers`.

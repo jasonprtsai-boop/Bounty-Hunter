@@ -1,7 +1,7 @@
 [project]
-name = "temple-ai-os-backend"
+name = "wan-chun-gong-service-backend"
 version = "0.1.0"
-description = "FastAPI backend for Temple AI OS Wan Chun Gong demo"
+description = "FastAPI backend for the Wan Chun Gong LINE service"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.0",

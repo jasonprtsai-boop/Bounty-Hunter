@@ -16,7 +16,7 @@ RED = "#B42318"
 DEEP_RED = "#7A1E17"
 GOLD = "#D6A33A"
 PALE_GOLD = "#FFF4D6"
-JADE = "#1F7A5B"
+JADE = "#365F85"
 PAPER = "#FFFCF4"
 COCOA = "#6B3F2A"
 MILK = "#FFF7E8"
@@ -35,7 +35,7 @@ def font(
     *,
     style: str = "sans",
 ) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    env_key = "TEMPLE_AI_OS_FONT_BOLD" if bold else "TEMPLE_AI_OS_FONT_REGULAR"
+    env_key = "WAN_CHUN_GONG_FONT_BOLD" if bold else "WAN_CHUN_GONG_FONT_REGULAR"
     if style == "serif":
         styled_candidates = [
             "C:/Windows/Fonts/NotoSerifTC-VF.ttf",
@@ -87,10 +87,18 @@ def ensure_dirs() -> None:
         ASSETS / "rich-menu",
         ASSETS / "banners",
         ASSETS / "flex",
+        PUBLIC_ASSETS / "rich-menu",
         PUBLIC_ASSETS / "banners",
         PUBLIC_ASSETS / "flex",
     ]:
         path.mkdir(parents=True, exist_ok=True)
+
+
+def save_png(image: Image.Image, out: Path) -> None:
+    out.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out.with_name(f".{out.stem}.tmp{out.suffix}")
+    image.convert("RGB").save(tmp, optimize=True)
+    tmp.replace(out)
 
 
 def text_center(
@@ -231,13 +239,13 @@ def rich_menu() -> None:
         spacing=0,
         style="round",
     )
-    draw.text((166, 170), "第一次來、活動報名、導覽與客服都從這裡開始", fill="#FFE9B2", font=font(34, bold=True, style="round"))
+    draw.text((166, 170), "參拜、活動、抽籤、導覽、查詢與客服都從這裡開始", fill="#FFE9B2", font=font(34, bold=True, style="round"))
     draw.rounded_rectangle((1745, 104, 2348, 218), radius=56, fill="#FFF7DF")
     text_center(draw, (1745, 104, 2348, 218), "常用入口  立即點選", DEEP_RED, 42, bold=True, style="round")
 
     main_cells = [
-        ((86, 310, 1216, 870), "AI 參拜助手", "問", "第一次來怎麼參拜？", "直接傳送問題", RED),
-        ((1284, 310, 2414, 870), "活動報名", "曆", "查活動、名額與時間", "開啟活動中心", JADE),
+        ((86, 310, 1216, 870), "詢問參拜方式", "問", "第一次來、交通與流程", "傳送參拜問題", RED),
+        ((1284, 310, 2414, 870), "查看活動報名", "曆", "查活動、名額與時間", "開啟活動列表", JADE),
     ]
     for box, title, icon, body, cta, accent in main_cells:
         draw.rounded_rectangle((box[0] + 18, box[1] + 24, box[2] + 18, box[3] + 24), radius=56, fill="#D8C3B4")
@@ -253,7 +261,7 @@ def rich_menu() -> None:
             spacing=0,
             style="round",
         )
-        draw.text((box[0] + 292, box[1] + 86), title, fill=INK, font=font(72, bold=True, style="round"))
+        draw.text((box[0] + 292, box[1] + 86), title, fill=INK, font=font(66, bold=True, style="round"))
         draw.text((box[0] + 296, box[1] + 190), body, fill="#5C6E66", font=font(42, bold=True, style="round"))
         draw.rounded_rectangle((box[0] + 292, box[1] + 314, box[0] + 760, box[1] + 412), radius=49, fill=accent)
         text_center(draw, (box[0] + 292, box[1] + 314, box[0] + 760, box[1] + 412), cta, "#FFFFFF", 38, bold=True, style="round")
@@ -261,22 +269,25 @@ def rich_menu() -> None:
         draw_sparkle(draw, box[2] - 100, box[1] + 236, 36, PALE_GOLD)
 
     small_cells = [
-        ((86, 958, 626, 1518), "文化抽籤", "籤", "抽一支\n平安提醒", "#8A5A12"),
-        ((682, 958, 1222, 1518), "宮廟導覽", "廟", "主殿故事\n參拜動線", "#1F7A5B"),
-        ((1278, 958, 1818, 1518), "我的紀錄", "人", "查看報名\n提醒狀態", "#245B8A"),
-        ((1874, 958, 2414, 1518), "客服中心", "聊", "留下問題\n人工接續", "#7A1E17"),
+        ((86, 958, 626, 1518), "抽文化籤", "籤", "抽一支\n平安提醒", "#8A5A12"),
+        ((682, 958, 1222, 1518), "看主殿導覽", "廟", "主殿故事\n參拜動線", COCOA),
+        ((1278, 958, 1818, 1518), "查報名進度", "查", "手機編號\n查詢進度", "#245B8A"),
+        ((1874, 958, 2414, 1518), "聯絡客服", "聊", "留下問題\n人工接續", "#7A1E17"),
     ]
     for box, title, icon, body, accent in small_cells:
         draw.rounded_rectangle((box[0] + 14, box[1] + 18, box[2] + 14, box[3] + 18), radius=44, fill="#D8C3B4")
         draw.rounded_rectangle(box, radius=44, fill="#FFFFFF", outline=accent, width=5)
         draw.rounded_rectangle((box[0] + 42, box[1] + 42, box[0] + 180, box[1] + 180), radius=38, fill=accent)
         text_center(draw, (box[0] + 42, box[1] + 42, box[0] + 180, box[1] + 180), icon, "#FFFFFF", 58, bold=True, style="round")
-        draw.text((box[0] + 52, box[1] + 246), title, fill=INK, font=font(54, bold=True, style="round"))
+        draw.text((box[0] + 52, box[1] + 246), title, fill=INK, font=font(48, bold=True, style="round"))
         draw.multiline_text((box[0] + 56, box[1] + 340), body, fill="#5C6E66", font=font(34, bold=True, style="round"), spacing=10)
         draw_sparkle(draw, box[2] - 96, box[1] + 84, 34, accent)
 
-    out = ASSETS / "rich-menu" / "main-2500x1686.png"
-    image.convert("RGB").save(out, optimize=True)
+    for out in [
+        ASSETS / "rich-menu" / "main-2500x1686.png",
+        PUBLIC_ASSETS / "rich-menu" / "main-2500x1686.png",
+    ]:
+        save_png(image, out)
 
 
 def banner(name: str, title: str, subtitle: str, accent: str) -> None:
@@ -288,10 +299,10 @@ def banner(name: str, title: str, subtitle: str, accent: str) -> None:
     draw.text((112, 122), title, fill=COCOA, font=font(72, bold=True, style="round"))
     draw.text((116, 224), subtitle, fill="#8B5A45", font=font(44, bold=True, style="hand"))
     for out in [ASSETS / "banners" / f"{name}.png", PUBLIC_ASSETS / "banners" / f"{name}.png"]:
-        image.convert("RGB").save(out, optimize=True)
+        save_png(image, out)
 
 
-def flex_card(name: str, title: str, subtitle: str, accent: str) -> None:
+def flex_card(name: str, title: str, subtitle: str, accent: str, *, cta: str = "查看服務說明") -> None:
     image = vertical_gradient((1024, 1024), "#FFF9E8", "#FFD4E4").convert("RGBA")
     draw = ImageDraw.Draw(image)
     draw_soft_pattern(draw, 1024, 1024)
@@ -303,22 +314,146 @@ def flex_card(name: str, title: str, subtitle: str, accent: str) -> None:
     text_center(draw, (104, 574, 920, 694), title, COCOA, 84, bold=True, spacing=0, style="round")
     text_center(draw, (142, 708, 882, 802), subtitle, "#8B5A45", 42, bold=True, spacing=4, style="hand")
     draw.rounded_rectangle((178, 840, 846, 922), radius=41, fill=accent)
-    text_center(draw, (178, 840, 846, 922), "查看詳情", "#FFFFFF", 46, bold=True, style="round")
+    text_center(draw, (178, 840, 846, 922), cta, "#FFFFFF", 46, bold=True, style="round")
     for out in [ASSETS / "flex" / f"{name}.png", PUBLIC_ASSETS / "flex" / f"{name}.png"]:
-        image.convert("RGB").save(out, optimize=True)
+        save_png(image, out)
+
+
+def event_flex_card(
+    name: str,
+    title: str,
+    subtitle: str,
+    accent: str,
+    accent2: str,
+    motif: str,
+    *,
+    top: str,
+    bottom: str,
+    style: str = "round",
+    layout: str = "festival",
+) -> None:
+    image = vertical_gradient((1024, 1024), top, bottom).convert("RGBA")
+    draw = ImageDraw.Draw(image)
+    for offset in range(-900, 1024, 116):
+        draw.line((offset, 0, offset + 820, 1024), fill="#FFFFFF", width=5)
+    for x, y, size in [(136, 232, 38), (850, 286, 34), (192, 820, 30), (812, 790, 42)]:
+        draw_sparkle(draw, x, y, size, accent2)
+
+    draw.rounded_rectangle((62, 62, 962, 962), radius=74, fill="#FFFDF7", outline=accent, width=8)
+    draw.rounded_rectangle((62, 62, 962, 226), radius=74, fill=accent)
+    draw.rectangle((62, 142, 962, 226), fill=accent)
+    draw.text((122, 96), "萬春宮活動", fill="#FFFFFF", font=font(48, bold=True, style="round"))
+    draw.rounded_rectangle((682, 92, 900, 166), radius=37, fill="#FFF8DF")
+    text_center(draw, (682, 92, 900, 166), motif, accent, 42, bold=True, spacing=0, style=style)
+
+    if layout == "ritual":
+        for x in [256, 302, 348]:
+            draw.line((x, 580, x, 338), fill=accent2, width=12)
+            draw.arc((x - 22, 300, x + 22, 374), 200, 340, fill=accent, width=5)
+        draw.rounded_rectangle((362, 288, 662, 642), radius=38, fill="#FFF7DF", outline=accent2, width=6)
+        draw.ellipse((406, 340, 618, 552), fill="#FFFFFF", outline=accent, width=7)
+        text_center(draw, (406, 340, 618, 552), motif, accent, 112, bold=True, spacing=0, style=style)
+        draw.rounded_rectangle((286, 628, 738, 690), radius=18, fill=accent)
+        text_center(draw, (286, 626, 738, 688), title, "#FFFFFF", 40, bold=True, spacing=0, style=style)
+    elif layout == "guide":
+        draw.rounded_rectangle((150, 286, 874, 650), radius=46, fill="#FFFFFF", outline=accent2, width=6)
+        draw.polygon([(244, 388), (372, 314), (500, 388), (470, 416), (372, 360), (274, 416)], fill=accent)
+        draw.rectangle((306, 418, 438, 470), fill=accent2)
+        points = [(276, 560), (414, 432), (582, 532), (746, 374)]
+        for start, end in zip(points, points[1:]):
+            draw.line((*start, *end), fill=accent2, width=14)
+        for index, (x, y) in enumerate(points, 1):
+            draw.ellipse((x - 38, y - 38, x + 38, y + 38), fill=accent)
+            text_center(draw, (x - 38, y - 38, x + 38, y + 38), str(index), "#FFFFFF", 34, bold=True, style="round")
+        text_center(draw, (470, 302, 824, 364), title, accent, 46, bold=True, spacing=0, style=style)
+    elif layout == "culture":
+        draw.rectangle((166, 334, 858, 606), fill="#FFEEC6")
+        draw.ellipse((112, 314, 220, 626), fill=accent2)
+        draw.ellipse((804, 314, 912, 626), fill=accent2)
+        draw.rounded_rectangle((160, 300, 864, 640), radius=46, fill="#FFF8DF", outline=accent, width=7)
+        draw.text((222, 332), motif, fill=(107, 58, 143, 72), font=font(170, bold=True, style=style))
+        draw.line((256, 536, 760, 468), fill=accent2, width=14)
+        draw.line((314, 574, 698, 556), fill=accent, width=8)
+        text_center(draw, (256, 406, 768, 506), title, COCOA, 58, bold=True, spacing=0, style=style)
+    else:
+        draw.polygon(
+            [(210, 384), (512, 248), (814, 384), (760, 430), (512, 322), (264, 430)],
+            fill=accent,
+        )
+        draw.rectangle((286, 424, 738, 492), fill=accent2)
+        draw.rectangle((336, 492, 688, 632), fill="#FFF3D8")
+        draw.rectangle((302, 632, 722, 674), fill=accent)
+        draw.rounded_rectangle((386, 514, 638, 632), radius=30, fill="#FFFFFF", outline="#E5C36C", width=4)
+        text_center(draw, (386, 510, 638, 626), title, COCOA, 54, bold=True, spacing=0, style=style)
+
+    draw.rounded_rectangle((116, 718, 908, 826), radius=54, fill="#FFFFFF", outline=accent2, width=4)
+    text_center(draw, (146, 718, 878, 826), subtitle, "#6B3F2A", 36, bold=True, spacing=2, style="hand")
+    draw.rounded_rectangle((234, 868, 790, 934), radius=33, fill=accent)
+    text_center(draw, (234, 868, 790, 934), "查看活動說明", "#FFFFFF", 34, bold=True, style="round")
+
+    for out in [ASSETS / "flex" / f"{name}.png", PUBLIC_ASSETS / "flex" / f"{name}.png"]:
+        save_png(image, out)
 
 
 def main() -> None:
     ensure_dirs()
     rich_menu()
-    banner("home", "智慧宮廟服務入口", "把參拜、活動、客服收進 LINE", JADE)
+    banner("home", "宮廟線上服務入口", "把參拜、活動、客服收進 LINE", COCOA)
     banner("events", "活動中心", "法會、講座、報名與提醒", RED)
     banner("fortune", "文化抽籤", "以籤詩語感做正向提醒", "#8A5A12")
     banner("support", "客服中心", "複雜問題轉人工確認", "#245B8A")
     banner("tour", "宮廟導覽", "QR/NFC 開啟文化點位", "#6B3A8F")
-    flex_card("event-card", "活動卡片", "活動資訊、報名入口、Demo 註記", RED)
-    flex_card("fortune-card", "文化抽籤", "不做命運斷言，只做文化解說", "#8A5A12")
-    flex_card("support-card", "客服工單", "需要人工確認時建立紀錄", "#245B8A")
+    flex_card("event-card", "活動卡片", "活動資訊、報名入口、廟方提醒", RED, cta="前往活動報名")
+    event_flex_card(
+        "event-card-festival",
+        "祭典公告",
+        "公開參拜、宮慶與節日提醒",
+        RED,
+        GOLD,
+        "祭",
+        top="#FFF7E8",
+        bottom="#FFD9C8",
+        style="serif",
+        layout="festival",
+    )
+    event_flex_card(
+        "event-card-ritual",
+        "法會服務",
+        "名額、時段與報名提醒",
+        JADE,
+        GOLD,
+        "福",
+        top="#F4FFF8",
+        bottom="#DDF4E8",
+        style="round",
+        layout="ritual",
+    )
+    event_flex_card(
+        "event-card-guide",
+        "導覽互動",
+        "第一次參拜與現場動線",
+        "#245B8A",
+        MINT,
+        "導",
+        top="#F1FBFF",
+        bottom="#D7F0F8",
+        style="round",
+        layout="guide",
+    )
+    event_flex_card(
+        "event-card-culture",
+        "文化講堂",
+        "故事、書法與信仰脈絡",
+        "#8A5A12",
+        LILAC,
+        "文",
+        top="#FFF9EF",
+        bottom="#F4E6FF",
+        style="hand",
+        layout="culture",
+    )
+    flex_card("fortune-card", "文化抽籤", "不做命運斷言，只做文化解說", "#8A5A12", cta="再抽一支文化籤")
+    flex_card("support-card", "客服工單", "需要人工確認時建立紀錄", "#245B8A", cta="前往客服詢問")
     print(f"Generated assets in {ASSETS} and {PUBLIC_ASSETS}")
 
 

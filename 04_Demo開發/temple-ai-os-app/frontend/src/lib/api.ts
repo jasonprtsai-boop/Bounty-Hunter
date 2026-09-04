@@ -44,6 +44,12 @@ export type EventItem = {
   registration_fields: string[];
   payment_policy?: string;
   demo_note: string;
+  registration_open_at?: string | null;
+  registration_close_at?: string | null;
+  countdown_target_at?: string | null;
+  countdown_label?: string | null;
+  max_party_size: number;
+  waitlist_enabled: boolean;
 };
 
 export type Registration = {
@@ -57,6 +63,52 @@ export type Registration = {
   contact_name?: string;
   phone?: string;
   note?: string;
+};
+
+export type RegistrationLookupResult = {
+  registration_id: string;
+  event_id: string;
+  event_title: string;
+  event_date: string;
+  event_time: string;
+  event_location: string;
+  status: string;
+  party_size: number;
+  reminder_opt_in: boolean;
+  masked_phone?: string | null;
+  created_at?: string | null;
+};
+
+export type AdminRegistrationRecord = Registration & {
+  event_title: string;
+  event_category: string;
+  event_date: string;
+  event_time: string;
+  event_location: string;
+};
+
+export type AdminRegistrationSummary = {
+  total_registrations: number;
+  total_party_size: number;
+  confirmed: number;
+  pending_review: number;
+  checked_in: number;
+  cancelled: number;
+  waitlisted: number;
+  events_with_registrations: number;
+};
+
+export type Deity = {
+  deity_id: string;
+  name: string;
+  category: string;
+  enshrined_area: string;
+  description: string;
+  birthday_lunar?: string | null;
+  service_notes?: string | null;
+  source_url?: string | null;
+  status: string;
+  sort_order: number;
 };
 
 export type ChatReply = {

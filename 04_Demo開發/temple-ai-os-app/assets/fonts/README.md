@@ -9,7 +9,7 @@ Supported default filenames:
 
 The asset generator also accepts:
 
-- `TEMPLE_AI_OS_FONT_REGULAR`
-- `TEMPLE_AI_OS_FONT_BOLD`
+- `WAN_CHUN_GONG_FONT_REGULAR`
+- `WAN_CHUN_GONG_FONT_BOLD`
 
 Do not add font files unless their license allows redistribution in this repository.

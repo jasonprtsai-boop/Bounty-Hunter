@@ -15,44 +15,52 @@ RICH_MENU_AREAS = [
 ]
 
 
+def build_main_menu_payload(frontend_base_url: str) -> dict[str, Any]:
+    base = frontend_base_url.rstrip("/")
+    return {
+        "size": {"width": 2500, "height": 1686},
+        "selected": True,
+        "name": "萬春宮服務主選單",
+        "chatBarText": "服務選單",
+        "areas": [
+            {
+                "bounds": RICH_MENU_AREAS[0],
+                "action": {
+                    "type": "message",
+                    "label": "詢問參拜方式",
+                    "text": "我第一次來萬春宮，想知道參拜流程與交通資訊。",
+                },
+            },
+            {
+                "bounds": RICH_MENU_AREAS[1],
+                "action": {"type": "uri", "label": "查看活動報名", "uri": f"{base}/events"},
+            },
+            {
+                "bounds": RICH_MENU_AREAS[2],
+                "action": {"type": "uri", "label": "抽文化籤", "uri": f"{base}/fortune"},
+            },
+            {
+                "bounds": RICH_MENU_AREAS[3],
+                "action": {"type": "uri", "label": "看主殿導覽", "uri": f"{base}/tour/main-hall"},
+            },
+            {
+                "bounds": RICH_MENU_AREAS[4],
+                "action": {"type": "uri", "label": "查報名進度", "uri": f"{base}/events?lookup=1"},
+            },
+            {
+                "bounds": RICH_MENU_AREAS[5],
+                "action": {"type": "uri", "label": "聯絡客服", "uri": f"{base}/support"},
+            },
+        ],
+    }
+
+
 class RichMenuService:
     def __init__(self) -> None:
         self.settings = get_settings()
 
     def main_menu_payload(self) -> dict[str, Any]:
-        base = self.settings.frontend_base_url.rstrip("/")
-        return {
-            "size": {"width": 2500, "height": 1686},
-            "selected": True,
-            "name": "Temple AI OS 主選單",
-            "chatBarText": "開啟服務選單",
-            "areas": [
-                {
-                    "bounds": RICH_MENU_AREAS[0],
-                    "action": {"type": "message", "label": "AI 參拜助手", "text": "我第一次來萬春宮，怎麼參拜？"},
-                },
-                {
-                    "bounds": RICH_MENU_AREAS[1],
-                    "action": {"type": "uri", "label": "活動報名", "uri": f"{base}/events"},
-                },
-                {
-                    "bounds": RICH_MENU_AREAS[2],
-                    "action": {"type": "uri", "label": "文化抽籤", "uri": f"{base}/fortune"},
-                },
-                {
-                    "bounds": RICH_MENU_AREAS[3],
-                    "action": {"type": "uri", "label": "宮廟導覽", "uri": f"{base}/tour/main-hall"},
-                },
-                {
-                    "bounds": RICH_MENU_AREAS[4],
-                    "action": {"type": "uri", "label": "我的紀錄", "uri": f"{base}/member"},
-                },
-                {
-                    "bounds": RICH_MENU_AREAS[5],
-                    "action": {"type": "uri", "label": "客服中心", "uri": f"{base}/support"},
-                },
-            ],
-        }
+        return build_main_menu_payload(self.settings.frontend_base_url)
 
     async def publish_main_menu(self) -> dict[str, object]:
         if not self.settings.line_channel_access_token:

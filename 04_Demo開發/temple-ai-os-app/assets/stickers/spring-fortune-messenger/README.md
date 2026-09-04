@@ -12,10 +12,10 @@
 
 ## LINE Creators Market 送審草稿
 
-- Creator：Temple AI OS Demo
+- Creator：萬春宮線上服務
 - Sticker Title：春福小使日常貼圖
-- Description：原創春福小使帶來日常問候、回覆與平安祝福，適合宮廟文化服務 Demo 的聊天情境。
-- Copyright：TempleAIOSDemo
+- Description：原創春福小使帶來日常問候、回覆與平安祝福，適合宮廟文化服務的聊天情境。
+- Copyright：WanChunGongService
 - Quantity：8
 
 ## 審核注意

@@ -4,6 +4,7 @@ import { CalendarDays, MapPin, Users } from "lucide-react";
 import { Shell } from "../../components/Shell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type EventItem } from "../../lib/api";
+import { eventRouteKey } from "../../lib/eventLinks";
 
 const statusLabels: Record<string, string> = {
   open: "可報名",
@@ -19,10 +20,17 @@ export function EventDetailPage() {
   const [event, setEvent] = useState<EventItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     loadEvent();
   }, [eventId]);
+
+  useEffect(() => {
+    if (!event?.countdown_target_at) return undefined;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [event?.countdown_target_at]);
 
   async function loadEvent() {
     if (!eventId) {
@@ -71,16 +79,25 @@ export function EventDetailPage() {
     );
   }
 
-  const canRegister = event.requires_registration && ["open", "published"].includes(event.status);
+  const registrationOpen = !event.registration_open_at || new Date(event.registration_open_at).getTime() <= now;
+  const registrationNotClosed = !event.registration_close_at || new Date(event.registration_close_at).getTime() >= now;
+  const canRegister = event.requires_registration && ["open", "published"].includes(event.status) && registrationOpen && registrationNotClosed;
   const isFull = Boolean(event.capacity && event.registered_count >= event.capacity);
+  const registrationNotStarted = Boolean(event.registration_open_at && new Date(event.registration_open_at).getTime() > now);
+  const registrationClosed = Boolean(event.registration_close_at && new Date(event.registration_close_at).getTime() <= now);
+  const countdownSeconds = event.countdown_target_at
+    ? Math.max(0, Math.floor((new Date(event.countdown_target_at).getTime() - now) / 1000))
+    : 0;
+  const countdownText = `${Math.floor(countdownSeconds / 86400)}天 ${String(Math.floor((countdownSeconds % 86400) / 3600)).padStart(2, "0")}:${String(Math.floor((countdownSeconds % 3600) / 60)).padStart(2, "0")}:${String(countdownSeconds % 60).padStart(2, "0")}`;
+  const canJoinWaitlist = canRegister && isFull && event.waitlist_enabled;
 
   return (
     <Shell title={event.title}>
       <section className="detail-panel">
         <div className="card-row">
           <span className="tag">{event.category}</span>
-          <span className={canRegister && !isFull ? "status open" : "status"}>
-            {isFull ? "名額已滿" : statusLabels[event.status] || event.status}
+          <span className={canRegister ? "status open" : "status"}>
+            {canJoinWaitlist ? "可登記候補" : isFull ? "名額已滿" : statusLabels[event.status] || event.status}
           </span>
         </div>
         <p>{event.summary}</p>
@@ -102,21 +119,49 @@ export function EventDetailPage() {
             </span>
           </div>
         ) : null}
-        <div className="event-info-grid">
+          <div className="event-info-grid">
           <div>
             <span>報名狀態</span>
-            <strong>{canRegister && !isFull ? "現在可報名" : "目前不開放"}</strong>
+            <strong>
+              {canJoinWaitlist
+                ? "額滿，可登記候補"
+                : canRegister
+                  ? "現在可報名"
+                  : registrationNotStarted
+                    ? "尚未開放"
+                    : registrationClosed
+                      ? "已截止"
+                      : "目前不開放"}
+            </strong>
           </div>
-          <div>
-            <span>參加方式</span>
-            <strong>{event.requires_registration ? "線上填寫資料" : "現場自由參加"}</strong>
+            <div>
+              <span>參加方式</span>
+              <strong>{event.requires_registration ? "線上填寫資料" : "現場自由參加"}</strong>
+            </div>
+            {event.registration_close_at ? (
+              <div>
+                <span>報名截止</span>
+                <strong>{new Date(event.registration_close_at).toLocaleString("zh-TW")}</strong>
+              </div>
+            ) : null}
+            {event.registration_open_at ? (
+              <div>
+                <span>開放報名</span>
+                <strong>{new Date(event.registration_open_at).toLocaleString("zh-TW")}</strong>
+              </div>
+            ) : null}
+            {event.countdown_target_at && countdownSeconds > 0 ? (
+              <div>
+                <span>{event.countdown_label || "活動開始倒數"}</span>
+                <strong>{countdownText}</strong>
+              </div>
+            ) : null}
           </div>
-        </div>
         {event.payment_policy ? <p className="notice">{event.payment_policy}</p> : null}
         <p className="notice">{event.demo_note}</p>
-        {canRegister && !isFull ? (
-          <Link className="button primary" to={`/register/${event.event_id}`}>
-            示範報名
+        {canRegister && (!isFull || event.waitlist_enabled) ? (
+          <Link className="button primary" to={`/register/${eventRouteKey(event.event_id)}`}>
+            {canJoinWaitlist ? "登記候補" : "線上報名"}
           </Link>
         ) : event.requires_registration ? (
           <span className="button muted">目前不開放報名</span>

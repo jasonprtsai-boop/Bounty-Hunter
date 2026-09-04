@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.admin_identity import normalize_admin_login_id
 from app.core.config import get_settings
@@ -21,8 +21,13 @@ from app.schemas.common import (
     AdminCurrentUser,
     AdminLoginRequest,
     AdminLoginResponse,
+    AdminRegistrationRecord,
+    AdminRegistrationSummary,
     ApiResponse,
     DashboardSummary,
+    Deity,
+    DeityCreate,
+    DeityUpdate,
     Event,
     EventCreate,
     EventUpdate,
@@ -32,6 +37,8 @@ from app.schemas.common import (
     NotificationJob,
     NotificationJobCreate,
     NotificationJobUpdate,
+    Registration,
+    RegistrationUpdate,
     SupportTicket,
     SupportTicketUpdate,
 )
@@ -78,13 +85,25 @@ def _document_id_from_title(title: str) -> str:
     return candidate[:80] or "admin_knowledge"
 
 
+def _admin_registration_record(registration: Registration) -> AdminRegistrationRecord:
+    event = get_repository().get_event(registration.event_id)
+    return AdminRegistrationRecord(
+        **registration.model_dump(),
+        event_title=event.title if event else "活動資料已移除",
+        event_category=event.category if event else "",
+        event_date=event.date if event else "",
+        event_time=f"{event.start_time}-{event.end_time}" if event else "",
+        event_location=event.location if event else "",
+    )
+
+
 def _read_knowledge_document(path: Path) -> KnowledgeDocument:
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
     title = path.stem
     if lines and lines[0].startswith("#"):
         title = lines[0].lstrip("# ").strip() or path.stem
-    source_type = "demo_knowledge_base"
+    source_type = "knowledge_base"
     for line in lines:
         if line.startswith("來源類型："):
             source_type = line.replace("來源類型：", "").strip()
@@ -263,6 +282,139 @@ async def admin_delete_event(
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="event_not_found")
     return ApiResponse(data={"deleted": True})
+
+
+@router.get("/deities", response_model=ApiResponse[list[Deity]])
+async def admin_list_deities() -> ApiResponse[list[Deity]]:
+    return ApiResponse(data=get_repository().list_deities())
+
+
+@router.post("/deities", response_model=ApiResponse[Deity], status_code=status.HTTP_201_CREATED)
+async def admin_create_deity(
+    payload: DeityCreate,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[Deity]:
+    _require_operations_manager(principal)
+    try:
+        deity = get_repository().create_deity(payload)
+    except ValueError as exc:
+        detail = str(exc)
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT
+            if detail == "deity_already_exists"
+            else status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=detail,
+        ) from exc
+    return ApiResponse(data=deity)
+
+
+@router.put("/deities/{deity_id}", response_model=ApiResponse[Deity])
+async def admin_update_deity(
+    deity_id: str,
+    payload: DeityUpdate,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[Deity]:
+    _require_operations_manager(principal)
+    deity = get_repository().update_deity(deity_id, payload)
+    if not deity:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="deity_not_found")
+    return ApiResponse(data=deity)
+
+
+@router.delete("/deities/{deity_id}", response_model=ApiResponse[dict[str, bool]])
+async def admin_delete_deity(
+    deity_id: str,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[dict[str, bool]]:
+    _require_operations_manager(principal)
+    if not get_repository().delete_deity(deity_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="deity_not_found")
+    return ApiResponse(data={"deleted": True})
+
+
+@router.get("/registrations", response_model=ApiResponse[list[AdminRegistrationRecord]])
+async def admin_list_registrations(
+    event_id: str | None = Query(default=None),
+    registration_status: str | None = Query(default=None),
+    keyword: str | None = Query(default=None, max_length=120),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    created_from: str | None = Query(default=None),
+    created_to: str | None = Query(default=None),
+) -> ApiResponse[list[AdminRegistrationRecord]]:
+    registrations = get_repository().list_registrations()
+    if event_id:
+        registrations = [item for item in registrations if item.event_id == event_id]
+    if registration_status:
+        registrations = [item for item in registrations if item.status == registration_status]
+    records = [_admin_registration_record(item) for item in registrations]
+    if date_from:
+        records = [item for item in records if item.event_date >= date_from]
+    if date_to:
+        records = [item for item in records if item.event_date <= date_to]
+    if created_from:
+        records = [item for item in records if (item.created_at or "")[:10] >= created_from]
+    if created_to:
+        records = [item for item in records if (item.created_at or "")[:10] <= created_to]
+    if keyword:
+        normalized_keyword = keyword.strip().lower()
+        records = [
+            item
+            for item in records
+            if normalized_keyword
+            in " ".join(
+                [
+                    item.registration_id,
+                    item.event_id,
+                    item.event_title,
+                    item.event_category,
+                    item.contact_name or "",
+                    item.phone or "",
+                    item.user_id,
+                    item.note or "",
+                ]
+            ).lower()
+        ]
+    return ApiResponse(data=sorted(records, key=lambda item: item.created_at or "", reverse=True))
+
+
+@router.get("/registrations/summary", response_model=ApiResponse[AdminRegistrationSummary])
+async def admin_registration_summary(
+    event_id: str | None = Query(default=None),
+) -> ApiResponse[AdminRegistrationSummary]:
+    registrations = get_repository().list_registrations()
+    if event_id:
+        registrations = [item for item in registrations if item.event_id == event_id]
+    counts = {key: 0 for key in ("confirmed", "pending_review", "checked_in", "cancelled", "waitlisted")}
+    for item in registrations:
+        if item.status in counts:
+            counts[item.status] += 1
+    return ApiResponse(
+        data=AdminRegistrationSummary(
+            total_registrations=len(registrations),
+            total_party_size=sum(item.party_size for item in registrations if item.status != "cancelled"),
+            events_with_registrations=len({item.event_id for item in registrations}),
+            **counts,
+        )
+    )
+
+
+@router.patch("/registrations/{registration_id}", response_model=ApiResponse[AdminRegistrationRecord])
+async def admin_update_registration(
+    registration_id: str,
+    payload: RegistrationUpdate,
+    principal: AdminPrincipal = Depends(require_admin_token),
+) -> ApiResponse[AdminRegistrationRecord]:
+    _require_operations_manager(principal)
+    try:
+        registration = get_repository().update_registration(registration_id, payload)
+    except ValueError as exc:
+        detail = str(exc)
+        status_code = status.HTTP_409_CONFLICT if detail == "event_capacity_exceeded" else status.HTTP_422_UNPROCESSABLE_CONTENT
+        raise HTTPException(status_code=status_code, detail=detail) from exc
+    if not registration:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="registration_not_found")
+    return ApiResponse(data=_admin_registration_record(registration))
 
 
 @router.get("/support-tickets", response_model=ApiResponse[list[SupportTicket]])
@@ -464,7 +616,7 @@ async def send_test_notification(
     _require_operations_manager(principal)
     result = await NotificationService(get_repository()).send_test_notification(
         user_id,
-        "Temple AI OS 測試推播：這是 Demo 訊息。",
+        "萬春宮線上服務：這是一則測試推播。",
     )
     if result.get("sent") is False and result.get("reason") != "LINE_CHANNEL_ACCESS_TOKEN is not configured":
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=result)

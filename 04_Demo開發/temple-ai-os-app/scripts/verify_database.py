@@ -138,7 +138,7 @@ def main() -> None:
                 "registered_count": 0,
                 "status": "open",
                 "registration_fields": ["name", "party_size"],
-                "demo_note": "Temporary row. Safe to delete.",
+                "demo_note": "Temporary verification row. Safe to delete.",
             },
         )
         request(

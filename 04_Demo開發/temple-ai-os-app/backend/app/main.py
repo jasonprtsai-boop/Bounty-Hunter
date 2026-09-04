@@ -24,9 +24,9 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(
-    title="Temple AI OS API",
+    title="萬春宮線上服務 API",
     version="0.1.0",
-    description="Wan Chun Gong demo backend for LINE, LIFF, AI, and admin dashboard.",
+    description="Wan Chun Gong service backend for LINE, LIFF, public pages, and admin dashboard.",
     lifespan=lifespan,
 )
 

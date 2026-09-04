@@ -9,7 +9,7 @@ from typing import Any, Callable
 import httpx
 
 
-DEFAULT_FRONTEND_BASE_URL = "https://temple-ai-os-demo.jasonprtsai.chatgpt.site"
+DEFAULT_FRONTEND_BASE_URL = "https://wanchun-gong-service.jasonprtsai.chatgpt.site"
 DEFAULT_API_BASE_URL = "https://temple-ai-os-api.onrender.com"
 DEFAULT_LIFF_URL = "https://liff.line.me/2010938588-VJXpaoyH"
 DEFAULT_ADD_FRIEND_URL = "https://line.me/R/ti/p/%40983zhzni"
@@ -128,12 +128,12 @@ def main() -> None:
         for check in checks:
             run_check(client, check)
 
-    print("Public demo smoke check OK.")
+    print("Public service smoke check OK.")
 
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as exc:
-        print(f"Public demo smoke check failed: {exc}", file=sys.stderr)
+        print(f"Public service smoke check failed: {exc}", file=sys.stderr)
         raise SystemExit(1) from exc

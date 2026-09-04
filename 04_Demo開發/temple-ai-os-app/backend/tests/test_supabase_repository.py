@@ -36,13 +36,13 @@ class FakeSupabaseClient:
                 [
                     {
                         "temple_id": supabase.TEMPLE_ID,
-                        "name": "Temple AI OS Demo",
-                        "aliases": ["Demo Temple"],
+                        "name": "萬春宮線上服務",
+                        "aliases": ["萬春宮"],
                         "main_deity": "Mazu",
                         "address": "Taichung",
                         "phone": "04-0000-0000",
                         "coordinates": {"lat": 24.0, "lng": 120.0},
-                        "demo_positioning": "Demo profile",
+                        "demo_positioning": "Service profile",
                         "sources": [],
                     }
                 ],
@@ -55,14 +55,14 @@ class FakeSupabaseClient:
                     {
                         "event_id": "evt_supabase_test",
                         "title": "Supabase event",
-                        "category": "demo",
+                        "category": "service",
                         "source_type": "test",
                         "event_date": "2026-09-01",
                         "start_time": "10:00",
                         "end_time": "11:00",
                         "location": "Main hall",
                         "address": "Taichung",
-                        "summary": "Demo event",
+                        "summary": "Service event",
                         "requires_registration": True,
                         "capacity": 20,
                         "registered_count": 0,
@@ -150,9 +150,9 @@ def reset_repository_state() -> None:
     get_settings.cache_clear()
 
 
-def test_get_repository_requires_supabase_config_when_not_demo(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_get_repository_requires_supabase_config_in_database_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_repository_state()
-    monkeypatch.setenv("DEMO_MODE", "false")
+    monkeypatch.setenv("WAN_CHUN_GONG_SERVICE_MODE", "database")
     monkeypatch.delenv("SUPABASE_URL", raising=False)
     monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
     get_settings.cache_clear()
@@ -163,14 +163,14 @@ def test_get_repository_requires_supabase_config_when_not_demo(monkeypatch: pyte
     reset_repository_state()
 
 
-def test_get_repository_uses_supabase_when_not_demo(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_get_repository_uses_supabase_in_database_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     class DummySupabaseRepository:
         def __init__(self, supabase_url: str, service_role_key: str) -> None:
             self.supabase_url = supabase_url
             self.service_role_key = service_role_key
 
     reset_repository_state()
-    monkeypatch.setenv("DEMO_MODE", "false")
+    monkeypatch.setenv("WAN_CHUN_GONG_SERVICE_MODE", "database")
     monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "service-role")
     monkeypatch.setattr(supabase, "SupabaseRepository", DummySupabaseRepository)
@@ -183,7 +183,7 @@ def test_get_repository_uses_supabase_when_not_demo(monkeypatch: pytest.MonkeyPa
     assert repository.service_role_key == "service-role"
 
 
-def test_get_repository_falls_back_to_demo_when_supabase_initialization_fails(
+def test_get_repository_falls_back_to_local_data_when_supabase_initialization_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class FailingSupabaseRepository:
@@ -191,7 +191,7 @@ def test_get_repository_falls_back_to_demo_when_supabase_initialization_fails(
             raise RuntimeError("supabase_temple_profile_missing")
 
     reset_repository_state()
-    monkeypatch.setenv("DEMO_MODE", "false")
+    monkeypatch.setenv("WAN_CHUN_GONG_SERVICE_MODE", "database")
     monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "service-role")
     monkeypatch.setattr(supabase, "SupabaseRepository", FailingSupabaseRepository)
@@ -199,7 +199,7 @@ def test_get_repository_falls_back_to_demo_when_supabase_initialization_fails(
 
     repository = supabase.get_repository()
 
-    assert isinstance(repository, supabase.DemoRepository)
+    assert isinstance(repository, supabase.LocalRepository)
     assert repository.list_events()
     reset_repository_state()
 
@@ -210,10 +210,10 @@ def test_get_repository_can_disable_supabase_fallback(monkeypatch: pytest.Monkey
             raise RuntimeError("supabase_temple_profile_missing")
 
     reset_repository_state()
-    monkeypatch.setenv("DEMO_MODE", "false")
+    monkeypatch.setenv("WAN_CHUN_GONG_SERVICE_MODE", "database")
     monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "service-role")
-    monkeypatch.setenv("SUPABASE_FALLBACK_TO_DEMO", "false")
+    monkeypatch.setenv("SUPABASE_FALLBACK_TO_LOCAL", "false")
     monkeypatch.setattr(supabase, "SupabaseRepository", FailingSupabaseRepository)
     get_settings.cache_clear()
 

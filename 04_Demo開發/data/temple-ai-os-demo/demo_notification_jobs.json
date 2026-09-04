@@ -7,7 +7,7 @@
     "status": "ready",
     "scheduled_at": null,
     "payload": {
-      "text": "Temple AI OS Demo：你的活動報名已建立。"
+      "text": "萬春宮線上服務：你的活動報名已建立。"
     }
   },
   {
@@ -18,7 +18,7 @@
     "status": "draft",
     "scheduled_at": "2026-08-26T18:00:00+08:00",
     "payload": {
-      "text": "提醒：你報名的 Demo 活動即將開始，正式資訊仍以廟方公告為準。"
+      "text": "提醒：你報名的活動即將開始，正式資訊仍以廟方公告為準。"
     }
   }
 ]

@@ -1,6 +1,8 @@
 import { FormEvent, useState } from "react";
+import { Link } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { Shell } from "../../components/Shell";
+import { StatePanel } from "../../components/StatePanel";
 import { apiFetch } from "../../lib/api";
 import { getLiffSession } from "../../lib/session";
 
@@ -57,10 +59,21 @@ export function SupportPage() {
   return (
     <Shell title="客服中心">
       {done ? (
-        <section className="success-panel">
-          <h2>工單已建立</h2>
-          <p>已收到你的問題。正式案件仍需由廟方或服務人員人工確認。</p>
-        </section>
+        <StatePanel
+          variant="success"
+          title="工單已建立"
+          body="已收到你的問題。正式案件仍需由廟方或服務人員人工確認。"
+          actions={
+            <>
+              <Link className="button primary" to="/">
+                回服務首頁
+              </Link>
+              <Link className="button" to="/events">
+                查看活動
+              </Link>
+            </>
+          }
+        />
       ) : (
         <form className="form-panel" onSubmit={submit}>
           <div className="form-intro">
@@ -117,7 +130,7 @@ export function SupportPage() {
               placeholder="選填"
             />
           </label>
-          {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text" role="alert">{error}</p>}
           <button className="button primary" disabled={saving} type="submit">
             {saving ? "送出中" : "送出問題"}
           </button>

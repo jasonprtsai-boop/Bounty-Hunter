@@ -214,11 +214,11 @@ def write_metadata() -> None:
     metadata = {
         "pack_id": "spring-fortune-messenger-01",
         "title_zh_tw": "春福小使日常貼圖",
-        "creator": "Temple AI OS Demo",
-        "copyright": "TempleAIOSDemo",
+        "creator": "萬春宮線上服務",
+        "copyright": "WanChunGongService",
         "sticker_count": len(STICKERS),
         "store_url_env": "VITE_LINE_STICKER_STORE_URL",
-        "review_note": "Original mascot artwork for a temple-culture demo. Not an official Wan Chun Gong logo, not a deity likeness, and not a direct advertisement.",
+        "review_note": "Original mascot artwork for a temple-culture service. Not an official Wan Chun Gong logo, not a deity likeness, and not a direct advertisement.",
         "source": "Generated with built-in image generation, then composed with deterministic text overlays.",
         "line_requirements": {
             "main_image": "240x240 PNG",

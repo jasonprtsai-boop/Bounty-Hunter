@@ -1,0 +1,86 @@
+[
+  {
+    "deity_id": "deity_guanyin",
+    "name": "觀音佛祖",
+    "category": "主配祀神",
+    "enshrined_area": "觀音佛祖神龕",
+    "description": "鎮殿觀音佛祖、老觀音佛祖與左觀音佛祖共同奉祀於觀音佛祖神龕。",
+    "birthday_lunar": null,
+    "service_notes": "神龕位置與參拜方式請依現場指示。",
+    "source_url": "https://www.lswc.org.tw/tw/?ID=5&Page=gods_list",
+    "status": "published",
+    "sort_order": 10
+  },
+  {
+    "deity_id": "deity_zhusheng",
+    "name": "註生娘娘",
+    "category": "主配祀神",
+    "enshrined_area": "註生娘娘神龕",
+    "description": "註生娘娘神龕另配祀婆姐、值年太歲與祿位牌位。",
+    "birthday_lunar": null,
+    "service_notes": "若涉及安太歲、祈求或正式登記，請以廟方公告與現場人員說明為準。",
+    "source_url": "https://www.lswc.org.tw/tw/?ID=5&Page=gods_list",
+    "status": "published",
+    "sort_order": 20
+  },
+  {
+    "deity_id": "deity_sanguan",
+    "name": "三官大帝",
+    "category": "副配祀神",
+    "enshrined_area": "中案神桌",
+    "description": "列於萬春宮公開配祀神佛資料中的副配祀神明。",
+    "birthday_lunar": null,
+    "service_notes": "節慶法會與供奉安排請以廟方公告為準。",
+    "source_url": "https://www.lswc.org.tw/tw/?ID=6&Page=gods_list",
+    "status": "published",
+    "sort_order": 30
+  },
+  {
+    "deity_id": "deity_wenchang",
+    "name": "文昌帝君",
+    "category": "副配祀神",
+    "enshrined_area": "副配祀神明區",
+    "description": "列於公開配祀神佛資料中的副配祀神明，可作為文化導覽與節慶查詢入口。",
+    "birthday_lunar": null,
+    "service_notes": "文化介紹不取代正式祭祀或廟方服務說明。",
+    "source_url": "https://www.lswc.org.tw/tw/?ID=6&Page=gods_list",
+    "status": "published",
+    "sort_order": 40
+  },
+  {
+    "deity_id": "deity_luxianzu",
+    "name": "孚佑帝君（呂仙祖）",
+    "category": "客座神明",
+    "enshrined_area": "客座神明區",
+    "description": "萬春宮公開資料列載的客座神明。",
+    "birthday_lunar": null,
+    "service_notes": "正式供奉與參拜細節請以現場公告為準。",
+    "source_url": "https://www.lswc.org.tw/tw/?ID=7&Page=gods_list",
+    "status": "published",
+    "sort_order": 50
+  },
+  {
+    "deity_id": "deity_qianliyan",
+    "name": "千里眼將軍",
+    "category": "護法神明",
+    "enshrined_area": "正殿與神龕前",
+    "description": "公開資料列載的護法神明，正殿與神龕前皆有奉祀位置。",
+    "birthday_lunar": null,
+    "service_notes": "位置資訊依公開頁整理，現場若有調整請以廟方公告為準。",
+    "source_url": "https://www.lswc.org.tw/tw/?ID=8&Page=gods_list",
+    "status": "published",
+    "sort_order": 60
+  },
+  {
+    "deity_id": "deity_shunfeng",
+    "name": "順風耳將軍",
+    "category": "護法神明",
+    "enshrined_area": "正殿與神龕前",
+    "description": "公開資料列載的護法神明，正殿與神龕前皆有奉祀位置。",
+    "birthday_lunar": null,
+    "service_notes": "位置資訊依公開頁整理，現場若有調整請以廟方公告為準。",
+    "source_url": "https://www.lswc.org.tw/tw/?ID=8&Page=gods_list",
+    "status": "published",
+    "sort_order": 70
+  }
+]

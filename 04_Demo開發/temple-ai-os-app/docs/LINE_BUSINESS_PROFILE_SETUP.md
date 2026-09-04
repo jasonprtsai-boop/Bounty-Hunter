@@ -1,28 +1,28 @@
 # LINE 商業簡介設定稿
 
-Last updated: 2026-08-23
+Last updated: 2026-09-04
 
 ## 定位
 
-此 LINE 官方帳號名稱為 `Temple AI OS示範`，目前用途是競賽 Demo 與系統測試。商業簡介文字必須清楚標示「不代表萬春宮官方正式營運」，避免使用者誤以為可透過此帳號辦理正式廟務、活動、捐款或客服。
+此 LINE 帳號建議名稱為 `萬春宮線上服務`。商業簡介文字必須清楚提醒「正式資訊仍以廟方公告為準」，避免使用者誤以為可透過此帳號辦理正式廟務、活動、捐款或客服。
 
 ## 建議填寫內容
 
 | 欄位 | 建議內容 |
 | --- | --- |
-| 商業簡介短標 | Temple AI OS示範｜LINE × AI 智慧宮廟服務入口 |
-| 商業簡介 | Temple AI OS 是智慧宮廟服務 Demo，示範如何把 LINE 官方帳號、AI 問答、活動報名、會員服務與管理後台整合為一個入口。本帳號以萬春宮公開資料建立展示場景，用於競賽與系統測試，不代表萬春宮官方正式營運。正式活動、開放時間與服務內容請以廟方公告為準。 |
-| 網站 | https://temple-ai-os-demo.jasonprtsai.chatgpt.site |
-| 隱私權政策 | https://temple-ai-os-demo.jasonprtsai.chatgpt.site/privacy |
-| 服務條款 | https://temple-ai-os-demo.jasonprtsai.chatgpt.site/terms |
-| 示範場景地址 | 臺中市中區成功路212號 |
+| 商業簡介短標 | 萬春宮線上服務｜LINE 宮廟服務入口 |
+| 商業簡介 | 萬春宮線上服務把 LINE 帳號、參拜問答、活動報名、報名進度查詢、文化抽籤與管理後台整合為一個入口。本帳號以萬春宮公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。 |
+| 網站 | https://wanchun-gong-service.jasonprtsai.chatgpt.site |
+| 隱私權政策 | https://wanchun-gong-service.jasonprtsai.chatgpt.site/privacy |
+| 服務條款 | https://wanchun-gong-service.jasonprtsai.chatgpt.site/terms |
+| 萬春宮地址 | 臺中市中區成功路212號 |
 | 公開資料電話 | 04-22245964 |
-| 營業時間說明 | 此帳號為競賽 Demo，不提供正式營業時間；參拜與活動資訊請以廟方公告為準。 |
+| 營業時間說明 | 參拜與活動資訊請以廟方公告為準；重要廟務建議再向正式窗口確認。 |
 
 ## 後台操作順序
 
 1. 進入 LINE Official Account Manager。
-2. 選擇 `Temple AI OS示範`。
+2. 選擇 `萬春宮線上服務`。
 3. 進入 `Profile / 商業簡介`。
 4. 上傳大頭貼 `assets/brand/line-oa-profile-v2.png`。
 5. 上傳背景圖 `assets/brand/line-oa-profile-background-v1.png`。
@@ -34,16 +34,16 @@ Last updated: 2026-08-23
 
 這些項目也已放在 `/admin/release`，可直接在後台頁面勾選追蹤。
 
-- LINE 商業簡介已貼上 Demo 聲明與公開網址。
+- LINE 商業簡介已貼上服務提醒與公開網址。
 - 帳號名稱、狀態訊息、歡迎訊息與 LINE VOOM 互動設定已確認。
 - LINE 大頭貼已換成 `line-oa-profile-v2.png`。
 - LINE 背景圖已換成 `line-oa-profile-background-v1.png`。
 - Messaging API Webhook 驗證成功。
 - Rich Menu 已發布，活動、導覽、抽籤、紀錄與客服入口可開啟。
-- 至少一篇 LINE VOOM Demo 貼文已建立草稿或排程。
+- 至少一篇 LINE VOOM 服務貼文已建立草稿或排程。
 - 手機 LINE 實測可開 LIFF 與活動頁。
 - 貼圖素材已確認，等待 LINE Creators Market 送審或審核。
-- Demo 現場前已暖機 Render 後端。
+- 發布前已暖機 Render 後端。
 
 ## 帳號設定與貼文範例
 
@@ -58,6 +58,6 @@ docs/LINE_CONTENT_PLAYBOOK.md
 ## 風險提醒
 
 - 若未取得廟方正式授權，不要把帳號名稱改成「萬春宮官方」。
-- 真實電話與地址屬於公開資料，但放在 LINE 商業簡介上容易被理解成正式客服入口；若要降低誤會，可只保留網站與 Demo 說明，不顯示電話。
+- 真實電話與地址屬於公開資料，但放在 LINE 商業簡介上容易被理解成正式客服入口；若要降低誤會，可只保留網站與「正式資訊以廟方公告為準」提醒，不顯示電話。
 - 正式上架貼圖後，才把 LINE STORE 貼圖購買網址加進 `/stickers` 的環境變數。
-- LINE VOOM 貼文與廣播訊息都不能暗示這是廟方正式公告；Demo 聲明要保留在貼文本文或圖片說明中。
+- LINE VOOM 貼文與廣播訊息都不能暗示這是廟方正式公告；服務提醒要保留在貼文本文或圖片說明中。

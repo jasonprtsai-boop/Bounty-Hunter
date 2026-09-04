@@ -16,6 +16,9 @@ from app.schemas.common import (
     AdminAccountCreate,
     AdminAccountUpdate,
     DashboardSummary,
+    Deity,
+    DeityCreate,
+    DeityUpdate,
     Event,
     EventCreate,
     EventUpdate,
@@ -27,6 +30,7 @@ from app.schemas.common import (
     NotificationJobUpdate,
     Registration,
     RegistrationCreate,
+    RegistrationUpdate,
     SupportTicket,
     SupportTicketCreate,
     SupportTicketUpdate,
@@ -36,7 +40,28 @@ from app.schemas.common import (
 
 
 TEMPLE_ID = "wcg_taichung_demo"
+COUNTED_REGISTRATION_STATUSES = {"confirmed", "pending_review", "checked_in"}
 logger = logging.getLogger(__name__)
+
+
+def _phone_digits(value: str | None) -> str:
+    return "".join(character for character in value or "" if character.isdigit())
+
+
+def _validate_registration_window(open_at: str | None, close_at: str | None) -> None:
+    if not open_at or not close_at:
+        return
+    try:
+        opened = datetime.fromisoformat(open_at.replace("Z", "+00:00"))
+        closed = datetime.fromisoformat(close_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("registration_window_invalid") from exc
+    if opened.tzinfo is None:
+        opened = opened.replace(tzinfo=timezone.utc)
+    if closed.tzinfo is None:
+        closed = closed.replace(tzinfo=timezone.utc)
+    if opened > closed:
+        raise ValueError("registration_window_invalid")
 
 
 def _read_json(path: Path, fallback: Any) -> Any:
@@ -45,8 +70,8 @@ def _read_json(path: Path, fallback: Any) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-class DemoRepository:
-    """Local demo repository; keeps the app usable before external accounts are configured."""
+class LocalRepository:
+    """Local fallback repository; keeps the app usable before external accounts are configured."""
 
     def __init__(self) -> None:
         settings = get_settings()
@@ -83,6 +108,9 @@ class DemoRepository:
         self.messages: list[dict[str, Any]] = []
         self.fortune_slips = self._build_fortune_slips()
         self.tour_spots = self._build_tour_spots()
+        self.deities = [
+            Deity.model_validate(item) for item in _read_json(data_dir / "demo_deities.json", [])
+        ]
 
     def _build_admin_accounts(self, settings) -> list[dict[str, Any]]:
         credentials = settings.admin_token_map.copy()
@@ -227,7 +255,7 @@ class DemoRepository:
                 title="靜心觀路",
                 poem="香煙一縷照初心，行到廟前問本心。",
                 plain_language="先把問題拆小，再決定下一步。這不是命運判斷，而是文化式的自我整理。",
-                cultural_note="籤詩在民間文化中常被用來提醒人沉澱心緒；本 Demo 只提供文化解說。",
+                cultural_note="籤詩在民間文化中常被用來提醒人沉澱心緒；本服務只提供文化解說。",
                 reminder="不保證吉凶，不替代醫療、法律、財務或人生重大決策建議。",
             ),
             FortuneSlip(
@@ -244,7 +272,7 @@ class DemoRepository:
                 poem="燈前莫急定行藏，問得分明路自長。",
                 plain_language="資訊不足時不要急著下結論，可以先列出要確認的問題。",
                 cultural_note="這是以傳統籤詩語感寫成的正向提醒，不代表神諭。",
-                reminder="AI 不能代表神明或廟方作出指示。",
+                reminder="線上服務不能代表神明或廟方作出指示。",
             ),
         ]
 
@@ -255,19 +283,19 @@ class DemoRepository:
                 code="main-hall",
                 title="萬春宮正殿",
                 category="參拜動線",
-                summary="示範點位：第一次到訪者可從正殿認識主祀天上聖母與基本參拜動線。",
-                cultural_note="此內容依公開資料與 Demo 摘要整理，現場細節仍以廟方公告為準。",
+                summary="第一次到訪者可從正殿認識主祀天上聖母與基本參拜動線。",
+                cultural_note="此內容依公開資料與服務摘要整理，現場細節仍以廟方公告為準。",
                 image_url=image_url,
-                source_type="open_data_plus_demo_summary",
+                source_type="open_data_plus_service_summary",
             ),
             TourSpot(
                 code="history-wall",
                 title="宮廟文化故事牆",
                 category="文化導覽",
-                summary="示範點位：用 LINE LIFF 呈現萬春宮歷史、城市信仰與文化脈絡摘要。",
+                summary="用 LINE LIFF 呈現萬春宮歷史、城市信仰與文化脈絡摘要。",
                 cultural_note="正式導入前，歷史文字與圖片應由廟方審核或採用明確授權素材。",
                 image_url=image_url,
-                source_type="demo_sample",
+                source_type="temple_service",
             ),
         ]
 
@@ -283,6 +311,7 @@ class DemoRepository:
             raise ValueError("event_already_exists")
         if payload.capacity is not None and payload.registered_count > payload.capacity:
             raise ValueError("event_capacity_below_registrations")
+        _validate_registration_window(payload.registration_open_at, payload.registration_close_at)
         event = Event(event_id=event_id, **payload.model_dump(exclude={"event_id"}))
         self.events.append(event)
         return event
@@ -293,9 +322,20 @@ class DemoRepository:
             return None
         updates = payload.model_dump(exclude_unset=True)
         next_capacity = updates.get("capacity", event.capacity)
+        next_max_party_size = updates.get("max_party_size", event.max_party_size)
         confirmed_total = self._confirmed_party_total(event_id)
+        _validate_registration_window(
+            updates.get("registration_open_at", event.registration_open_at),
+            updates.get("registration_close_at", event.registration_close_at),
+        )
         if next_capacity is not None and confirmed_total > next_capacity:
             raise ValueError("event_capacity_below_registrations")
+        active_max_party_size = max(
+            (item.party_size for item in self.registrations if item.event_id == event_id and item.status in COUNTED_REGISTRATION_STATUSES),
+            default=0,
+        )
+        if next_max_party_size is not None and active_max_party_size > int(next_max_party_size):
+            raise ValueError("event_max_party_size_below_registrations")
         if "registered_count" in updates and next_capacity is not None:
             next_registered_count = int(updates["registered_count"] or 0)
             if next_registered_count > next_capacity:
@@ -310,6 +350,34 @@ class DemoRepository:
             return False
         self.events = [item for item in self.events if item.event_id != event_id]
         self.registrations = [item for item in self.registrations if item.event_id != event_id]
+        return True
+
+    def list_deities(self) -> list[Deity]:
+        return sorted(self.deities, key=lambda deity: (deity.sort_order, deity.name))
+
+    def get_deity(self, deity_id: str) -> Deity | None:
+        return next((deity for deity in self.deities if deity.deity_id == deity_id), None)
+
+    def create_deity(self, payload: DeityCreate) -> Deity:
+        deity_id = payload.deity_id or f"deity_admin_{uuid.uuid4().hex[:8]}"
+        if self.get_deity(deity_id):
+            raise ValueError("deity_already_exists")
+        deity = Deity(deity_id=deity_id, **payload.model_dump(exclude={"deity_id"}))
+        self.deities.append(deity)
+        return deity
+
+    def update_deity(self, deity_id: str, payload: DeityUpdate) -> Deity | None:
+        deity = self.get_deity(deity_id)
+        if not deity:
+            return None
+        for key, value in payload.model_dump(exclude_unset=True).items():
+            setattr(deity, key, value)
+        return deity
+
+    def delete_deity(self, deity_id: str) -> bool:
+        if not self.get_deity(deity_id):
+            return False
+        self.deities = [item for item in self.deities if item.deity_id != deity_id]
         return True
 
     def list_users(self) -> list[LineUser]:
@@ -336,6 +404,42 @@ class DemoRepository:
             return [item for item in self.registrations if item.user_id == user_id]
         return self.registrations
 
+    def update_registration(self, registration_id: str, payload: RegistrationUpdate) -> Registration | None:
+        registration = next((item for item in self.registrations if item.registration_id == registration_id), None)
+        if not registration:
+            return None
+        event = self.get_event(registration.event_id)
+        old_counted_size = (
+            registration.party_size if registration.status in COUNTED_REGISTRATION_STATUSES else 0
+        )
+        updates = payload.model_dump(exclude_unset=True)
+        next_status = str(updates.get("status", registration.status))
+        next_party_size = int(updates.get("party_size", registration.party_size))
+        next_counted_size = next_party_size if next_status in COUNTED_REGISTRATION_STATUSES else 0
+        if event:
+            next_total = event.registered_count - old_counted_size + next_counted_size
+            if event.capacity is not None and next_total > event.capacity:
+                raise ValueError("event_capacity_exceeded")
+            event.registered_count = max(0, next_total)
+        for key, value in updates.items():
+            setattr(registration, key, value)
+        return registration
+
+    def lookup_registrations(
+        self, phone: str | None = None, registration_id: str | None = None
+    ) -> list[Registration]:
+        phone_key = _phone_digits(phone)
+        registration_key = (registration_id or "").strip().lower()
+        results: dict[str, Registration] = {}
+        for item in self.registrations:
+            matches_registration_id = bool(
+                registration_key and item.registration_id.lower() == registration_key
+            )
+            matches_phone = bool(phone_key and _phone_digits(item.phone) == phone_key)
+            if matches_registration_id or matches_phone:
+                results[item.registration_id] = item
+        return list(results.values())
+
     def create_registration(self, event_id: str, payload: RegistrationCreate) -> Registration:
         event = self.get_event(event_id)
         if not event:
@@ -343,23 +447,29 @@ class DemoRepository:
         if not event.requires_registration:
             raise ValueError("registration_not_required")
 
+        if payload.party_size > event.max_party_size:
+            raise ValueError("party_size_exceeded")
+
         if any(
             item.event_id == event_id
             and item.user_id == payload.user_id
-            and item.status in {"confirmed", "pending_review", "checked_in"}
+            and item.status in COUNTED_REGISTRATION_STATUSES
             for item in self.registrations
         ):
             raise ValueError("duplicate_registration")
 
         current_total = self._confirmed_party_total(event_id)
+        registration_status = "confirmed"
         if event.capacity is not None and current_total + payload.party_size > event.capacity:
-            raise ValueError("event_capacity_exceeded")
+            if not event.waitlist_enabled:
+                raise ValueError("event_capacity_exceeded")
+            registration_status = "waitlisted"
 
         registration = Registration(
             registration_id=f"reg_{uuid.uuid4().hex[:8]}",
             event_id=event_id,
             user_id=payload.user_id,
-            status="confirmed",
+            status=registration_status,
             party_size=payload.party_size,
             reminder_opt_in=payload.reminder_opt_in,
             created_at=datetime.now(timezone.utc).isoformat(),
@@ -368,14 +478,15 @@ class DemoRepository:
             note=payload.note,
         )
         self.registrations.append(registration)
-        event.registered_count += payload.party_size
+        if registration_status in COUNTED_REGISTRATION_STATUSES:
+            event.registered_count += payload.party_size
         return registration
 
     def _confirmed_party_total(self, event_id: str) -> int:
         return sum(
             item.party_size
             for item in self.registrations
-            if item.event_id == event_id and item.status in {"confirmed", "pending_review"}
+            if item.event_id == event_id and item.status in COUNTED_REGISTRATION_STATUSES
         )
 
     def create_support_ticket(self, payload: SupportTicketCreate) -> SupportTicket:
@@ -520,7 +631,7 @@ class DemoRepository:
 
 
 class SupabaseRepository:
-    """Supabase REST repository used when DEMO_MODE=false."""
+    """Supabase REST repository used in database service mode."""
 
     def __init__(self, supabase_url: str, service_role_key: str) -> None:
         self.rest_url = f"{supabase_url.rstrip('/')}/rest/v1"
@@ -766,6 +877,11 @@ class SupabaseRepository:
             data["event_date"] = data.pop("date")
         if "event_id" in data:
             data["temple_id"] = TEMPLE_ID
+        # For partial updates, an explicit null is meaningful: it clears an
+        # optional control such as registration_open_at or countdown_target_at.
+        # Creates still omit unset optional values so database defaults apply.
+        if isinstance(payload, EventUpdate):
+            return data
         return {key: value for key, value in data.items() if value is not None}
 
     def _events_cache_is_valid(self) -> bool:
@@ -803,6 +919,7 @@ class SupabaseRepository:
             raise ValueError("event_already_exists")
         if payload.capacity is not None and payload.registered_count > payload.capacity:
             raise ValueError("event_capacity_below_registrations")
+        _validate_registration_window(payload.registration_open_at, payload.registration_close_at)
         event = self._event_from_row(self._insert_returning("events", self._event_row(payload, event_id)))
         self._clear_event_cache()
         return event
@@ -813,9 +930,20 @@ class SupabaseRepository:
             return None
         updates = self._event_row(payload)
         next_capacity = updates.get("capacity", event.capacity)
+        next_max_party_size = updates.get("max_party_size", event.max_party_size)
         confirmed_total = self._confirmed_party_total(event_id)
+        _validate_registration_window(
+            updates.get("registration_open_at", event.registration_open_at),
+            updates.get("registration_close_at", event.registration_close_at),
+        )
         if next_capacity is not None and confirmed_total > int(next_capacity):
             raise ValueError("event_capacity_below_registrations")
+        active_max_party_size = max(
+            (item.party_size for item in self.list_registrations() if item.event_id == event_id and item.status in COUNTED_REGISTRATION_STATUSES),
+            default=0,
+        )
+        if next_max_party_size is not None and active_max_party_size > int(next_max_party_size):
+            raise ValueError("event_max_party_size_below_registrations")
         row = self._patch_returning("events", "event_id", event_id, updates)
         self._clear_event_cache()
         return self._event_from_row(row) if row else None
@@ -825,6 +953,45 @@ class SupabaseRepository:
         if deleted:
             self._clear_event_cache()
         return deleted
+
+    @staticmethod
+    def _deity_from_row(row: dict[str, Any]) -> Deity:
+        data = {key: value for key, value in row.items() if key != "temple_id"}
+        return Deity.model_validate(data)
+
+    @staticmethod
+    def _deity_row(payload: DeityCreate | DeityUpdate, deity_id: str | None = None) -> dict[str, Any]:
+        data = payload.model_dump(exclude_unset=isinstance(payload, DeityUpdate))
+        if deity_id is not None:
+            data["deity_id"] = deity_id
+        data["temple_id"] = TEMPLE_ID
+        if isinstance(payload, DeityUpdate):
+            return data
+        return {key: value for key, value in data.items() if value is not None}
+
+    def list_deities(self) -> list[Deity]:
+        rows = self._select("deities", {"order": "sort_order.asc,name.asc"})
+        return [self._deity_from_row(row) for row in rows]
+
+    def get_deity(self, deity_id: str) -> Deity | None:
+        row = self._single("deities", "deity_id", deity_id)
+        return self._deity_from_row(row) if row else None
+
+    def create_deity(self, payload: DeityCreate) -> Deity:
+        deity_id = payload.deity_id or f"deity_admin_{uuid.uuid4().hex[:8]}"
+        if self.get_deity(deity_id):
+            raise ValueError("deity_already_exists")
+        row = self._insert_returning("deities", self._deity_row(payload, deity_id))
+        return self._deity_from_row(row)
+
+    def update_deity(self, deity_id: str, payload: DeityUpdate) -> Deity | None:
+        if not self.get_deity(deity_id):
+            return None
+        row = self._patch_returning("deities", "deity_id", deity_id, self._deity_row(payload))
+        return self._deity_from_row(row) if row else None
+
+    def delete_deity(self, deity_id: str) -> bool:
+        return self._delete_returning("deities", "deity_id", deity_id)
 
     def list_users(self) -> list[LineUser]:
         return [LineUser.model_validate(row) for row in self._select("line_users")]
@@ -854,6 +1021,44 @@ class SupabaseRepository:
             params["user_id"] = f"eq.{user_id}"
         return [Registration.model_validate(row) for row in self._select("event_registrations", params)]
 
+    def update_registration(self, registration_id: str, payload: RegistrationUpdate) -> Registration | None:
+        row = self._patch_returning(
+            "event_registrations",
+            "registration_id",
+            registration_id,
+            payload.model_dump(exclude_unset=True),
+        )
+        self._clear_event_cache()
+        return Registration.model_validate(row) if row else None
+
+    def lookup_registrations(
+        self, phone: str | None = None, registration_id: str | None = None
+    ) -> list[Registration]:
+        results: dict[str, Registration] = {}
+        registration_key = (registration_id or "").strip()
+        phone_key = (phone or "").strip()
+        if registration_key:
+            rows = self._select(
+                "event_registrations",
+                {
+                    "registration_id": f"eq.{registration_key}",
+                    "order": "created_at.desc",
+                    "limit": "10",
+                },
+            )
+            for row in rows:
+                item = Registration.model_validate(row)
+                results[item.registration_id] = item
+        if phone_key:
+            rows = self._select(
+                "event_registrations",
+                {"phone": f"eq.{phone_key}", "order": "created_at.desc", "limit": "10"},
+            )
+            for row in rows:
+                item = Registration.model_validate(row)
+                results[item.registration_id] = item
+        return list(results.values())
+
     def create_registration(self, event_id: str, payload: RegistrationCreate) -> Registration:
         rows = self._rpc(
             "register_for_event",
@@ -878,7 +1083,7 @@ class SupabaseRepository:
             "event_registrations",
             {
                 "event_id": f"eq.{event_id}",
-                "status": "in.(confirmed,pending_review)",
+                "status": "in.(confirmed,pending_review,checked_in)",
                 "select": "party_size",
             },
         )
@@ -1044,7 +1249,7 @@ class SupabaseRepository:
         )
 
 
-Repository = DemoRepository | SupabaseRepository
+Repository = LocalRepository | SupabaseRepository
 
 _repo: Repository | None = None
 
@@ -1054,7 +1259,7 @@ def get_repository() -> Repository:
     if _repo is None:
         settings = get_settings()
         if settings.demo_mode:
-            _repo = DemoRepository()
+            _repo = LocalRepository()
         else:
             if not settings.supabase_url or not settings.supabase_service_role_key:
                 raise RuntimeError("supabase_not_configured")
@@ -1064,5 +1269,5 @@ def get_repository() -> Repository:
                 if not settings.supabase_fallback_to_demo:
                     raise
                 logger.exception("Supabase repository initialization failed; falling back to demo data")
-                _repo = DemoRepository()
+                _repo = LocalRepository()
     return _repo

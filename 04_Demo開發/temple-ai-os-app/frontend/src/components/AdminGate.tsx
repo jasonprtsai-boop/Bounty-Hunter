@@ -134,7 +134,7 @@ export function AdminGate({ children }: AdminGateProps) {
           <LockKeyhole size={18} />
           {checking || loggingIn ? "驗證中" : "進入後台"}
         </button>
-        {error && <p className="error-text">{error}</p>}
+        {error && <p className="error-text" role="alert">{error}</p>}
       </form>
     </main>
   );

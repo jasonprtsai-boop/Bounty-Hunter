@@ -30,9 +30,16 @@ export function StatePanel({
   children
 }: StatePanelProps) {
   const Icon = icon || defaultIcons[variant];
+  const role = variant === "error" ? "alert" : "status";
+  const ariaLive = variant === "error" ? "assertive" : "polite";
 
   return (
-    <section className={`state-panel ${variant}`} aria-live={variant === "loading" ? "polite" : "assertive"}>
+    <section
+      className={`state-panel ${variant}`}
+      role={role}
+      aria-live={ariaLive}
+      aria-busy={variant === "loading" ? true : undefined}
+    >
       <Icon className="state-panel-icon" size={26} />
       <div>
         <h2>{title}</h2>

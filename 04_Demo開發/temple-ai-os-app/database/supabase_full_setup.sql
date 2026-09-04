@@ -1,6 +1,6 @@
--- Temple AI OS Supabase full setup
+-- Wan Chun Gong service Supabase full setup
 -- Execute this file in Supabase SQL Editor for a fresh project.
--- It is generated from database/migrations/*.sql plus database/seeds/demo_seed.sql.
+-- It is generated from database/migrations/*.sql plus database/seeds/service_seed.sql.
 
 
 -- ============================================================
@@ -645,7 +645,7 @@ $$;
 
 
 -- ============================================================
--- 007_data_integrity_and_demo_ops.sql
+-- 007_data_integrity_and_service_ops.sql
 -- ============================================================
 
 create unique index if not exists event_registrations_check_in_token_unique
@@ -926,7 +926,25 @@ create index if not exists admin_accounts_updated_idx
 
 
 -- ============================================================
--- demo_seed.sql
+-- 009_admin_account_email_login.sql
+-- ============================================================
+
+alter table admin_accounts
+  drop constraint if exists admin_accounts_username_valid;
+
+alter table admin_accounts
+  add constraint admin_accounts_username_valid
+  check (
+    username ~ '^[A-Za-z0-9_.-]{1,80}$'
+    or (
+      char_length(username) <= 120
+      and username ~ '^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,253}\.[A-Za-z]{2,}$'
+    )
+  );
+
+
+-- ============================================================
+-- service_seed.sql
 -- ============================================================
 
 insert into temples (
@@ -944,7 +962,7 @@ insert into temples (
   '04-22245964',
   '{"longitude":120.681602478027,"latitude":24.1420803070068}',
   '{"url":"https://travel.taichung.gov.tw/content/images/attractions/60331/640x480_attractions-image-reeo_rka6kg04vfs2xyzmw.jpg","source":"臺中市政府觀光旅遊局，觀光多媒體開放資料「萬春宮」","license":"Open Government Data License"}',
-  '以政府開放資料與觀光開放資料建立的萬春宮示範場景，非萬春宮官方系統。',
+  '依政府開放資料與觀光開放資料整理的萬春宮服務資訊；正式活動與服務細節請以廟方公告為準。',
   '[]'
 ) on conflict (temple_id) do update set updated_at = now();
 
@@ -961,31 +979,31 @@ insert into events (
   location, address, summary, requires_registration, capacity, registered_count,
   status, registration_fields, payment_policy, demo_note
 ) values
-  ('evt_20260806_guansheng','wcg_taichung_demo','關聖帝君聖誕佳辰','祭典參拜','official_public_reference','2026-08-06','09:00','11:00','萬春宮','臺中市中區成功路212號','國曆8月6日為關聖帝君聖誕佳辰，Demo 可用於近期祭典提醒。',false,null,0,'upcoming','{}',null,'公開活動資訊整理，非官方報名資料。'),
-  ('evt_20260818_mazu_305','wcg_taichung_demo','開基媽祖來台305週年宮慶','宮慶活動','official_public_reference','2026-08-18','09:00','12:00','萬春宮','臺中市中區成功路212號','以宮慶紀念為主題，適合展示活動卡、提醒推播與文化導覽。',false,null,0,'upcoming','{}',null,'公開活動資訊整理，時間細節為 Demo 補齊。'),
-  ('evt_20260827_zhongyuan','wcg_taichung_demo','中元普度法會示範報名','法會服務','official_public_reference_plus_demo_flow','2026-08-27','14:00','17:00','萬春宮','臺中市中區成功路212號','以公開中元普度法會資訊為背景，Demo 展示登記需求、廟方確認與提醒通知。',true,120,78,'open',array['姓名','手機','參加人數','祈福項目','備註'],'Demo 不串接真實金流，正式服務需由廟方確認。','報名名額、欄位與統計數字為示範資料。'),
-  ('evt_demo_worship_intro','wcg_taichung_demo','第一次參拜導覽','導覽互動','team_demo_sample','2026-09-07','10:00','10:40','萬春宮正殿與拜殿','臺中市中區成功路212號','面向第一次到訪者，透過 LIFF 頁面與 AI 導覽了解參拜流程與建築特色。',true,30,18,'open',array['姓名','LINE 顯示名稱','參加人數','是否需要提醒'],null,'純 Demo 活動。'),
-  ('evt_demo_culture_talk','wcg_taichung_demo','媽祖文化小講堂','文化教育','team_demo_sample','2026-09-14','15:00','16:00','萬春會館','臺中市中區成功路210號','介紹臺中媽祖信仰、萬春宮歷史與城市文化脈絡。',true,50,34,'open',array['姓名','手機','參加人數','想了解的主題'],null,'純 Demo 活動。')
+  ('evt_20260806_guansheng','wcg_taichung_demo','關聖帝君聖誕佳辰','祭典參拜','official_public_reference','2026-08-06','09:00','11:00','萬春宮','臺中市中區成功路212號','國曆8月6日為關聖帝君聖誕佳辰，可用於近期祭典提醒。',false,null,0,'upcoming','{}',null,'公開活動資訊整理，非官方報名資料。'),
+  ('evt_20260818_mazu_305','wcg_taichung_demo','開基媽祖來台305週年宮慶','宮慶活動','official_public_reference','2026-08-18','09:00','12:00','萬春宮','臺中市中區成功路212號','以宮慶紀念為主題，適合活動卡、提醒推播與文化導覽。',false,null,0,'upcoming','{}',null,'公開活動資訊整理，時間細節請以廟方公告為準。'),
+  ('evt_20260827_zhongyuan','wcg_taichung_demo','中元普度法會線上報名','法會服務','official_public_reference_plus_service_flow','2026-08-27','14:00','17:00','萬春宮','臺中市中區成功路212號','以公開中元普度法會資訊為背景，提供登記需求、廟方確認與提醒通知。',true,120,78,'open',array['姓名','手機','參加人數','祈福項目','備註'],'目前不串接真實金流，正式服務需由廟方確認。','報名名額、欄位與統計數字請以廟方公告為準。'),
+  ('evt_demo_worship_intro','wcg_taichung_demo','第一次參拜導覽','導覽互動','temple_service','2026-09-07','10:00','10:40','萬春宮正殿與拜殿','臺中市中區成功路212號','面向第一次到訪者，透過 LIFF 頁面與參拜導覽了解參拜流程與建築特色。',true,30,18,'open',array['姓名','LINE 顯示名稱','參加人數','是否需要提醒'],null,'活動內容與報名規則請以廟方公告為準。'),
+  ('evt_demo_culture_talk','wcg_taichung_demo','媽祖文化小講堂','文化教育','temple_service','2026-09-14','15:00','16:00','萬春會館','臺中市中區成功路210號','介紹臺中媽祖信仰、萬春宮歷史與城市文化脈絡。',true,50,34,'open',array['姓名','手機','參加人數','想了解的主題'],null,'活動內容與報名規則請以廟方公告為準。')
 on conflict (event_id) do nothing;
 
 insert into fortune_slips (slip_id, temple_id, title, poem, plain_language, cultural_note, reminder) values
-  ('fortune_culture_001','wcg_taichung_demo','靜心觀路','香煙一縷照初心，行到廟前問本心。','先把問題拆小，再決定下一步。這不是命運判斷，而是文化式的自我整理。','籤詩在民間文化中常被用來提醒人沉澱心緒；本 Demo 只提供文化解說。','不保證吉凶，不替代醫療、法律、財務或人生重大決策建議。'),
+  ('fortune_culture_001','wcg_taichung_demo','靜心觀路','香煙一縷照初心，行到廟前問本心。','先把問題拆小，再決定下一步。這不是命運判斷，而是文化式的自我整理。','籤詩在民間文化中常被用來提醒人沉澱心緒；本服務只提供文化解說。','不保證吉凶，不替代醫療、法律、財務或人生重大決策建議。'),
   ('fortune_culture_002','wcg_taichung_demo','循序成事','一階一履過前庭，風來仍聽鼓聲清。','事情適合分階段處理，先確認資訊來源，再安排時間與資源。','以宮廟建築動線作比喻，提醒使用者按部就班。','若問題涉及報名、付款或廟方決策，請以廟方公告為準。')
 on conflict (slip_id) do nothing;
 
 insert into tour_spots (code, temple_id, title, category, summary, cultural_note, image_url, source_type) values
-  ('main-hall','wcg_taichung_demo','萬春宮正殿','參拜動線','示範點位：第一次到訪者可從正殿認識主祀天上聖母與基本參拜動線。','此內容依公開資料與 Demo 摘要整理，現場細節仍以廟方公告為準。','https://travel.taichung.gov.tw/content/images/attractions/60331/640x480_attractions-image-reeo_rka6kg04vfs2xyzmw.jpg','open_data_plus_demo_summary'),
-  ('history-wall','wcg_taichung_demo','宮廟文化故事牆','文化導覽','示範點位：用 LINE LIFF 呈現萬春宮歷史、城市信仰與文化脈絡摘要。','正式導入前，歷史文字與圖片應由廟方審核或採用明確授權素材。',null,'demo_sample')
+  ('main-hall','wcg_taichung_demo','萬春宮正殿','參拜動線','第一次到訪者可從正殿認識主祀天上聖母與基本參拜動線。','此內容依公開資料與服務摘要整理，現場細節仍以廟方公告為準。','https://travel.taichung.gov.tw/content/images/attractions/60331/640x480_attractions-image-reeo_rka6kg04vfs2xyzmw.jpg','open_data_plus_service_summary'),
+  ('history-wall','wcg_taichung_demo','宮廟文化故事牆','文化導覽','用 LINE LIFF 呈現萬春宮歷史、城市信仰與文化脈絡摘要。','正式導入前，歷史文字與圖片應由廟方審核或採用明確授權素材。',null,'temple_service')
 on conflict (code) do nothing;
 
 insert into support_tickets (ticket_id, user_id, category, subject, message, status, priority, created_at) values
-  ('ticket_demo_001','demo_u001','event_registration','想確認第一次參拜導覽是否可以帶家人','Demo 使用者詢問活動是否可增加同行人數。','open','general','2026-08-05T12:10:00+08:00'),
-  ('ticket_demo_002','demo_u003','content_feedback','建議補充無障礙動線說明','Demo 使用者回饋導覽頁需要更明確的無障礙資訊。','triaged','general','2026-08-05T14:35:00+08:00')
+  ('ticket_demo_001','demo_u001','event_registration','想確認第一次參拜導覽是否可以帶家人','使用者詢問活動是否可增加同行人數。','open','general','2026-08-05T12:10:00+08:00'),
+  ('ticket_demo_002','demo_u003','content_feedback','建議補充無障礙動線說明','使用者回饋導覽頁需要更明確的無障礙資訊。','triaged','general','2026-08-05T14:35:00+08:00')
 on conflict (ticket_id) do nothing;
 
 insert into notification_jobs (job_id, job_type, target_user_id, event_id, status, scheduled_at, payload) values
-  ('job_demo_registration_confirmation','registration_confirmation','demo_u001','evt_demo_worship_intro','ready',null,'{"text":"Temple AI OS Demo：你的活動報名已建立。"}'),
-  ('job_demo_event_reminder','event_reminder','demo_u002','evt_20260827_zhongyuan','draft','2026-08-26T18:00:00+08:00','{"text":"提醒：你報名的 Demo 活動即將開始，正式資訊仍以廟方公告為準。"}')
+  ('job_demo_registration_confirmation','registration_confirmation','demo_u001','evt_demo_worship_intro','ready',null,'{"text":"萬春宮線上服務：你的活動報名已建立。"}'),
+  ('job_demo_event_reminder','event_reminder','demo_u002','evt_20260827_zhongyuan','draft','2026-08-26T18:00:00+08:00','{"text":"提醒：你報名的活動即將開始，正式資訊仍以廟方公告為準。"}')
 on conflict (job_id) do nothing;
 
 insert into faq_rules (
@@ -1003,7 +1021,7 @@ insert into faq_rules (
     1000,
     true,
     'fixed_safety_reply',
-    '[{"source":"04_AI安全回覆規則.md","source_type":"demo_policy"}]'::jsonb
+    '[{"source":"04_安全回覆規則.md","source_type":"safety_policy"}]'::jsonb
   ),
   (
     'rule_support',
@@ -1012,11 +1030,11 @@ insert into faq_rules (
     '需要人工確認的客服問題',
     array['客服','真人','聯絡','工單','付款','收據','退款','失物','申訴','報名狀態','取消報名'],
     '{}',
-    '若問題涉及報名狀態、付款、失物、申訴或廟方決策，建議建立客服工單由人工確認。Demo 系統只示範流程，不會直接代表廟方處理正式案件。',
+    '若問題涉及報名狀態、付款、失物、申訴或廟方決策，建議建立客服工單由人工確認。線上服務不會直接代表廟方處理正式案件。',
     880,
     true,
     'fixed_support_reply',
-    '[{"source":"客服工單示範規則","source_type":"demo_policy"}]'::jsonb
+    '[{"source":"客服工單處理規則","source_type":"service_policy"}]'::jsonb
   ),
   (
     'rule_event_query',
@@ -1025,11 +1043,11 @@ insert into faq_rules (
     '近期活動與報名查詢',
     array['活動','近期','報名','法會','講堂','中元','宮慶','導覽活動','書法','繪畫'],
     '{}',
-    '目前可展示的近期活動如下；其中活動、報名與統計為 Demo 示範資料，正式資訊仍以廟方公告為準。',
+    '目前可查看的近期活動如下；活動、報名與統計資訊仍以廟方公告為準。',
     800,
     true,
     'fixed_event_reply',
-    '[{"source":"demo_events.json","source_type":"team_demo_sample"}]'::jsonb
+    '[{"source":"demo_events.json","source_type":"temple_service"}]'::jsonb
   ),
   (
     'rule_temple_location',
@@ -1042,7 +1060,7 @@ insert into faq_rules (
     700,
     true,
     'fixed_knowledge_reply',
-    '[{"source":"01_基本問答.md","title":"Q1：萬春宮在哪裡？","source_type":"open_data_plus_demo_summary"}]'::jsonb
+    '[{"source":"01_基本問答.md","title":"Q1：萬春宮在哪裡？","source_type":"open_data_plus_service_summary"}]'::jsonb
   ),
   (
     'rule_worship_process',
@@ -1051,11 +1069,11 @@ insert into faq_rules (
     '第一次參拜流程',
     array['第一次','參拜','怎麼拜','拜拜','流程','正殿','香','主殿'],
     '{}',
-    '第一次到訪可先保持安靜與尊重，依現場動線進入正殿，再依廟方公告、服務人員或現場指示參拜。Demo 只能提供一般文化導覽，不替代廟方正式流程說明。',
+    '第一次到訪可先保持安靜與尊重，依現場動線進入正殿，再依廟方公告、服務人員或現場指示參拜。本服務只能提供一般文化導覽，不替代廟方正式流程說明。',
     700,
     true,
     'fixed_knowledge_reply',
-    '[{"source":"02_參拜與服務流程.md","title":"第一次參拜流程","source_type":"demo_summary"}]'::jsonb
+    '[{"source":"02_參拜與服務流程.md","title":"第一次參拜流程","source_type":"service_summary"}]'::jsonb
   ),
   (
     'rule_history_culture',
@@ -1064,7 +1082,7 @@ insert into faq_rules (
     '歷史文化與主祀介紹',
     array['歷史','文化','媽祖','主祀','天上聖母','藍興','藍廷珍','故事','沿革'],
     '{}',
-    '萬春宮示範知識庫以公開資料與人工摘要整理媽祖信仰、主祀天上聖母與地方文化脈絡。若涉及年份、沿革細節或正式說法，仍應以廟方與文化主管機關資料為準。',
+    '萬春宮知識庫以公開資料與人工摘要整理媽祖信仰、主祀天上聖母與地方文化脈絡。若涉及年份、沿革細節或正式說法，仍應以廟方與文化主管機關資料為準。',
     650,
     true,
     'fixed_knowledge_reply',
@@ -1077,11 +1095,11 @@ insert into faq_rules (
     '文化抽籤與籤詩邊界',
     array['抽籤','籤詩','求籤','文化抽籤','解籤'],
     '{}',
-    '文化抽籤是 Demo 體驗，用來協助整理心情與閱讀民俗語感，不代表神諭、吉凶保證或人生重大決策建議。涉及醫療、法律、財務或安全時，請尋求專業協助。',
+    '文化抽籤是文化體驗，用來協助整理心情與閱讀民俗語感，不代表神諭、吉凶保證或人生重大決策建議。涉及醫療、法律、財務或安全時，請尋求專業協助。',
     620,
     true,
     'fixed_safety_reply',
-    '[{"source":"文化抽籤安全規則","source_type":"demo_policy"}]'::jsonb
+    '[{"source":"文化抽籤安全規則","source_type":"safety_policy"}]'::jsonb
   ),
   (
     'rule_general_fallback',
@@ -1090,11 +1108,11 @@ insert into faq_rules (
     '未命中時的固定安全回覆',
     '{}',
     '{}',
-    '目前我只能回答萬春宮公開資料、活動、參拜流程、文化導覽與 Demo 操作問題。若問題涉及現場規則、付款或廟方決策，請以萬春宮公告或電話確認。',
+    '目前我只能回答萬春宮公開資料、活動、參拜流程、文化導覽與線上服務操作問題。若問題涉及現場規則、付款或廟方決策，請以萬春宮公告或電話確認。',
     0,
     true,
     'fixed_fallback_reply',
-    '[{"source":"固定安全回覆規則","source_type":"demo_policy"}]'::jsonb
+    '[{"source":"固定安全回覆規則","source_type":"service_policy"}]'::jsonb
   )
 on conflict (rule_id) do update set
   temple_id = excluded.temple_id,
@@ -1114,9 +1132,123 @@ insert into dashboard_snapshots (
 ) values (
   '2026-08-05',
   'wcg_taichung_demo',
-  'All metrics are demo sample data, not official Wan Chun Gong operating data.',
+  'Dashboard 指標供服務檢查使用；正式活動、名額與營運數據仍以廟方確認為準。',
   '{"line_friends":1268,"active_users_7d":342,"event_views_7d":918,"registrations_total":172,"ai_questions_7d":486,"knowledge_gap_count":11}',
-  '[{"event_id":"evt_20260827_zhongyuan","title":"中元普度法會示範報名","views":328,"registrations":78,"reminder_opt_ins":65,"conversion_rate":0.238},{"event_id":"evt_demo_worship_intro","title":"第一次參拜導覽","views":146,"registrations":18,"reminder_opt_ins":17,"conversion_rate":0.123}]',
+  '[{"event_id":"evt_20260827_zhongyuan","title":"中元普度法會線上報名","views":328,"registrations":78,"reminder_opt_ins":65,"conversion_rate":0.238},{"event_id":"evt_demo_worship_intro","title":"第一次參拜導覽","views":146,"registrations":18,"reminder_opt_ins":17,"conversion_rate":0.123}]',
   '[{"intent":"temple_location","label":"地址與交通","count":88},{"intent":"worship_process","label":"第一次參拜流程","count":73},{"intent":"event_query","label":"近期活動查詢","count":69}]',
   '["停車場即時資訊","無障礙動線細節","現場祭典準確流程時間","官方報名規則細節","廟方授權圖片清單"]'
 ) on conflict (snapshot_date) do nothing;
+
+-- ============================================================
+-- 010_event_controls_and_deities.sql
+-- ============================================================
+
+alter table events
+  add column if not exists registration_open_at timestamptz,
+  add column if not exists registration_close_at timestamptz,
+  add column if not exists countdown_target_at timestamptz,
+  add column if not exists countdown_label text,
+  add column if not exists max_party_size integer not null default 10,
+  add column if not exists waitlist_enabled boolean not null default false;
+
+alter table events drop constraint if exists events_max_party_size_valid;
+alter table events add constraint events_max_party_size_valid check (max_party_size between 1 and 10);
+
+alter table event_registrations drop constraint if exists event_registrations_status_valid;
+alter table event_registrations add constraint event_registrations_status_valid
+  check (status in ('confirmed', 'pending_review', 'checked_in', 'cancelled', 'waitlisted'));
+
+create table if not exists deities (
+  deity_id text primary key,
+  temple_id text not null references temples(temple_id) on delete cascade,
+  name text not null,
+  category text not null default '配祀神佛',
+  enshrined_area text not null default '',
+  description text not null,
+  birthday_lunar text,
+  service_notes text,
+  source_url text,
+  status text not null default 'published',
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table deities enable row level security;
+drop policy if exists "public read published deities" on deities;
+create policy "public read published deities" on deities for select using (status = 'published');
+create index if not exists deities_temple_status_order_idx on deities (temple_id, status, sort_order, name);
+create index if not exists events_registration_window_idx on events (status, registration_open_at, registration_close_at);
+
+update events set max_party_size = 10 where max_party_size is null;
+
+create or replace function register_for_event(
+  p_event_id text,
+  p_user_id text,
+  p_contact_name text,
+  p_phone text default null,
+  p_party_size integer default 1,
+  p_reminder_opt_in boolean default true,
+  p_note text default null
+)
+returns event_registrations
+language plpgsql
+as $$
+declare
+  locked_event events%rowtype;
+  confirmed_total integer;
+  existing_registration event_registrations%rowtype;
+  new_registration event_registrations%rowtype;
+  registration_status text := 'confirmed';
+begin
+  if p_user_id is null or btrim(p_user_id) = '' then raise exception 'invalid_user_id'; end if;
+  if p_contact_name is null or btrim(p_contact_name) = '' then raise exception 'invalid_contact_name'; end if;
+  select * into locked_event from events where event_id = p_event_id for update;
+  if not found then raise exception 'event_not_found'; end if;
+  if not locked_event.requires_registration then raise exception 'registration_not_required'; end if;
+  if locked_event.status not in ('open', 'published') then raise exception 'event_not_open'; end if;
+  if locked_event.registration_open_at is not null and now() < locked_event.registration_open_at then raise exception 'event_not_open'; end if;
+  if locked_event.registration_close_at is not null and now() >= locked_event.registration_close_at then raise exception 'event_registration_closed'; end if;
+  if p_party_size < 1 or p_party_size > locked_event.max_party_size then raise exception 'party_size_exceeded'; end if;
+  insert into line_users (user_id, line_display_name, segment)
+  values (p_user_id, 'LINE user', 'line_friend') on conflict (user_id) do nothing;
+  select * into existing_registration from event_registrations
+   where event_id = p_event_id and user_id = p_user_id
+     and status in ('confirmed', 'pending_review', 'checked_in', 'waitlisted') limit 1;
+  if found then raise exception 'duplicate_registration'; end if;
+  select coalesce(sum(party_size), 0) into confirmed_total from event_registrations
+   where event_id = p_event_id and status in ('confirmed', 'pending_review', 'checked_in');
+  if locked_event.capacity is not null and confirmed_total + p_party_size > locked_event.capacity then
+    if not locked_event.waitlist_enabled then raise exception 'event_capacity_exceeded'; end if;
+    registration_status := 'waitlisted';
+  end if;
+  insert into event_registrations (registration_id, event_id, user_id, status, party_size, reminder_opt_in, contact_name, phone, note)
+  values ('reg_' || encode(gen_random_bytes(4), 'hex'), p_event_id, p_user_id, registration_status, p_party_size,
+    p_reminder_opt_in, btrim(p_contact_name), nullif(btrim(coalesce(p_phone, '')), ''), nullif(btrim(coalesce(p_note, '')), ''))
+  returning * into new_registration;
+  perform sync_event_registered_count(p_event_id);
+  return new_registration;
+end;
+$$;
+
+insert into deities (
+  deity_id, temple_id, name, category, enshrined_area, description,
+  birthday_lunar, service_notes, source_url, status, sort_order
+) values
+  ('deity_guanyin', 'wcg_taichung_demo', '觀音佛祖', '主配祀神', '觀音佛祖神龕', '鎮殿觀音佛祖、老觀音佛祖與左觀音佛祖共同奉祀於觀音佛祖神龕。', null, '神龕位置與參拜方式請依現場指示。', 'https://www.lswc.org.tw/tw/?ID=5&Page=gods_list', 'published', 10),
+  ('deity_zhusheng', 'wcg_taichung_demo', '註生娘娘', '主配祀神', '註生娘娘神龕', '註生娘娘神龕另配祀婆姐、值年太歲與祿位牌位。', null, '正式登記與服務細節請以廟方公告與現場人員說明為準。', 'https://www.lswc.org.tw/tw/?ID=5&Page=gods_list', 'published', 20),
+  ('deity_sanguan', 'wcg_taichung_demo', '三官大帝', '副配祀神', '中案神桌', '列於萬春宮公開配祀神佛資料中的副配祀神明。', null, '節慶法會與供奉安排請以廟方公告為準。', 'https://www.lswc.org.tw/tw/?ID=6&Page=gods_list', 'published', 30),
+  ('deity_wenchang', 'wcg_taichung_demo', '文昌帝君', '副配祀神', '副配祀神明區', '列於公開配祀神佛資料中的副配祀神明，可作為文化導覽與節慶查詢入口。', null, '文化介紹不取代正式祭祀或廟方服務說明。', 'https://www.lswc.org.tw/tw/?ID=6&Page=gods_list', 'published', 40),
+  ('deity_luxianzu', 'wcg_taichung_demo', '孚佑帝君（呂仙祖）', '客座神明', '客座神明區', '萬春宮公開資料列載的客座神明。', null, '正式供奉與參拜細節請以現場公告為準。', 'https://www.lswc.org.tw/tw/?ID=7&Page=gods_list', 'published', 50),
+  ('deity_qianliyan', 'wcg_taichung_demo', '千里眼將軍', '護法神明', '正殿與神龕前', '公開資料列載的護法神明，正殿與神龕前皆有奉祀位置。', null, '位置資訊依公開頁整理，現場若有調整請以廟方公告為準。', 'https://www.lswc.org.tw/tw/?ID=8&Page=gods_list', 'published', 60),
+  ('deity_shunfeng', 'wcg_taichung_demo', '順風耳將軍', '護法神明', '正殿與神龕前', '公開資料列載的護法神明，正殿與神龕前皆有奉祀位置。', null, '位置資訊依公開頁整理，現場若有調整請以廟方公告為準。', 'https://www.lswc.org.tw/tw/?ID=8&Page=gods_list', 'published', 70)
+on conflict (deity_id) do update set
+  name = excluded.name,
+  category = excluded.category,
+  enshrined_area = excluded.enshrined_area,
+  description = excluded.description,
+  service_notes = excluded.service_notes,
+  source_url = excluded.source_url,
+  status = excluded.status,
+  sort_order = excluded.sort_order,
+  updated_at = now();

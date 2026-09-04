@@ -1,2 +1,1 @@
-"""Temple AI OS backend package."""
-
+"""Wan Chun Gong service backend package."""

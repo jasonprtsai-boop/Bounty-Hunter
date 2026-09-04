@@ -28,8 +28,8 @@
     "source_type": "fixed_safety_reply",
     "source_refs": [
       {
-        "source": "04_AI安全回覆規則.md",
-        "source_type": "demo_policy"
+        "source": "04_安全回覆規則.md",
+        "source_type": "safety_policy"
       }
     ]
   },
@@ -51,14 +51,14 @@
       "取消報名"
     ],
     "negative_keywords": [],
-    "reply": "若問題涉及報名狀態、付款、失物、申訴或廟方決策，建議建立客服工單由人工確認。Demo 系統只示範流程，不會直接代表廟方處理正式案件。",
+    "reply": "若問題涉及報名狀態、付款、失物、申訴或廟方決策，建議建立客服工單由人工確認。線上服務不會直接代表廟方處理正式案件。",
     "priority": 880,
     "enabled": true,
     "source_type": "fixed_support_reply",
     "source_refs": [
       {
-        "source": "客服工單示範規則",
-        "source_type": "demo_policy"
+        "source": "客服工單處理規則",
+        "source_type": "service_policy"
       }
     ]
   },
@@ -79,14 +79,14 @@
       "繪畫"
     ],
     "negative_keywords": [],
-    "reply": "目前可展示的近期活動如下；其中活動、報名與統計為 Demo 示範資料，正式資訊仍以廟方公告為準。",
+    "reply": "目前可查看的近期活動如下；活動、報名與統計資訊仍以廟方公告為準。",
     "priority": 800,
     "enabled": true,
     "source_type": "fixed_event_reply",
     "source_refs": [
       {
         "source": "demo_events.json",
-        "source_type": "team_demo_sample"
+        "source_type": "temple_service"
       }
     ]
   },
@@ -113,7 +113,7 @@
       {
         "source": "01_基本問答.md",
         "title": "Q1：萬春宮在哪裡？",
-        "source_type": "open_data_plus_demo_summary"
+        "source_type": "open_data_plus_service_summary"
       }
     ]
   },
@@ -132,7 +132,7 @@
       "主殿"
     ],
     "negative_keywords": [],
-    "reply": "第一次到訪可先保持安靜與尊重，依現場動線進入正殿，再依廟方公告、服務人員或現場指示參拜。Demo 只能提供一般文化導覽，不替代廟方正式流程說明。",
+    "reply": "第一次到訪可先保持安靜與尊重，依現場動線進入正殿，再依廟方公告、服務人員或現場指示參拜。本服務只能提供一般文化導覽，不替代廟方正式流程說明。",
     "priority": 700,
     "enabled": true,
     "source_type": "fixed_knowledge_reply",
@@ -140,7 +140,7 @@
       {
         "source": "02_參拜與服務流程.md",
         "title": "第一次參拜流程",
-        "source_type": "demo_summary"
+        "source_type": "service_summary"
       }
     ]
   },
@@ -160,7 +160,7 @@
       "沿革"
     ],
     "negative_keywords": [],
-    "reply": "萬春宮示範知識庫以公開資料與人工摘要整理媽祖信仰、主祀天上聖母與地方文化脈絡。若涉及年份、沿革細節或正式說法，仍應以廟方與文化主管機關資料為準。",
+    "reply": "萬春宮知識庫以公開資料與人工摘要整理媽祖信仰、主祀天上聖母與地方文化脈絡。若涉及年份、沿革細節或正式說法，仍應以廟方與文化主管機關資料為準。",
     "priority": 650,
     "enabled": true,
     "source_type": "fixed_knowledge_reply",
@@ -184,14 +184,14 @@
       "解籤"
     ],
     "negative_keywords": [],
-    "reply": "文化抽籤是 Demo 體驗，用來協助整理心情與閱讀民俗語感，不代表神諭、吉凶保證或人生重大決策建議。涉及醫療、法律、財務或安全時，請尋求專業協助。",
+    "reply": "文化抽籤是文化體驗，用來協助整理心情與閱讀民俗語感，不代表神諭、吉凶保證或人生重大決策建議。涉及醫療、法律、財務或安全時，請尋求專業協助。",
     "priority": 620,
     "enabled": true,
     "source_type": "fixed_safety_reply",
     "source_refs": [
       {
         "source": "文化抽籤安全規則",
-        "source_type": "demo_policy"
+        "source_type": "safety_policy"
       }
     ]
   },
@@ -201,14 +201,14 @@
     "title": "未命中時的固定安全回覆",
     "keywords": [],
     "negative_keywords": [],
-    "reply": "目前我只能回答萬春宮公開資料、活動、參拜流程、文化導覽與 Demo 操作問題。若問題涉及現場規則、付款或廟方決策，請以萬春宮公告或電話確認。",
+    "reply": "目前我只能回答萬春宮公開資料、活動、參拜流程、文化導覽與線上服務操作問題。若問題涉及現場規則、付款或廟方決策，請以萬春宮公告或電話確認。",
     "priority": 0,
     "enabled": true,
     "source_type": "fixed_fallback_reply",
     "source_refs": [
       {
         "source": "固定安全回覆規則",
-        "source_type": "demo_policy"
+        "source_type": "service_policy"
       }
     ]
   }

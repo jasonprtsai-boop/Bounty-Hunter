@@ -1,11 +1,11 @@
 # LINE setup checklist
 
-This checklist is for Temple AI OS demo setup. Do not commit LINE secrets, passwords, access tokens, OpenAI keys, or Supabase service keys.
+This checklist is for Wan Chun Gong LINE service setup. Do not commit LINE secrets, passwords, access tokens, model/API keys, or Supabase service keys.
 
 ## 1. Current LINE assets
 
 - Provider: `宮廟服務商`
-- Official Account: `Temple AI OS示範`
+- Official Account: `萬春宮線上服務`
 - Official Account Basic ID: `@983zhzni`
 - Add friend URL: `https://line.me/R/ti/p/%40983zhzni`
 - Messaging API Channel ID: `2010991408`
@@ -13,7 +13,7 @@ This checklist is for Temple AI OS demo setup. Do not commit LINE secrets, passw
 - LINE Login Channel ID: `2010938588`
 - LIFF ID: `2010938588-VJXpaoyH`
 - LIFF URL: `https://liff.line.me/2010938588-VJXpaoyH`
-- Public frontend: `https://temple-ai-os-demo.jasonprtsai.chatgpt.site`
+- Public frontend: `https://wanchun-gong-service.jasonprtsai.chatgpt.site`
 
 ## 2. Completed
 
@@ -39,8 +39,8 @@ Backend:
 
 ```text
 LINE_LIFF_ID=2010938588-VJXpaoyH
-FRONTEND_BASE_URL=https://temple-ai-os-demo.jasonprtsai.chatgpt.site
-ALLOWED_ORIGINS=https://temple-ai-os-demo.jasonprtsai.chatgpt.site
+FRONTEND_BASE_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site
+ALLOWED_ORIGINS=https://wanchun-gong-service.jasonprtsai.chatgpt.site
 ```
 
 Frontend after backend deployment:
@@ -58,18 +58,18 @@ VITE_LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Required environment:
 
 ```text
-FRONTEND_BASE_URL=https://temple-ai-os-demo.jasonprtsai.chatgpt.site
+FRONTEND_BASE_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site
 LINE_CHANNEL_ACCESS_TOKEN=<secret>
 ```
 
 ## 6. Validation
 
-- The add friend URL opens `Temple AI OS示範`.
+- The add friend URL opens `萬春宮線上服務`.
 - LIFF URL opens in LINE.
 - Rich Menu appears after adding the official account.
 - Tapping LIFF buttons opens the deployed frontend.
 - LIFF profile loads after login.
 - LINE webhook Verify succeeds.
 - Text messages reach the backend webhook.
-- AI reply is sent through Messaging API.
-- Demo pages clearly state this is not Wan Chun Gong official operation.
+- Service reply is sent through Messaging API.
+- Service pages remind visitors that formal information follows temple announcements.

@@ -372,7 +372,7 @@ export function AdminAccounts() {
               )}
             </div>
             {message && <p className="notice">{message}</p>}
-            {error && <p className="error-text">{error}</p>}
+            {error && <p className="error-text" role="alert">{error}</p>}
           </form>
 
           <section className="tool-panel">

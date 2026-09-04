@@ -27,7 +27,7 @@ const emptyKnowledgeForm: KnowledgeForm = {
   document_id: "",
   title: "",
   body: "",
-  source_type: "admin_demo_knowledge",
+  source_type: "admin_knowledge",
   status: "published"
 };
 
@@ -149,7 +149,7 @@ export function AdminKnowledge() {
     if (
       !(await requestConfirmation({
         title: "刪除知識文件",
-        body: "刪除後 AI 回覆依據會少一筆資料，相關示範問題可能無法再引用這份內容。",
+        body: "刪除後問答依據會少一筆資料，相關問題可能無法再引用這份內容。",
         confirmLabel: "刪除文件"
       }))
     ) {
@@ -299,13 +299,13 @@ export function AdminKnowledge() {
             )}
           </div>
           {message && <p className="notice">{message}</p>}
-          {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text" role="alert">{error}</p>}
         </form>
         ) : (
           <StatePanel
             variant="info"
             title="目前是查看模式"
-            body="服務人員可以查閱知識文件；新增、編輯與刪除 AI 回覆依據需要管理員以上權限。"
+            body="服務人員可以查閱知識文件；新增、編輯與刪除問答依據需要管理員以上權限。"
           />
         )}
 
@@ -349,7 +349,7 @@ export function AdminKnowledge() {
           </div>
           <div className="knowledge-list">
             {loading ? (
-              <StatePanel variant="loading" title="正在讀取知識庫" body="系統正在載入 AI 回覆依據與文件狀態。" />
+              <StatePanel variant="loading" title="正在讀取知識庫" body="系統正在載入問答依據與文件狀態。" />
             ) : loadError ? (
               <StatePanel
                 variant="error"

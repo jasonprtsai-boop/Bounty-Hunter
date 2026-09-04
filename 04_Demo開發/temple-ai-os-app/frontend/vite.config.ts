@@ -8,11 +8,11 @@ export default defineConfig(({ mode }) => {
     surface === "admin"
       ? fileURLToPath(new URL("./src/apps/AdminApp.tsx", import.meta.url))
       : fileURLToPath(new URL("./src/apps/PublicApp.tsx", import.meta.url));
-  const pageTitle = surface === "admin" ? "Temple AI OS 管理後台" : "萬春宮智慧服務示範頁";
+  const pageTitle = surface === "admin" ? "萬春宮管理後台" : "萬春宮線上服務入口";
   const pageDescription =
     surface === "admin"
-      ? "Temple AI OS 管理後台，供授權人員管理活動、客服、知識庫與發布設定。"
-      : "萬春宮智慧服務示範頁，提供 LINE 服務入口、活動資訊、參拜導覽與客服聯繫。";
+      ? "萬春宮管理後台，供授權人員管理活動、客服、知識庫與發布設定。"
+      : "萬春宮線上服務入口，提供 LINE 服務入口、活動資訊、參拜導覽與客服聯繫。";
 
   return {
     plugins: [
@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
           return html
             .replace(/<title>.*<\/title>/, `<title>${pageTitle}</title>`)
             .replace(
-              /content="萬春宮智慧服務示範頁，提供 LINE 服務入口、活動資訊、參拜導覽與客服聯繫。"/,
+              /content="萬春宮線上服務入口，提供 LINE 服務入口、活動資訊、參拜導覽與客服聯繫。"/,
               `content="${pageDescription}"`
             );
         }

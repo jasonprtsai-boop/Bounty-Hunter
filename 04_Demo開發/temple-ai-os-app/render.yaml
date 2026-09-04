@@ -12,9 +12,9 @@ services:
       - key: API_BASE_URL
         value: https://temple-ai-os-api.onrender.com
       - key: FRONTEND_BASE_URL
-        value: https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
+        value: https://wanchun-gong-service.jasonprtsai.chatgpt.site
       - key: ALLOWED_ORIGINS
-        value: https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site,https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site,http://localhost:5173,http://127.0.0.1:5173
+        value: https://wanchun-gong-service.jasonprtsai.chatgpt.site,https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site,http://localhost:5173,http://127.0.0.1:5173
       - key: LINE_CHANNEL_ID
         value: "2010991408"
       - key: LINE_LOGIN_CHANNEL_ID

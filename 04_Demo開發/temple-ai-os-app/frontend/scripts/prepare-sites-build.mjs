@@ -19,6 +19,7 @@ const publicRoutes = [
   "privacy",
   "terms",
   "events",
+  "deities",
   "fortune",
   "member",
   "stickers",
@@ -28,6 +29,7 @@ const publicRoutes = [
 const adminRoutes = [
   "admin",
   "admin/events",
+  "admin/deities",
   "admin/knowledge",
   "admin/support",
   "admin/notifications",

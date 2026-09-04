@@ -53,5 +53,5 @@ async def create_support_ticket(
     ticket = get_repository().create_support_ticket(payload.model_copy(update={"user_id": user_id}))
     return ApiResponse(
         data=ticket,
-        meta={"demo_notice": "客服工單為 Demo 流程；正式案件仍需廟方人工確認。"},
+        meta={"demo_notice": "客服工單已建立；正式案件仍需廟方人工確認。"},
     )
