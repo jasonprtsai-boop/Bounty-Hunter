@@ -20,14 +20,11 @@ export function StickerShopPage() {
 
   return (
     <Shell title="貼圖小舖">
-      <section className="sticker-hero">
+      <section className="sticker-hero sticker-hero-compact">
         <div>
           <span className="tag">春福小使</span>
           <h2>日常問候、回覆與平安祝福</h2>
-          <p>
-            原創貼圖角色已準備第一套 8 張靜態 PNG，可送 LINE Creators Market
-            審核。通過後這裡會直接導向 LINE 貼圖購買頁。
-          </p>
+          <p>第一套 8 張靜態貼圖，通過審核後會開放購買。</p>
           <div className="inline-actions">
             {canBuy ? (
               <a className="button primary" href={stickerStoreUrl} target="_blank" rel="noreferrer">
@@ -43,7 +40,6 @@ export function StickerShopPage() {
             )}
           </div>
         </div>
-        <img src={`${stickerBase}/main.png`} alt="春福小使貼圖主圖" />
       </section>
 
       <section className="tool-panel">

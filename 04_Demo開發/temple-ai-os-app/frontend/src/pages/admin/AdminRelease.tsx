@@ -40,7 +40,7 @@ const businessProfileFields = [
   {
     label: "商業簡介",
     value:
-      "萬春宮線上服務把 LINE 帳號、參拜問答、活動報名、報名進度查詢與管理後台整合為一個入口。本帳號以萬春宮公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。"
+      "萬春宮線上服務把 LINE 帳號、參拜問答、活動報名、報名進度查詢、文化抽籤、擲筊問事與管理後台整合為一個入口。本帳號以萬春宮公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。"
   },
   {
     label: "網站",
@@ -70,7 +70,7 @@ const businessProfileFields = [
 
 const businessProfileChecklist = [
   "進入 LINE 後台的 Profile / 商業簡介頁面設定。",
-  "先上傳大頭貼與背景圖，再編輯商業簡介文字。",
+  "到 LINE 後台上傳品牌頭像與背景圖，再編輯商業簡介文字。",
   "網站、隱私權政策、服務條款填入已部署的公開網址。",
   "電話與地址屬於萬春宮公開資料；若未取得廟方正式授權，建議在簡介文字中清楚保留「正式資訊以廟方公告為準」的提醒。",
   "完成後按下 Publish changes / 發布變更。"
@@ -83,12 +83,12 @@ const accountSettingFields = [
   },
   {
     label: "狀態訊息",
-    value: "LINE 宮廟服務入口｜參拜・活動・客服"
+    value: "LINE 宮廟服務入口｜參拜・活動・抽籤・擲筊"
   },
   {
     label: "歡迎訊息",
     value:
-      "歡迎加入萬春宮線上服務。你可以點選下方選單詢問參拜方式、查看活動報名、抽文化籤、看主殿導覽、查報名進度或聯絡客服。正式活動、開放時間與服務內容請以廟方公告為準。"
+      "歡迎加入萬春宮線上服務。你可以點選下方選單詢問參拜方式、查看活動報名、抽文化籤、看主殿導覽、查報名進度或聯絡客服；擲筊問事可從線上服務入口進入。正式活動、開放時間與服務內容請以廟方公告為準。"
   },
   {
     label: "聊天回覆模式",
@@ -108,6 +108,7 @@ const publicLinks = [
   ["公開官網", `${publicSiteBaseUrl}/site`],
   ["LINE 社群入口", `${publicSiteBaseUrl}/community`],
   ["LIFF 入口", "https://liff.line.me/2010938588-VJXpaoyH"],
+  ["擲筊問事", `${publicSiteBaseUrl}/jiao`],
   ["加入好友", "https://line.me/R/ti/p/%40983zhzni"],
   ["貼圖小舖", `${publicSiteBaseUrl}/stickers`],
   ["隱私權政策", `${publicSiteBaseUrl}/privacy`],
@@ -119,7 +120,7 @@ const voomPostExamples = [
     title: "線上服務介紹",
     asset: "assets/banners/home.png",
     value:
-      `萬春宮線上服務入口整理完成。\n\n這是一個以 LINE 為入口的宮廟服務流程，將參拜問答、活動報名、報名進度查詢、文化抽籤與後台管理整合在同一個入口。\n\n本帳號以公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。\n\n服務入口：${publicSiteBaseUrl}/site\n\n#萬春宮服務 #LINE服務 #宮廟線上服務 #廟埕入口`
+      `萬春宮線上服務入口整理完成。\n\n這是一個以 LINE 為入口的宮廟服務流程，將參拜問答、活動報名、報名進度查詢、文化抽籤、擲筊問事與後台管理整合在同一個入口。\n\n本帳號以公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。\n\n服務入口：${publicSiteBaseUrl}/site\n\n#萬春宮服務 #LINE服務 #宮廟線上服務 #廟埕入口`
   },
   {
     title: "活動報名服務",
@@ -155,17 +156,17 @@ const broadcastExamples = [
   {
     title: "服務發布前檢查",
     value:
-      `萬春宮線上服務今日檢查重點：\n1. LINE Rich Menu 服務入口\n2. 參拜問答與活動卡片\n3. LIFF 活動報名\n4. 後台管理與通知任務\n\n公開服務頁：\n${publicSiteBaseUrl}/site`
+      `萬春宮線上服務今日檢查重點：\n1. LINE Rich Menu 服務入口\n2. 參拜問答與活動卡片\n3. LIFF 活動報名\n4. 抽籤與擲筊文化互動\n5. 後台管理與通知任務\n\n公開服務頁：\n${publicSiteBaseUrl}/site`
   }
 ];
 
 const releaseChecklist = [
   "LINE 商業簡介已貼上服務提醒與公開網址",
   "帳號名稱、狀態訊息、歡迎訊息與 VOOM 互動設定已確認",
-  "LINE 大頭貼已換成 line-oa-profile-v2.png",
-  "LINE 背景圖已換成 line-oa-profile-background-v1.png",
+  "LINE 品牌頭像圖檔已更新為 line-oa-profile-v2.png",
+  "LINE 背景圖檔已更新為 line-oa-profile-background-v1.png",
   "Messaging API Webhook 驗證成功",
-  "Rich Menu 已發布，詢問、活動、抽籤、導覽、查詢與客服入口可開啟",
+  "Rich Menu 已發布，詢問、活動、抽籤、導覽、查詢與客服入口可開啟；擲筊可從線上服務入口進入",
   "至少一篇 LINE VOOM 服務貼文已建立草稿或排程",
   "手機 LINE 實測可開 LIFF 與活動頁",
   "貼圖素材已確認，等待 LINE Creators Market 送審或審核",
@@ -174,7 +175,7 @@ const releaseChecklist = [
 
 const setupSequence = [
   ["1", "公開頁面", "確認官網、活動、隱私權與條款都可正常開啟。"],
-  ["2", "LINE 帳號", "更新大頭貼、背景圖、商業簡介與歡迎訊息。"],
+  ["2", "LINE 帳號", "更新品牌頭像、背景圖、商業簡介與歡迎訊息。"],
   ["3", "Rich Menu", "發布 LINE 底部選單，確認每個入口的圖像、文案與實際動作一致。"],
   ["4", "實機驗收", "用手機 LINE 確認加入好友、活動、客服、推播與貼圖入口。"]
 ];
@@ -337,20 +338,17 @@ export function AdminRelease() {
         <article className="tool-panel release-card release-media-card">
           <div className="section-title">
             <Image size={20} />
-            <h2>大頭貼與背景</h2>
+            <h2>品牌圖檔</h2>
           </div>
-          <div className="release-media-preview">
-            <img className="release-avatar" src={profileImageUrl} alt="萬春宮 LINE 帳號大頭貼" />
-            <img className="release-cover" src={profileBackgroundUrl} alt="萬春宮 LINE 帳號背景圖" />
-          </div>
+          <p>控制台不再放大型頭像預覽；這裡只保留圖檔連結，實際更換到 LINE 後台操作。</p>
           <div className="inline-actions">
             <a className="button" href={profileImageUrl} target="_blank" rel="noreferrer">
               <Image size={18} />
-              大頭貼
+              品牌頭像圖檔
             </a>
             <a className="button" href={profileBackgroundUrl} target="_blank" rel="noreferrer">
               <Image size={18} />
-              背景圖
+              背景圖檔
             </a>
             <a className="button" href={lineManagerUrl} target="_blank" rel="noreferrer">
               <ExternalLink size={18} />

@@ -371,7 +371,7 @@ def event_flex_card(
         draw.ellipse((112, 314, 220, 626), fill=accent2)
         draw.ellipse((804, 314, 912, 626), fill=accent2)
         draw.rounded_rectangle((160, 300, 864, 640), radius=46, fill="#FFF8DF", outline=accent, width=7)
-        draw.text((222, 332), motif, fill=(107, 58, 143, 72), font=font(170, bold=True, style=style))
+        draw.text((222, 332), motif, fill=(180, 35, 24, 56), font=font(170, bold=True, style=style))
         draw.line((256, 536, 760, 468), fill=accent2, width=14)
         draw.line((314, 574, 698, 556), fill=accent, width=8)
         text_center(draw, (256, 406, 768, 506), title, COCOA, 58, bold=True, spacing=0, style=style)
@@ -401,8 +401,8 @@ def main() -> None:
     banner("home", "宮廟線上服務入口", "把參拜、活動、客服收進 LINE", COCOA)
     banner("events", "活動中心", "法會、講座、報名與提醒", RED)
     banner("fortune", "文化抽籤", "以籤詩語感做正向提醒", "#8A5A12")
-    banner("support", "客服中心", "複雜問題轉人工確認", "#245B8A")
-    banner("tour", "宮廟導覽", "QR/NFC 開啟文化點位", "#6B3A8F")
+    banner("support", "客服中心", "複雜問題轉人工確認", COCOA)
+    banner("tour", "宮廟導覽", "QR/NFC 開啟文化點位", "#8A5A12")
     flex_card("event-card", "活動卡片", "活動資訊、報名入口、廟方提醒", RED, cta="前往活動報名")
     event_flex_card(
         "event-card-festival",
@@ -420,11 +420,11 @@ def main() -> None:
         "event-card-ritual",
         "法會服務",
         "名額、時段與報名提醒",
-        JADE,
+        DEEP_RED,
         GOLD,
         "福",
-        top="#F4FFF8",
-        bottom="#DDF4E8",
+        top="#FFF7E8",
+        bottom="#FFE6C8",
         style="round",
         layout="ritual",
     )
@@ -445,15 +445,27 @@ def main() -> None:
         "文化講堂",
         "故事、書法與信仰脈絡",
         "#8A5A12",
-        LILAC,
+        RED,
         "文",
         top="#FFF9EF",
-        bottom="#F4E6FF",
+        bottom="#FFE8D8",
+        style="hand",
+        layout="culture",
+    )
+    event_flex_card(
+        "event-card-calligraphy",
+        "書法體驗",
+        "筆墨、祈願與文化體驗",
+        COCOA,
+        RED,
+        "書",
+        top="#FFF9EF",
+        bottom="#FFE8D8",
         style="hand",
         layout="culture",
     )
     flex_card("fortune-card", "文化抽籤", "不做命運斷言，只做文化解說", "#8A5A12", cta="再抽一支文化籤")
-    flex_card("support-card", "客服工單", "需要人工確認時建立紀錄", "#245B8A", cta="前往客服詢問")
+    flex_card("support-card", "客服工單", "需要人工確認時建立紀錄", COCOA, cta="前往客服詢問")
     print(f"Generated assets in {ASSETS} and {PUBLIC_ASSETS}")
 
 

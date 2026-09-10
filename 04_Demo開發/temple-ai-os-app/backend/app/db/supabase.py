@@ -499,6 +499,8 @@ class LocalRepository:
             message=payload.message,
             status="open",
             priority=priority,
+            contact_name=payload.contact_name,
+            phone=payload.phone,
             created_at=datetime.now(timezone.utc).isoformat(),
         )
         self.tickets.append(ticket)
@@ -1090,7 +1092,7 @@ class SupabaseRepository:
         return sum(int(row.get("party_size") or 0) for row in rows)
 
     def create_support_ticket(self, payload: SupportTicketCreate) -> SupportTicket:
-        row = payload.model_dump(exclude={"contact_name", "phone"})
+        row = payload.model_dump()
         row.update(
             {
                 "ticket_id": f"ticket_{uuid.uuid4().hex[:8]}",

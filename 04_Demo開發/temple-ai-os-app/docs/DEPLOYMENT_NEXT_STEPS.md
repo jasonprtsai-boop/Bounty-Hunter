@@ -34,7 +34,7 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Flex event and fortune messages now include public hero images.
 - Production Supabase path now has pgvector search RPC and atomic event registration RPC in migration `004_search_and_atomic_registration.sql`.
 - FAQ fixed replies are stored in `faq_rules` via migration `005_faq_rules.sql`, with local JSON fallback when the table is unavailable or missing required rules.
-- Database operational hardening is in migrations `006_operational_hardening.sql`, `007_data_integrity_and_service_ops.sql`, `008_admin_accounts.sql`, and `009_admin_account_email_login.sql`; the generated all-in-one setup file is `database/supabase_full_setup.sql`.
+- Database operational hardening is in migrations `006_operational_hardening.sql`, `007_data_integrity_and_service_ops.sql`, `008_admin_accounts.sql`, `009_admin_account_email_login.sql`, `010_event_controls_and_deities.sql`, and `011_support_ticket_contact_fields.sql`; the generated all-in-one setup file is `database/supabase_full_setup.sql`.
 - `/stickers` page and first 8-image sticker pack assets are prepared for LINE Creators Market submission.
 - LINE OA profile image asset is prepared at `assets/brand/line-oa-profile-v2.png`.
 - LINE OA profile background asset is prepared at `assets/brand/line-oa-profile-background-v1.png`.
@@ -117,6 +117,8 @@ database/migrations/006_operational_hardening.sql
 database/migrations/007_data_integrity_and_service_ops.sql
 database/migrations/008_admin_accounts.sql
 database/migrations/009_admin_account_email_login.sql
+database/migrations/010_event_controls_and_deities.sql
+database/migrations/011_support_ticket_contact_fields.sql
 ```
 
 For a fresh Supabase project, you can run the generated bundle instead:
@@ -148,7 +150,7 @@ python scripts/import_knowledge.py
 
 `scripts/import_knowledge.py` does a dry run without secrets. It is not required for the current fixed FAQ reply flow.
 
-Registration capacity and duplicate active registration checks are handled by the `register_for_event` database function; do not switch production traffic to database mode until migrations through `009` are applied and `scripts/verify_database.py` passes.
+Registration capacity and duplicate active registration checks are handled by the `register_for_event` database function; do not switch production traffic to database mode until migrations through `011` are applied and `scripts/verify_database.py` passes.
 
 ## 5. Frontend API target
 

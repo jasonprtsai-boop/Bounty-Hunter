@@ -12,6 +12,20 @@ from app.core.admin_identity import (
 T = TypeVar("T")
 
 
+def _strip_required_text(value: str) -> str:
+    normalized = value.strip()
+    if not normalized:
+        raise ValueError("field_empty")
+    return normalized
+
+
+def _strip_optional_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    return normalized or None
+
+
 class ApiError(BaseModel):
     code: str
     message: str
@@ -136,21 +150,36 @@ class Registration(BaseModel):
 
 
 class RegistrationCreate(BaseModel):
-    user_id: str = "demo_u001"
-    contact_name: str
-    phone: str | None = None
+    user_id: str = Field(default="demo_u001", max_length=128)
+    contact_name: str = Field(min_length=1, max_length=80)
+    phone: str | None = Field(default=None, max_length=32)
     party_size: int = Field(default=1, ge=1, le=10)
     reminder_opt_in: bool = True
-    note: str | None = None
+    note: str | None = Field(default=None, max_length=500)
+
+    @field_validator("contact_name")
+    @classmethod
+    def normalize_contact_name(cls, value: str) -> str:
+        return _strip_required_text(value)
+
+    @field_validator("phone", "note")
+    @classmethod
+    def normalize_optional_registration_text(cls, value: str | None) -> str | None:
+        return _strip_optional_text(value)
 
 
 class RegistrationUpdate(BaseModel):
     status: str | None = None
     party_size: int | None = Field(default=None, ge=1, le=10)
     reminder_opt_in: bool | None = None
-    contact_name: str | None = None
-    phone: str | None = None
-    note: str | None = None
+    contact_name: str | None = Field(default=None, max_length=80)
+    phone: str | None = Field(default=None, max_length=32)
+    note: str | None = Field(default=None, max_length=500)
+
+    @field_validator("contact_name", "phone", "note")
+    @classmethod
+    def normalize_optional_registration_update_text(cls, value: str | None) -> str | None:
+        return _strip_optional_text(value)
 
 
 class RegistrationLookupResult(BaseModel):
@@ -273,12 +302,22 @@ class LiffSession(BaseModel):
 
 
 class SupportTicketCreate(BaseModel):
-    user_id: str = "demo_u001"
-    category: str = "general"
-    subject: str
-    message: str
-    contact_name: str | None = None
-    phone: str | None = None
+    user_id: str = Field(default="demo_u001", max_length=128)
+    category: str = Field(default="general", max_length=40)
+    subject: str = Field(min_length=2, max_length=120)
+    message: str = Field(min_length=6, max_length=2000)
+    contact_name: str | None = Field(default=None, max_length=80)
+    phone: str | None = Field(default=None, max_length=32)
+
+    @field_validator("subject", "message")
+    @classmethod
+    def normalize_support_required_text(cls, value: str) -> str:
+        return _strip_required_text(value)
+
+    @field_validator("contact_name", "phone")
+    @classmethod
+    def normalize_support_optional_text(cls, value: str | None) -> str | None:
+        return _strip_optional_text(value)
 
 
 class SupportTicket(BaseModel):
@@ -289,15 +328,24 @@ class SupportTicket(BaseModel):
     message: str
     status: str
     priority: str
+    contact_name: str | None = None
+    phone: str | None = None
     created_at: str
     model_config = ConfigDict(from_attributes=True)
 
 
 class SupportTicketUpdate(BaseModel):
-    status: str | None = None
-    priority: str | None = None
-    subject: str | None = None
-    message: str | None = None
+    status: str | None = Field(default=None, max_length=40)
+    priority: str | None = Field(default=None, max_length=40)
+    subject: str | None = Field(default=None, min_length=2, max_length=120)
+    message: str | None = Field(default=None, min_length=6, max_length=2000)
+    contact_name: str | None = Field(default=None, max_length=80)
+    phone: str | None = Field(default=None, max_length=32)
+
+    @field_validator("status", "priority", "subject", "message", "contact_name", "phone")
+    @classmethod
+    def normalize_support_update_text(cls, value: str | None) -> str | None:
+        return _strip_optional_text(value)
 
 
 class FortuneSlip(BaseModel):

@@ -1,24 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  BookOpen,
   CalendarDays,
   ChevronRight,
-  Gift,
   Globe2,
+  Headphones,
   Map,
   MessageCircle,
-  Search,
+  ScrollText,
   Sparkles,
   UsersRound
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { apiFetch, type ChatReply, type TempleProfile } from "../../lib/api";
+import { apiFetch, type ChatReply } from "../../lib/api";
+import { canUsePreviewFallback, isLocalPreview } from "../../lib/localPreviewData";
+import { hasStoredLiffToken } from "../../lib/liff";
 import { getLiffSession } from "../../lib/session";
+import { templePhotoGallery, visualAssets } from "../../lib/visualAssets";
 import { Shell } from "../../components/Shell";
-
-const templeImage =
-  "https://travel.taichung.gov.tw/content/images/attractions/60331/640x480_attractions-image-reeo_rka6kg04vfs2xyzmw.jpg";
 
 const suggestedQuestions = [
   "第一次來萬春宮，怎麼參拜？",
@@ -31,54 +30,76 @@ const visualActions: Array<{
   icon: LucideIcon;
   title: string;
   label: string;
-  image: string;
-  featured?: boolean;
 }> = [
-  { to: "/events", icon: CalendarDays, title: "活動中心", label: "查看活動與報名", image: "/assets/banners/events.png", featured: true },
-  { to: "/tour/main-hall", icon: Map, title: "宮廟導覽", label: "主殿與現場動線", image: "/assets/banners/tour.png", featured: true },
-  { to: "/fortune", icon: Sparkles, title: "文化抽籤", label: "抽一支平安提醒", image: "/assets/banners/fortune.png" },
-  { to: "/support", icon: MessageCircle, title: "客服中心", label: "留下問題", image: "/assets/banners/support.png" }
+  { to: "/events", icon: CalendarDays, title: "活動報名", label: "活動、名額、查詢" },
+  { to: "/fortune", icon: ScrollText, title: "文化抽籤", label: "抽一支提醒" },
+  { to: "/jiao", icon: Sparkles, title: "擲筊問事", label: "先問一句再擲" },
+  { to: "/support", icon: Headphones, title: "客服中心", label: "留下問題" }
 ];
 
 const secondaryActions: Array<{ to: string; icon: LucideIcon; label: string }> = [
-  { to: "/events?lookup=1", icon: Search, label: "查報名進度" },
-  { to: "/deities", icon: BookOpen, label: "神佛介紹" },
-  { to: "/site", icon: Globe2, label: "線上官網" },
-  { to: "/community", icon: UsersRound, label: "LINE 社群" },
-  { to: "/stickers", icon: Gift, label: "貼圖小舖" }
+  { to: "/tour/main-hall", icon: Map, label: "主殿導覽" },
+  { to: "/site", icon: Globe2, label: "萬春宮介紹" },
+  { to: "/community", icon: UsersRound, label: "LINE 入口" }
 ];
 
-const fallbackTemple: TempleProfile = {
-  temple_id: "wanchun-demo",
-  name: "萬春宮",
-  aliases: ["台中媽祖", "藍興媽祖"],
-  main_deity: "天上聖母",
-  address: "臺中市中區成功路212號",
-  phone: "04-22245964",
-  demo_positioning: "臺中中區的宮廟服務入口，可查看活動、導覽、抽籤與客服流程。",
-  image: {
-    url: templeImage,
-    source: "臺中市觀光旅遊局",
-    license: "open data"
+const homeFeatureItems: Array<{
+  to: string;
+  image: string;
+  label: string;
+  title: string;
+  body: string;
+  icon: LucideIcon;
+  large?: boolean;
+}> = [
+  {
+    to: "/site",
+    image: templePhotoGallery[1].src,
+    label: "官網首頁",
+    title: "萬春宮介紹",
+    body: "照片、地址與參拜資訊。",
+    icon: Globe2,
+    large: true
+  },
+  {
+    to: "/events",
+    image: templePhotoGallery[0].src,
+    label: "近期活動",
+    title: "活動消息",
+    body: "報名與查詢放在活動頁。",
+    icon: CalendarDays
+  },
+  {
+    to: "/community",
+    image: visualAssets.richMenu,
+    label: "LINE 快捷",
+    title: "聊天選單入口",
+    body: "服務收在選單裡，需要再展開。",
+    icon: MessageCircle
   }
-};
+];
+
+const serviceSymbols = ["香", "籤", "筊", "燈"];
 
 export function HomePage() {
-  const [temple, setTemple] = useState<TempleProfile | null>(null);
   const [question, setQuestion] = useState("我第一次來萬春宮，怎麼參拜？");
   const [reply, setReply] = useState<ChatReply | null>(null);
   const [asking, setAsking] = useState(false);
 
-  useEffect(() => {
-    getLiffSession().catch(() => undefined);
-    apiFetch<TempleProfile>("/api/temple/profile")
-      .then(setTemple)
-      .catch(() => undefined);
-  }, []);
-
   async function ask(nextQuestion = question) {
     setAsking(true);
     setQuestion(nextQuestion);
+    if (isLocalPreview() || (canUsePreviewFallback() && !hasStoredLiffToken())) {
+      setReply({
+        intent: "local_preview",
+        reply: "第一次參拜可先看主殿導覽；想參加活動可到活動中心，找不到資訊再到客服中心留下問題。",
+        sources: [],
+        events: [],
+        demo_notice: "目前為網站展示回覆；正式互動請從 LINE 開啟。"
+      });
+      setAsking(false);
+      return;
+    }
     try {
       const session = await getLiffSession();
       const result = await apiFetch<ChatReply>("/api/chat", {
@@ -89,7 +110,7 @@ export function HomePage() {
     } catch {
       setReply({
         intent: "service_unavailable",
-        reply: "參拜問答服務暫時無法連線。你仍可先查看活動、導覽，或到客服中心留下問題。",
+        reply: "參拜問答暫時無法連線。你仍可先查看活動、導覽，或從 LINE 開啟後再送出問題。",
         sources: [],
         events: [],
         demo_notice: "正式活動與廟務資訊仍以廟方公告為準。"
@@ -99,48 +120,71 @@ export function HomePage() {
     }
   }
 
-  const templeProfile = temple || fallbackTemple;
-
   return (
-    <Shell title="萬春宮">
-      <section className="liff-visual-hero">
-        <div className="liff-hero-copy">
-          <span className="tag">主祀 {templeProfile.main_deity}</span>
-          <h2>{templeProfile.name}線上服務</h2>
-          <p>{templeProfile.demo_positioning}</p>
-          <div className="hero-facts" aria-label="廟宇資訊">
-            <span>{templeProfile.address}</span>
-            <span>{templeProfile.phone}</span>
+    <Shell title="線上服務">
+      <section className="service-launch-panel">
+        <div className="service-launch-copy">
+          <span className="tag">常用服務</span>
+          <h2>今天想辦哪件事？</h2>
+          <p>首頁只留常用入口，細節進到各頁處理。</p>
+          <div className="service-symbol-strip" aria-label="宮廟元素">
+            {serviceSymbols.map((symbol) => (
+              <span key={symbol}>{symbol}</span>
+            ))}
           </div>
           <div className="primary-route-row" aria-label="建議下一步">
             <Link className="button primary" to="/events">
               查看活動 <ChevronRight size={18} />
             </Link>
-            <Link className="button" to="/fortune">
-              抽文化籤
+            <Link className="button" to="/jiao">
+              擲筊問事
             </Link>
-            <Link className="button" to="/tour/main-hall">
-              主殿導覽
+            <Link className="button" to="/fortune">
+              文化抽籤
             </Link>
           </div>
         </div>
-        <div className="liff-hero-gallery" aria-label="萬春宮服務圖片">
-          {templeProfile.image?.url ? <img className="liff-hero-photo" src={templeProfile.image.url} alt="萬春宮實景照片" /> : null}
-          <img className="liff-hero-banner" src="/assets/banners/home.png" alt="宮廟線上服務入口" />
-        </div>
+        <figure className="service-launch-sticker service-launch-photo-card">
+          <img src={templePhotoGallery[2].src} alt="萬春宮老城廟景" />
+          <figcaption>
+            <MessageCircle size={18} />
+            服務收在選單，需要時再展開
+          </figcaption>
+        </figure>
       </section>
 
-      <section className="line-visual-links" aria-label="常用服務入口">
+      <section className="home-feature-board" aria-label="今日服務看板">
+        {homeFeatureItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              className={`home-feature-card${item.large ? " large" : ""}${item.image === visualAssets.richMenu ? " contain" : ""}`}
+              key={item.to}
+              to={item.to}
+            >
+              <img src={item.image} alt={item.title} />
+              <span>
+                <Icon size={17} />
+                {item.label}
+              </span>
+              <strong>{item.title}</strong>
+              <small>{item.body}</small>
+            </Link>
+          );
+        })}
+      </section>
+
+      <section className="home-service-capsules" aria-label="常用服務入口">
         {visualActions.map((action) => {
           const Icon = action.icon;
           return (
-            <Link className={`line-visual-card${action.featured ? " featured" : ""}`} key={action.to} to={action.to}>
-              <img src={action.image} alt={action.title} />
+            <Link key={action.to} to={action.to}>
+              <Icon size={21} />
               <span>
-                <Icon size={17} />
-                {action.label}
+                <strong>{action.title}</strong>
+                <small>{action.label}</small>
               </span>
-              <strong>{action.title}</strong>
+              <ChevronRight size={18} />
             </Link>
           );
         })}
@@ -179,7 +223,7 @@ export function HomePage() {
             想詢問的內容
             <textarea value={question} onChange={(event) => setQuestion(event.target.value)} />
           </label>
-          <button className="button primary" disabled={asking} onClick={() => ask()}>
+          <button className="button primary" type="button" disabled={asking} onClick={() => ask()}>
             {asking ? "回覆中" : "送出問題"}
           </button>
           {reply ? (

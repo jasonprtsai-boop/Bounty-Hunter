@@ -160,7 +160,7 @@ export function AdminDashboard() {
                 <XAxis dataKey="title" tick={{ fontSize: 11 }} />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="views" fill="#06C755" name="瀏覽" />
+                <Bar dataKey="views" fill="#D3A23A" name="瀏覽" />
                 <Bar dataKey="registrations" fill="#B42318" name="報名" />
               </BarChart>
             </ResponsiveContainer>

@@ -19,8 +19,13 @@ const publicRoutes = [
   "privacy",
   "terms",
   "events",
+  "events/worship-intro",
+  "events/evt_demo_worship_intro",
+  "register/worship-intro",
+  "register/evt_demo_worship_intro",
   "deities",
   "fortune",
+  "jiao",
   "member",
   "stickers",
   "support",
@@ -33,6 +38,7 @@ const adminRoutes = [
   "admin/knowledge",
   "admin/support",
   "admin/notifications",
+  "admin/accounts",
   "admin/release"
 ];
 const appRoutes = surface === "admin" ? adminRoutes : publicRoutes;

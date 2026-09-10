@@ -97,6 +97,7 @@ database/migrations/007_data_integrity_and_service_ops.sql
 database/migrations/008_admin_accounts.sql
 database/migrations/009_admin_account_email_login.sql
 database/migrations/010_event_controls_and_deities.sql
+database/migrations/011_support_ticket_contact_fields.sql
 ```
 
 Fresh Supabase project can run this generated bundle instead:

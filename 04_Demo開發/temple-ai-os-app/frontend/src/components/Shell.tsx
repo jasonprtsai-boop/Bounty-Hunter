@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { BookOpen, CalendarDays, ChevronDown, Headphones, Home, Map, ScrollText, Search } from "lucide-react";
+import { CalendarDays, ChevronDown, Headphones, Home, Map, ScrollText, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 type ShellProps = {
@@ -12,20 +12,21 @@ type NavItem = {
   icon: LucideIcon;
   label: string;
   hint: string;
+  bottom?: boolean;
 };
 
 const liffLinks: NavItem[] = [
-  { path: "/", icon: Home, label: "首頁", hint: "服務" },
-  { path: "/events", icon: CalendarDays, label: "活動", hint: "報名" },
-  { path: "/deities", icon: BookOpen, label: "神佛", hint: "介紹" },
-  { path: "/events?lookup=1", icon: Search, label: "查詢", hint: "進度" },
-  { path: "/fortune", icon: ScrollText, label: "抽籤", hint: "文化" },
+  { path: "/", icon: Home, label: "服務", hint: "入口", bottom: true },
+  { path: "/events", icon: CalendarDays, label: "活動", hint: "報名", bottom: true },
   { path: "/tour/main-hall", icon: Map, label: "導覽", hint: "現場" },
-  { path: "/support", icon: Headphones, label: "客服", hint: "提問" }
+  { path: "/fortune", icon: ScrollText, label: "抽籤", hint: "文化", bottom: true },
+  { path: "/jiao", icon: Sparkles, label: "擲筊", hint: "問事", bottom: true },
+  { path: "/support", icon: Headphones, label: "客服", hint: "提問", bottom: true }
 ];
 
 export function Shell({ title, children }: ShellProps) {
   const location = useLocation();
+  const bottomLinks = liffLinks.filter((item) => item.bottom);
 
   function navClass(item: NavItem, isActive: boolean) {
     if (item.path === "/events?lookup=1") {
@@ -47,9 +48,11 @@ export function Shell({ title, children }: ShellProps) {
             <small>LINE 服務入口</small>
           </span>
         </Link>
-        <div className="topbar-context" aria-label="目前介面狀態">
-          <span>LINE 服務入口</span>
-          <strong>常用服務快速進入</strong>
+        <div className="topbar-context symbol-context" aria-label="宮廟服務符號">
+          <span>香</span>
+          <span>籤</span>
+          <span>筊</span>
+          <span>安</span>
         </div>
         <div className="topbar-actions">
           <details className="service-drawer">
@@ -78,7 +81,7 @@ export function Shell({ title, children }: ShellProps) {
         {children}
       </main>
       <nav className="bottom-nav" aria-label="主要導覽">
-        {liffLinks.map((item) => {
+        {bottomLinks.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink

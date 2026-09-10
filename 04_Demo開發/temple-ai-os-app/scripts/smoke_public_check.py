@@ -9,7 +9,7 @@ from typing import Any, Callable
 import httpx
 
 
-DEFAULT_FRONTEND_BASE_URL = "https://wanchun-gong-service.jasonprtsai.chatgpt.site"
+DEFAULT_FRONTEND_BASE_URL = "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site"
 DEFAULT_API_BASE_URL = "https://temple-ai-os-api.onrender.com"
 DEFAULT_LIFF_URL = "https://liff.line.me/2010938588-VJXpaoyH"
 DEFAULT_ADD_FRIEND_URL = "https://line.me/R/ti/p/%40983zhzni"
@@ -55,6 +55,18 @@ def expect_html_page(response: httpx.Response) -> None:
         raise RuntimeError(f"expected HTML, got {content_type or 'unknown content type'}")
     if "<html" not in response.text.lower():
         raise RuntimeError("response does not look like an HTML page")
+
+
+def expect_html_route(expected_path: str) -> Callable[[httpx.Response], None]:
+    normalized_expected = f"/{expected_path.strip('/')}" if expected_path.strip("/") else "/"
+
+    def validate(response: httpx.Response) -> None:
+        expect_html_page(response)
+        actual_path = response.url.path.rstrip("/") or "/"
+        if actual_path != normalized_expected:
+            raise RuntimeError(f"expected final path {normalized_expected}, got {actual_path}")
+
+    return validate
 
 
 def expect_image(response: httpx.Response) -> None:
@@ -114,11 +126,34 @@ def main() -> None:
             method="POST",
             json_body={"username": "public-smoke-test", "password": "invalid-password"},
         ),
-        Check("public site", f"{frontend}/site", expect_html_page),
-        Check("community page", f"{frontend}/community", expect_html_page),
-        Check("sticker page", f"{frontend}/stickers", expect_html_page),
-        Check("privacy page", f"{frontend}/privacy", expect_html_page),
-        Check("terms page", f"{frontend}/terms", expect_html_page),
+        Check("public site", f"{frontend}/site", expect_html_route("/site")),
+        Check("community page", f"{frontend}/community", expect_html_route("/community")),
+        Check("events page", f"{frontend}/events", expect_html_route("/events")),
+        Check(
+            "event detail deep route",
+            f"{frontend}/events/worship-intro",
+            expect_html_route("/events/worship-intro"),
+        ),
+        Check(
+            "event id deep route",
+            f"{frontend}/events/evt_demo_worship_intro",
+            expect_html_route("/events/evt_demo_worship_intro"),
+        ),
+        Check(
+            "registration deep route",
+            f"{frontend}/register/worship-intro",
+            expect_html_route("/register/worship-intro"),
+        ),
+        Check(
+            "registration id deep route",
+            f"{frontend}/register/evt_demo_worship_intro",
+            expect_html_route("/register/evt_demo_worship_intro"),
+        ),
+        Check("jiao page", f"{frontend}/jiao", expect_html_route("/jiao")),
+        Check("tour page", f"{frontend}/tour/main-hall", expect_html_route("/tour/main-hall")),
+        Check("sticker page", f"{frontend}/stickers", expect_html_route("/stickers")),
+        Check("privacy page", f"{frontend}/privacy", expect_html_route("/privacy")),
+        Check("terms page", f"{frontend}/terms", expect_html_route("/terms")),
         Check("Flex event hero image", f"{frontend}/assets/flex/event-card.png", expect_image),
         Check("LIFF entry URL", liff_url, expect_status(200, 301, 302, 303, 307, 308)),
         Check("LINE add friend URL", add_friend_url, expect_status(200, 301, 302, 303, 307, 308)),

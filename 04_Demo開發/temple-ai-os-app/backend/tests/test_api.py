@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import json
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.api.routes.line import _line_reply_messages
@@ -10,6 +11,7 @@ from app.core.config import get_settings
 from app.db.supabase import get_repository
 from app.main import app
 from app.schemas.common import ChatReply
+from app.services.liff_auth import resolve_liff_user_id, verify_liff_id_token
 from app.services.rich_menu_service import RichMenuService
 
 
@@ -206,6 +208,40 @@ def test_liff_token_overrides_client_user_id_for_registration() -> None:
     )
     assert response.status_code == 200
     assert response.json()["data"]["user_id"] == "demo_u001"
+
+
+async def test_liff_missing_token_fallback_is_not_allowed_in_production(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    get_settings.cache_clear()
+    monkeypatch.setenv("APP_ENV", "local")
+    monkeypatch.setenv("DEMO_MODE", "true")
+    monkeypatch.delenv("WAN_CHUN_GONG_SERVICE_MODE", raising=False)
+
+    assert await resolve_liff_user_id(None, "local_preview_user") == "local_preview_user"
+
+    monkeypatch.setenv("APP_ENV", "production")
+    get_settings.cache_clear()
+    with pytest.raises(ValueError, match="missing_liff_token"):
+        await resolve_liff_user_id(None, "spoofed_user")
+
+    get_settings.cache_clear()
+
+
+async def test_demo_liff_token_is_not_allowed_in_production(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    get_settings.cache_clear()
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("DEMO_MODE", "true")
+    monkeypatch.delenv("WAN_CHUN_GONG_SERVICE_MODE", raising=False)
+    monkeypatch.delenv("LINE_LOGIN_CHANNEL_ID", raising=False)
+    get_settings.cache_clear()
+
+    with pytest.raises(ValueError, match="LINE_LOGIN_CHANNEL_ID"):
+        await verify_liff_id_token("demo")
+
+    get_settings.cache_clear()
 
 
 def test_duplicate_active_registration_is_rejected() -> None:
@@ -808,10 +844,23 @@ def test_support_ticket_admin_flow() -> None:
             "category": "event_registration",
             "subject": "測試客服工單",
             "message": "用於驗證客服後台處理流程。",
+            "contact_name": "林小安",
+            "phone": "0912111222",
         },
     )
     assert create_response.status_code == 200
-    ticket_id = create_response.json()["data"]["ticket_id"]
+    created_ticket = create_response.json()["data"]
+    ticket_id = created_ticket["ticket_id"]
+    assert created_ticket["contact_name"] == "林小安"
+    assert created_ticket["phone"] == "0912111222"
+
+    list_response = client.get("/api/admin/support-tickets", headers=ADMIN_HEADERS)
+    assert list_response.status_code == 200
+    listed_ticket = next(
+        ticket for ticket in list_response.json()["data"] if ticket["ticket_id"] == ticket_id
+    )
+    assert listed_ticket["contact_name"] == "林小安"
+    assert listed_ticket["phone"] == "0912111222"
 
     update_response = client.patch(
         f"/api/admin/support-tickets/{ticket_id}",

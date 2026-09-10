@@ -1,11 +1,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { RefreshCw, Search, TicketCheck } from "lucide-react";
+import { BookOpen, CalendarDays, ChevronRight, MapPin, RefreshCw, Search, Sparkles, TicketCheck } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { EventCard } from "../../components/EventCard";
 import { Shell } from "../../components/Shell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type EventItem, type RegistrationLookupResult } from "../../lib/api";
 import { eventPath } from "../../lib/eventLinks";
+import { canUsePreviewFallback, isLocalPreview, localPreviewEvents, lookupLocalRegistrations } from "../../lib/localPreviewData";
+import { templeExteriorImage } from "../../lib/visualAssets";
 
 const statusLabels: Record<string, string> = {
   confirmed: "已完成報名",
@@ -14,6 +17,20 @@ const statusLabels: Record<string, string> = {
   cancelled: "已取消",
   waitlisted: "候補中"
 };
+
+const eventCategoryLinks: Array<{
+  label: string;
+  title: string;
+  body: string;
+  icon: LucideIcon;
+  to?: string;
+  href?: string;
+}> = [
+  { label: "法會", title: "法會服務", body: "普度、祈福、禮斗", icon: Sparkles, href: "#event-list" },
+  { label: "導覽", title: "參拜導覽", body: "第一次來先看這裡", icon: MapPin, to: "/tour/main-hall" },
+  { label: "講堂", title: "文化活動", body: "媽祖故事與書法體驗", icon: BookOpen, href: "#event-list" },
+  { label: "查詢", title: "報名進度", body: "手機或編號查詢", icon: Search, href: "#registration-lookup" }
+];
 
 export function EventsPage() {
   const location = useLocation();
@@ -27,6 +44,11 @@ export function EventsPage() {
   const [lookupResults, setLookupResults] = useState<RegistrationLookupResult[] | null>(null);
 
   useEffect(() => {
+    if (isLocalPreview()) {
+      setEvents(localPreviewEvents);
+      setLoading(false);
+      return undefined;
+    }
     let mounted = true;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 5000);
@@ -40,6 +62,11 @@ export function EventsPage() {
       })
       .catch((eventError) => {
         if (mounted) {
+          if (canUsePreviewFallback()) {
+            setEvents(localPreviewEvents);
+            setError("");
+            return;
+          }
           setError(
             eventError instanceof Error && eventError.name === "AbortError"
               ? "活動資料讀取逾時"
@@ -88,9 +115,18 @@ export function EventsPage() {
     }
     setLookupLoading(true);
     setLookupError("");
+    if (isLocalPreview()) {
+      setLookupResults(lookupLocalRegistrations(phone, registrationId));
+      setLookupLoading(false);
+      return;
+    }
     try {
       setLookupResults(await apiFetch<RegistrationLookupResult[]>(`/api/events/registrations/lookup?${params}`));
     } catch (err) {
+      if (canUsePreviewFallback()) {
+        setLookupResults(lookupLocalRegistrations(phone, registrationId));
+        return;
+      }
       setLookupError(err instanceof Error ? err.message : "查詢失敗，請稍後再試");
       setLookupResults(null);
     } finally {
@@ -98,24 +134,92 @@ export function EventsPage() {
     }
   }
 
+  const featuredEvent = events.find((eventItem) => eventItem.status === "open" && eventItem.requires_registration) || events[0];
+
   return (
     <Shell title="活動中心">
-      <section className="event-page-hero">
+      <section className="event-page-hero visual-page-hero events-visual-hero">
+        <figure>
+          <img src={templeExteriorImage} alt="萬春宮實景" />
+        </figure>
         <div>
-          <span className="tag">LINE 活動入口</span>
-          <h2>查看近期活動與報名狀態</h2>
-          <p>活動中心會集中顯示法會、導覽、講座與志工服務。若目前沒有開放活動，也會清楚標示狀態。</p>
+          <span className="tag">活動看板</span>
+          <h2>近期活動與報名</h2>
+          <p>法會、導覽、講座與服務活動集中查看。</p>
+          <div className="primary-route-row">
+            <a className="button primary" href="#event-list">
+              查看活動
+            </a>
+            <a className="button" href="#registration-lookup">
+              查報名
+            </a>
+            <Link className="button" to="/support">
+              詢問
+            </Link>
+          </div>
         </div>
-        <Link className="button" to="/support">
-          詢問活動資訊
-        </Link>
       </section>
+
+      <section className="event-reference-rail" aria-label="活動分類">
+        {eventCategoryLinks.map((item) => {
+          const Icon = item.icon;
+          const content = (
+            <>
+              <span>{item.label}</span>
+              <Icon size={20} />
+              <strong>{item.title}</strong>
+              <small>{item.body}</small>
+            </>
+          );
+          return item.to ? (
+            <Link key={item.title} to={item.to}>
+              {content}
+            </Link>
+          ) : (
+            <a key={item.title} href={item.href}>
+              {content}
+            </a>
+          );
+        })}
+      </section>
+
+      {!loading && !error && featuredEvent ? (
+        <section className="featured-event-panel" aria-label="本期主推活動">
+          <figure>
+            <img src={templeExteriorImage} alt={featuredEvent.title} />
+          </figure>
+          <div>
+            <span className="tag">本期主推</span>
+            <h2>{featuredEvent.title}</h2>
+            <p>{featuredEvent.summary}</p>
+            <dl>
+              <div>
+                <dt>日期</dt>
+                <dd>{featuredEvent.date}</dd>
+              </div>
+              <div>
+                <dt>時間</dt>
+                <dd>
+                  {featuredEvent.start_time} - {featuredEvent.end_time}
+                </dd>
+              </div>
+              <div>
+                <dt>地點</dt>
+                <dd>{featuredEvent.location}</dd>
+              </div>
+            </dl>
+            <Link className="button primary" to={eventPath(featuredEvent.event_id)}>
+              查看活動 <ChevronRight size={18} />
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       <section className="registration-lookup-panel" id="registration-lookup">
         <div className="registration-lookup-copy">
           <span className="tag">報名進度</span>
-          <h2>在活動頁直接查報名狀態</h2>
-          <p>輸入報名時留下的手機，或輸入報名成功後取得的編號，即可查看活動名稱、日期與目前狀態。</p>
+          <h2>查報名狀態</h2>
+          <p>輸入手機或報名編號即可查看。</p>
         </div>
         <form className="registration-lookup-form" onSubmit={lookupRegistration}>
           <label>
@@ -189,7 +293,7 @@ export function EventsPage() {
           }
         />
       ) : events.length > 0 ? (
-        <div className="event-list-grid">
+        <div className="event-list-grid" id="event-list">
           {events.map((event) => (
             <EventCard key={event.event_id} event={event} />
           ))}

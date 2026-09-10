@@ -5,6 +5,7 @@ import { Shell } from "../../components/Shell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type EventItem } from "../../lib/api";
 import { eventRouteKey } from "../../lib/eventLinks";
+import { canUsePreviewFallback, findLocalPreviewEvent, isLocalPreview } from "../../lib/localPreviewData";
 
 const statusLabels: Record<string, string> = {
   open: "可報名",
@@ -40,9 +41,22 @@ export function EventDetailPage() {
     }
     setLoading(true);
     setLoadError("");
+    if (isLocalPreview()) {
+      const localEvent = findLocalPreviewEvent(eventId);
+      if (localEvent) {
+        setEvent(localEvent);
+        setLoading(false);
+        return;
+      }
+    }
     try {
       setEvent(await apiFetch<EventItem>(`/api/events/${eventId}`));
     } catch (err) {
+      const localEvent = canUsePreviewFallback() ? findLocalPreviewEvent(eventId) : null;
+      if (localEvent) {
+        setEvent(localEvent);
+        return;
+      }
       setLoadError(err instanceof Error ? err.message : "讀取活動失敗");
     } finally {
       setLoading(false);
@@ -93,47 +107,48 @@ export function EventDetailPage() {
 
   return (
     <Shell title={event.title}>
-      <section className="detail-panel">
-        <div className="card-row">
-          <span className="tag">{event.category}</span>
-          <span className={canRegister ? "status open" : "status"}>
-            {canJoinWaitlist ? "可登記候補" : isFull ? "名額已滿" : statusLabels[event.status] || event.status}
-          </span>
-        </div>
-        <p>{event.summary}</p>
-        <div className="meta-line">
-          <CalendarDays size={18} />
-          <span>
-            {event.date} {event.start_time}-{event.end_time}
-          </span>
-        </div>
-        <div className="meta-line">
-          <MapPin size={18} />
-          <span>{event.address}</span>
-        </div>
-        {event.capacity ? (
+      <section className="detail-panel event-detail-layout event-detail-layout-compact">
+        <div className="event-detail-main">
+          <div className="event-detail-badges">
+            <span className="tag">{event.category}</span>
+            <span className={canRegister ? "status open" : "status"}>
+              {canJoinWaitlist ? "可登記候補" : isFull ? "名額已滿" : statusLabels[event.status] || event.status}
+            </span>
+          </div>
+          <p className="event-detail-summary">{event.summary}</p>
+          <div className="meta-line">
+            <CalendarDays size={18} />
+            <span>
+              {event.date} {event.start_time}-{event.end_time}
+            </span>
+          </div>
+          <div className="meta-line">
+            <MapPin size={18} />
+            <span>{event.address}</span>
+          </div>
+          {event.capacity ? (
           <div className="meta-line">
             <Users size={18} />
             <span>
               {event.registered_count}/{event.capacity} 人
             </span>
           </div>
-        ) : null}
+          ) : null}
           <div className="event-info-grid">
-          <div>
-            <span>報名狀態</span>
-            <strong>
-              {canJoinWaitlist
-                ? "額滿，可登記候補"
-                : canRegister
-                  ? "現在可報名"
-                  : registrationNotStarted
-                    ? "尚未開放"
-                    : registrationClosed
-                      ? "已截止"
-                      : "目前不開放"}
-            </strong>
-          </div>
+            <div>
+              <span>報名狀態</span>
+              <strong>
+                {canJoinWaitlist
+                  ? "額滿，可候補"
+                  : canRegister
+                    ? "可報名"
+                    : registrationNotStarted
+                      ? "尚未開放"
+                      : registrationClosed
+                        ? "已截止"
+                        : "未開放"}
+              </strong>
+            </div>
             <div>
               <span>參加方式</span>
               <strong>{event.requires_registration ? "線上填寫資料" : "現場自由參加"}</strong>
@@ -157,15 +172,16 @@ export function EventDetailPage() {
               </div>
             ) : null}
           </div>
-        {event.payment_policy ? <p className="notice">{event.payment_policy}</p> : null}
-        <p className="notice">{event.demo_note}</p>
-        {canRegister && (!isFull || event.waitlist_enabled) ? (
-          <Link className="button primary" to={`/register/${eventRouteKey(event.event_id)}`}>
-            {canJoinWaitlist ? "登記候補" : "線上報名"}
-          </Link>
-        ) : event.requires_registration ? (
-          <span className="button muted">目前不開放報名</span>
-        ) : null}
+          {event.payment_policy ? <p className="notice">{event.payment_policy}</p> : null}
+          <p className="notice">{event.demo_note}</p>
+          {canRegister && (!isFull || event.waitlist_enabled) ? (
+            <Link className="button primary" to={`/register/${eventRouteKey(event.event_id)}`}>
+              {canJoinWaitlist ? "登記候補" : "線上報名"}
+            </Link>
+          ) : event.requires_registration ? (
+            <span className="button muted">目前不開放報名</span>
+          ) : null}
+        </div>
       </section>
     </Shell>
   );

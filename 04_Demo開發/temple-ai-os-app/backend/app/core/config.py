@@ -9,6 +9,7 @@ from app.core.admin_identity import normalize_admin_login_id
 
 DEFAULT_ALLOWED_SITE_ORIGINS = (
     "https://wanchun-gong-service.jasonprtsai.chatgpt.site",
+    "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site",
     "https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site",
 )
 

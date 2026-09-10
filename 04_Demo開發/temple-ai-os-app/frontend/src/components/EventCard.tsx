@@ -14,9 +14,11 @@ const statusLabels: Record<string, string> = {
 
 function eventCardThemeClass(event: EventItem) {
   const text = `${event.category} ${event.title}`;
-  if (/法會|普度|祈福|服務/.test(text)) return "event-card-ritual";
+  if (/法會|普度|祈福|服務|關聖|聖誕|佳辰/.test(text)) return "event-card-ritual";
   if (/導覽|第一次|參拜流程|動線/.test(text)) return "event-card-guide";
+  if (/書法|筆墨/.test(text)) return "event-card-calligraphy";
   if (/文化|講堂|書法|教育|體驗/.test(text)) return "event-card-culture";
+  if (/宮慶|週年|祭典/.test(text)) return "event-card-festival";
   return "event-card-festival";
 }
 
@@ -38,15 +40,15 @@ export function EventCard({ event }: { event: EventItem }) {
       : "免報名";
 
   return (
-    <article className={`card event-card ${eventCardThemeClass(event)}`}>
-      <div className="card-row">
+    <article className={`card event-card event-card-no-visual ${eventCardThemeClass(event)}`}>
+      <div className="event-card-badges">
         <span className="tag">{event.category}</span>
         <span className={canRegister ? "status open" : "status"}>
           {canJoinWaitlist ? "可登記候補" : isFull ? "名額已滿" : statusLabels[event.status] || event.status}
         </span>
       </div>
       <h2>{event.title}</h2>
-      <p>{event.summary}</p>
+      <p className="event-card-summary">{event.summary}</p>
       <div className="meta-line">
         <CalendarDays size={16} />
         <span>

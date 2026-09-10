@@ -944,6 +944,178 @@ alter table admin_accounts
 
 
 -- ============================================================
+-- 010_event_controls_and_deities.sql
+-- ============================================================
+
+alter table events
+  add column if not exists registration_open_at timestamptz,
+  add column if not exists registration_close_at timestamptz,
+  add column if not exists countdown_target_at timestamptz,
+  add column if not exists countdown_label text,
+  add column if not exists max_party_size integer not null default 10,
+  add column if not exists waitlist_enabled boolean not null default false;
+
+alter table events
+  drop constraint if exists events_max_party_size_valid;
+
+alter table events
+  add constraint events_max_party_size_valid
+  check (max_party_size between 1 and 10);
+
+alter table event_registrations
+  drop constraint if exists event_registrations_status_valid;
+
+alter table event_registrations
+  add constraint event_registrations_status_valid
+  check (status in ('confirmed', 'pending_review', 'checked_in', 'cancelled', 'waitlisted'));
+
+create table if not exists deities (
+  deity_id text primary key,
+  temple_id text not null references temples(temple_id) on delete cascade,
+  name text not null,
+  category text not null default '配祀神佛',
+  enshrined_area text not null default '',
+  description text not null,
+  birthday_lunar text,
+  service_notes text,
+  source_url text,
+  status text not null default 'published',
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table deities enable row level security;
+
+drop policy if exists "public read published deities" on deities;
+create policy "public read published deities" on deities
+  for select using (status = 'published');
+
+create index if not exists deities_temple_status_order_idx
+  on deities (temple_id, status, sort_order, name);
+
+create index if not exists events_registration_window_idx
+  on events (status, registration_open_at, registration_close_at);
+
+update events
+   set max_party_size = 10
+ where max_party_size is null;
+
+create or replace function register_for_event(
+  p_event_id text,
+  p_user_id text,
+  p_contact_name text,
+  p_phone text default null,
+  p_party_size integer default 1,
+  p_reminder_opt_in boolean default true,
+  p_note text default null
+)
+returns event_registrations
+language plpgsql
+as $$
+declare
+  locked_event events%rowtype;
+  confirmed_total integer;
+  existing_registration event_registrations%rowtype;
+  new_registration event_registrations%rowtype;
+  registration_status text := 'confirmed';
+begin
+  if p_user_id is null or btrim(p_user_id) = '' then
+    raise exception 'invalid_user_id';
+  end if;
+  if p_contact_name is null or btrim(p_contact_name) = '' then
+    raise exception 'invalid_contact_name';
+  end if;
+
+  select * into locked_event from events where event_id = p_event_id for update;
+  if not found then raise exception 'event_not_found'; end if;
+  if not locked_event.requires_registration then raise exception 'registration_not_required'; end if;
+  if locked_event.status not in ('open', 'published') then raise exception 'event_not_open'; end if;
+  if locked_event.registration_open_at is not null and now() < locked_event.registration_open_at then
+    raise exception 'event_not_open';
+  end if;
+  if locked_event.registration_close_at is not null and now() >= locked_event.registration_close_at then
+    raise exception 'event_registration_closed';
+  end if;
+  if p_party_size < 1 or p_party_size > locked_event.max_party_size then
+    raise exception 'party_size_exceeded';
+  end if;
+
+  insert into line_users (user_id, line_display_name, segment)
+  values (p_user_id, 'LINE user', 'line_friend')
+  on conflict (user_id) do nothing;
+
+  select * into existing_registration
+    from event_registrations
+   where event_id = p_event_id and user_id = p_user_id
+     and status in ('confirmed', 'pending_review', 'checked_in', 'waitlisted')
+   limit 1;
+  if found then raise exception 'duplicate_registration'; end if;
+
+  select coalesce(sum(party_size), 0) into confirmed_total
+    from event_registrations
+   where event_id = p_event_id and status in ('confirmed', 'pending_review', 'checked_in');
+
+  if locked_event.capacity is not null and confirmed_total + p_party_size > locked_event.capacity then
+    if not locked_event.waitlist_enabled then raise exception 'event_capacity_exceeded'; end if;
+    registration_status := 'waitlisted';
+  end if;
+
+  insert into event_registrations (
+    registration_id, event_id, user_id, status, party_size,
+    reminder_opt_in, contact_name, phone, note
+  ) values (
+    'reg_' || encode(gen_random_bytes(4), 'hex'), p_event_id, p_user_id,
+    registration_status, p_party_size, p_reminder_opt_in, btrim(p_contact_name),
+    nullif(btrim(coalesce(p_phone, '')), ''), nullif(btrim(coalesce(p_note, '')), '')
+  ) returning * into new_registration;
+
+  perform sync_event_registered_count(p_event_id);
+  return new_registration;
+end;
+$$;
+
+
+-- ============================================================
+-- 011_support_ticket_contact_fields.sql
+-- ============================================================
+
+alter table support_tickets
+  add column if not exists contact_name text;
+
+alter table support_tickets
+  add column if not exists phone text;
+
+alter table support_tickets
+  drop constraint if exists support_tickets_category_length;
+
+alter table support_tickets
+  add constraint support_tickets_category_length
+  check (char_length(category) <= 40);
+
+alter table support_tickets
+  drop constraint if exists support_tickets_subject_reasonable_length;
+
+alter table support_tickets
+  add constraint support_tickets_subject_reasonable_length
+  check (char_length(subject) between 2 and 120);
+
+alter table support_tickets
+  drop constraint if exists support_tickets_contact_name_length;
+
+alter table support_tickets
+  add constraint support_tickets_contact_name_length
+  check (contact_name is null or char_length(contact_name) <= 80);
+
+alter table support_tickets
+  drop constraint if exists support_tickets_phone_length;
+
+alter table support_tickets
+  add constraint support_tickets_phone_length
+  check (phone is null or char_length(phone) <= 32);
+
+
+-- ============================================================
 -- service_seed.sql
 -- ============================================================
 
@@ -965,6 +1137,28 @@ insert into temples (
   '依政府開放資料與觀光開放資料整理的萬春宮服務資訊；正式活動與服務細節請以廟方公告為準。',
   '[]'
 ) on conflict (temple_id) do update set updated_at = now();
+
+insert into deities (
+  deity_id, temple_id, name, category, enshrined_area, description,
+  birthday_lunar, service_notes, source_url, status, sort_order
+) values
+  ('deity_guanyin', 'wcg_taichung_demo', '觀音佛祖', '主配祀神', '觀音佛祖神龕', '鎮殿觀音佛祖、老觀音佛祖與左觀音佛祖共同奉祀於觀音佛祖神龕。', null, '神龕位置與參拜方式請依現場指示。', 'https://www.lswc.org.tw/tw/?ID=5&Page=gods_list', 'published', 10),
+  ('deity_zhusheng', 'wcg_taichung_demo', '註生娘娘', '主配祀神', '註生娘娘神龕', '註生娘娘神龕另配祀婆姐、值年太歲與祿位牌位。', null, '正式登記與服務細節請以廟方公告與現場人員說明為準。', 'https://www.lswc.org.tw/tw/?ID=5&Page=gods_list', 'published', 20),
+  ('deity_sanguan', 'wcg_taichung_demo', '三官大帝', '副配祀神', '中案神桌', '列於萬春宮公開配祀神佛資料中的副配祀神明。', null, '節慶法會與供奉安排請以廟方公告為準。', 'https://www.lswc.org.tw/tw/?ID=6&Page=gods_list', 'published', 30),
+  ('deity_wenchang', 'wcg_taichung_demo', '文昌帝君', '副配祀神', '副配祀神明區', '列於公開配祀神佛資料中的副配祀神明，可作為文化導覽與節慶查詢入口。', null, '文化介紹不取代正式祭祀或廟方服務說明。', 'https://www.lswc.org.tw/tw/?ID=6&Page=gods_list', 'published', 40),
+  ('deity_luxianzu', 'wcg_taichung_demo', '孚佑帝君（呂仙祖）', '客座神明', '客座神明區', '萬春宮公開資料列載的客座神明。', null, '正式供奉與參拜細節請以現場公告為準。', 'https://www.lswc.org.tw/tw/?ID=7&Page=gods_list', 'published', 50),
+  ('deity_qianliyan', 'wcg_taichung_demo', '千里眼將軍', '護法神明', '正殿與神龕前', '公開資料列載的護法神明，正殿與神龕前皆有奉祀位置。', null, '位置資訊依公開頁整理，現場若有調整請以廟方公告為準。', 'https://www.lswc.org.tw/tw/?ID=8&Page=gods_list', 'published', 60),
+  ('deity_shunfeng', 'wcg_taichung_demo', '順風耳將軍', '護法神明', '正殿與神龕前', '公開資料列載的護法神明，正殿與神龕前皆有奉祀位置。', null, '位置資訊依公開頁整理，現場若有調整請以廟方公告為準。', 'https://www.lswc.org.tw/tw/?ID=8&Page=gods_list', 'published', 70)
+on conflict (deity_id) do update set
+  name = excluded.name,
+  category = excluded.category,
+  enshrined_area = excluded.enshrined_area,
+  description = excluded.description,
+  service_notes = excluded.service_notes,
+  source_url = excluded.source_url,
+  status = excluded.status,
+  sort_order = excluded.sort_order,
+  updated_at = now();
 
 insert into line_users (user_id, line_display_name, segment, consent_status, interests) values
   ('demo_u001', '小安', 'new_visitor', 'demo_consented', array['第一次參拜','交通','活動提醒']),
@@ -1138,117 +1332,3 @@ insert into dashboard_snapshots (
   '[{"intent":"temple_location","label":"地址與交通","count":88},{"intent":"worship_process","label":"第一次參拜流程","count":73},{"intent":"event_query","label":"近期活動查詢","count":69}]',
   '["停車場即時資訊","無障礙動線細節","現場祭典準確流程時間","官方報名規則細節","廟方授權圖片清單"]'
 ) on conflict (snapshot_date) do nothing;
-
--- ============================================================
--- 010_event_controls_and_deities.sql
--- ============================================================
-
-alter table events
-  add column if not exists registration_open_at timestamptz,
-  add column if not exists registration_close_at timestamptz,
-  add column if not exists countdown_target_at timestamptz,
-  add column if not exists countdown_label text,
-  add column if not exists max_party_size integer not null default 10,
-  add column if not exists waitlist_enabled boolean not null default false;
-
-alter table events drop constraint if exists events_max_party_size_valid;
-alter table events add constraint events_max_party_size_valid check (max_party_size between 1 and 10);
-
-alter table event_registrations drop constraint if exists event_registrations_status_valid;
-alter table event_registrations add constraint event_registrations_status_valid
-  check (status in ('confirmed', 'pending_review', 'checked_in', 'cancelled', 'waitlisted'));
-
-create table if not exists deities (
-  deity_id text primary key,
-  temple_id text not null references temples(temple_id) on delete cascade,
-  name text not null,
-  category text not null default '配祀神佛',
-  enshrined_area text not null default '',
-  description text not null,
-  birthday_lunar text,
-  service_notes text,
-  source_url text,
-  status text not null default 'published',
-  sort_order integer not null default 0,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-alter table deities enable row level security;
-drop policy if exists "public read published deities" on deities;
-create policy "public read published deities" on deities for select using (status = 'published');
-create index if not exists deities_temple_status_order_idx on deities (temple_id, status, sort_order, name);
-create index if not exists events_registration_window_idx on events (status, registration_open_at, registration_close_at);
-
-update events set max_party_size = 10 where max_party_size is null;
-
-create or replace function register_for_event(
-  p_event_id text,
-  p_user_id text,
-  p_contact_name text,
-  p_phone text default null,
-  p_party_size integer default 1,
-  p_reminder_opt_in boolean default true,
-  p_note text default null
-)
-returns event_registrations
-language plpgsql
-as $$
-declare
-  locked_event events%rowtype;
-  confirmed_total integer;
-  existing_registration event_registrations%rowtype;
-  new_registration event_registrations%rowtype;
-  registration_status text := 'confirmed';
-begin
-  if p_user_id is null or btrim(p_user_id) = '' then raise exception 'invalid_user_id'; end if;
-  if p_contact_name is null or btrim(p_contact_name) = '' then raise exception 'invalid_contact_name'; end if;
-  select * into locked_event from events where event_id = p_event_id for update;
-  if not found then raise exception 'event_not_found'; end if;
-  if not locked_event.requires_registration then raise exception 'registration_not_required'; end if;
-  if locked_event.status not in ('open', 'published') then raise exception 'event_not_open'; end if;
-  if locked_event.registration_open_at is not null and now() < locked_event.registration_open_at then raise exception 'event_not_open'; end if;
-  if locked_event.registration_close_at is not null and now() >= locked_event.registration_close_at then raise exception 'event_registration_closed'; end if;
-  if p_party_size < 1 or p_party_size > locked_event.max_party_size then raise exception 'party_size_exceeded'; end if;
-  insert into line_users (user_id, line_display_name, segment)
-  values (p_user_id, 'LINE user', 'line_friend') on conflict (user_id) do nothing;
-  select * into existing_registration from event_registrations
-   where event_id = p_event_id and user_id = p_user_id
-     and status in ('confirmed', 'pending_review', 'checked_in', 'waitlisted') limit 1;
-  if found then raise exception 'duplicate_registration'; end if;
-  select coalesce(sum(party_size), 0) into confirmed_total from event_registrations
-   where event_id = p_event_id and status in ('confirmed', 'pending_review', 'checked_in');
-  if locked_event.capacity is not null and confirmed_total + p_party_size > locked_event.capacity then
-    if not locked_event.waitlist_enabled then raise exception 'event_capacity_exceeded'; end if;
-    registration_status := 'waitlisted';
-  end if;
-  insert into event_registrations (registration_id, event_id, user_id, status, party_size, reminder_opt_in, contact_name, phone, note)
-  values ('reg_' || encode(gen_random_bytes(4), 'hex'), p_event_id, p_user_id, registration_status, p_party_size,
-    p_reminder_opt_in, btrim(p_contact_name), nullif(btrim(coalesce(p_phone, '')), ''), nullif(btrim(coalesce(p_note, '')), ''))
-  returning * into new_registration;
-  perform sync_event_registered_count(p_event_id);
-  return new_registration;
-end;
-$$;
-
-insert into deities (
-  deity_id, temple_id, name, category, enshrined_area, description,
-  birthday_lunar, service_notes, source_url, status, sort_order
-) values
-  ('deity_guanyin', 'wcg_taichung_demo', '觀音佛祖', '主配祀神', '觀音佛祖神龕', '鎮殿觀音佛祖、老觀音佛祖與左觀音佛祖共同奉祀於觀音佛祖神龕。', null, '神龕位置與參拜方式請依現場指示。', 'https://www.lswc.org.tw/tw/?ID=5&Page=gods_list', 'published', 10),
-  ('deity_zhusheng', 'wcg_taichung_demo', '註生娘娘', '主配祀神', '註生娘娘神龕', '註生娘娘神龕另配祀婆姐、值年太歲與祿位牌位。', null, '正式登記與服務細節請以廟方公告與現場人員說明為準。', 'https://www.lswc.org.tw/tw/?ID=5&Page=gods_list', 'published', 20),
-  ('deity_sanguan', 'wcg_taichung_demo', '三官大帝', '副配祀神', '中案神桌', '列於萬春宮公開配祀神佛資料中的副配祀神明。', null, '節慶法會與供奉安排請以廟方公告為準。', 'https://www.lswc.org.tw/tw/?ID=6&Page=gods_list', 'published', 30),
-  ('deity_wenchang', 'wcg_taichung_demo', '文昌帝君', '副配祀神', '副配祀神明區', '列於公開配祀神佛資料中的副配祀神明，可作為文化導覽與節慶查詢入口。', null, '文化介紹不取代正式祭祀或廟方服務說明。', 'https://www.lswc.org.tw/tw/?ID=6&Page=gods_list', 'published', 40),
-  ('deity_luxianzu', 'wcg_taichung_demo', '孚佑帝君（呂仙祖）', '客座神明', '客座神明區', '萬春宮公開資料列載的客座神明。', null, '正式供奉與參拜細節請以現場公告為準。', 'https://www.lswc.org.tw/tw/?ID=7&Page=gods_list', 'published', 50),
-  ('deity_qianliyan', 'wcg_taichung_demo', '千里眼將軍', '護法神明', '正殿與神龕前', '公開資料列載的護法神明，正殿與神龕前皆有奉祀位置。', null, '位置資訊依公開頁整理，現場若有調整請以廟方公告為準。', 'https://www.lswc.org.tw/tw/?ID=8&Page=gods_list', 'published', 60),
-  ('deity_shunfeng', 'wcg_taichung_demo', '順風耳將軍', '護法神明', '正殿與神龕前', '公開資料列載的護法神明，正殿與神龕前皆有奉祀位置。', null, '位置資訊依公開頁整理，現場若有調整請以廟方公告為準。', 'https://www.lswc.org.tw/tw/?ID=8&Page=gods_list', 'published', 70)
-on conflict (deity_id) do update set
-  name = excluded.name,
-  category = excluded.category,
-  enshrined_area = excluded.enshrined_area,
-  description = excluded.description,
-  service_notes = excluded.service_notes,
-  source_url = excluded.source_url,
-  status = excluded.status,
-  sort_order = excluded.sort_order,
-  updated_at = now();

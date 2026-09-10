@@ -96,6 +96,10 @@ class FakeSupabaseClient:
         if method == "POST" and url.endswith("/messages"):
             self.messages.append(json)
             return FakeResponse(201, None)
+        if method == "POST" and url.endswith("/support_tickets"):
+            body = dict(json)  # type: ignore[arg-type]
+            body.setdefault("created_at", "2026-09-01T10:00:00+00:00")
+            return FakeResponse(201, [body])
         raise AssertionError(f"Unhandled request: {method} {url} {params} {json} {headers}")
 
     def post(
@@ -270,6 +274,25 @@ def test_supabase_registration_uses_atomic_rpc(monkeypatch: pytest.MonkeyPatch) 
     assert registration.registration_id == "reg_rpc_test"
     assert registration.event_id == "evt_supabase_test"
     assert registration.party_size == 2
+
+
+def test_supabase_support_ticket_keeps_contact_fields(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(supabase.httpx, "Client", FakeSupabaseClient)
+
+    repository = supabase.SupabaseRepository("https://example.supabase.co", "service-role")
+    ticket = repository.create_support_ticket(
+        supabase.SupportTicketCreate(
+            user_id="line_user_1",
+            category="event_registration",
+            subject="測試客服工單",
+            message="確認 Supabase 寫入時保留聯絡資訊。",
+            contact_name="林小安",
+            phone="0912111222",
+        ),
+    )
+
+    assert ticket.contact_name == "林小安"
+    assert ticket.phone == "0912111222"
 
 
 def test_supabase_vector_search_uses_rpc(monkeypatch: pytest.MonkeyPatch) -> None:

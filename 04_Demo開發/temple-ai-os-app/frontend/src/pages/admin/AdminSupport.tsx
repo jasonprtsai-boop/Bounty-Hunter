@@ -15,6 +15,8 @@ type Ticket = {
   message: string;
   status: string;
   priority: string;
+  contact_name?: string | null;
+  phone?: string | null;
   created_at: string;
 };
 
@@ -27,6 +29,18 @@ const ticketStatusOptions = [
 
 function ticketStatusLabel(status: string) {
   return ticketStatusOptions.find((option) => option.value === status)?.label || status;
+}
+
+function ticketMeta(ticket: Ticket) {
+  return [
+    ticket.category,
+    ticket.user_id,
+    ticket.contact_name ? `聯絡人：${ticket.contact_name}` : "",
+    ticket.phone ? `電話：${ticket.phone}` : "",
+    ticket.created_at
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 export function AdminSupport() {
@@ -109,7 +123,15 @@ export function AdminSupport() {
     const keyword = query.trim().toLowerCase();
     const matchesQuery =
       !keyword ||
-      [ticket.subject, ticket.message, ticket.category, ticket.user_id, ticket.priority]
+      [
+        ticket.subject,
+        ticket.message,
+        ticket.category,
+        ticket.user_id,
+        ticket.priority,
+        ticket.contact_name,
+        ticket.phone
+      ]
         .join(" ")
         .toLowerCase()
         .includes(keyword);
@@ -125,6 +147,8 @@ export function AdminSupport() {
         { header: "序號", value: (_ticket, index) => index + 1 },
         { header: "工單 ID", value: (ticket) => ticket.ticket_id },
         { header: "使用者 ID", value: (ticket) => ticket.user_id },
+        { header: "聯絡人", value: (ticket) => ticket.contact_name || "" },
+        { header: "電話", value: (ticket) => ticket.phone || "" },
         { header: "分類", value: (ticket) => ticket.category },
         { header: "主旨", value: (ticket) => ticket.subject },
         { header: "內容", value: (ticket) => ticket.message },
@@ -223,9 +247,7 @@ export function AdminSupport() {
                 <span className={`status ${ticket.status}`}>{ticketStatusLabel(ticket.status)}</span>
               </div>
               <p>{ticket.message}</p>
-              <small>
-                {ticket.category} · {ticket.user_id} · {ticket.created_at}
-              </small>
+              <small>{ticketMeta(ticket)}</small>
             </div>
             <div className="inline-actions">
               <select

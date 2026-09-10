@@ -1,66 +1,52 @@
 import { Link } from "react-router-dom";
 import {
-  BookOpen,
   CalendarDays,
   ChevronDown,
   ChevronRight,
-  Gift,
   MapPin,
   MessageCircle,
   ScrollText,
   ShieldCheck,
   Sparkles,
-  UserCheck,
-  UsersRound
+  UserCheck
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ADMIN_SITE_BASE_URL } from "../../lib/siteLinks";
+import { templePhotoGallery, visualAssets } from "../../lib/visualAssets";
 import "../../styles/public.css";
 
-const templeImage =
-  "https://travel.taichung.gov.tw/content/images/attractions/60331/640x480_attractions-image-reeo_rka6kg04vfs2xyzmw.jpg";
-
 const imageAssets = {
-  home: "/assets/banners/home.png",
-  events: "/assets/banners/events.png",
-  fortune: "/assets/banners/fortune.png",
-  tour: "/assets/banners/tour.png",
-  support: "/assets/banners/support.png",
-  richMenu: "/assets/rich-menu/main-2500x1686.png",
-  sticker: "/assets/stickers/spring-fortune-messenger/main.png"
+  events: visualAssets.banners.events,
+  jiao: visualAssets.banners.jiao,
+  richMenu: visualAssets.richMenu
 };
 
 const publicNavItems = [
-  { label: "萬春宮", to: "#temple" },
-  { label: "展示", to: "#showcase" },
-  { label: "LINE", to: "/community" },
-  { label: "活動", to: "/events" }
+  { label: "首頁", to: "#temple" },
+  { label: "照片", to: "#photos" },
+  { label: "活動", to: "/events" },
+  { label: "LINE", to: "/community" }
 ];
 
 const quickAccessItems: Array<{ label: string; title: string; body: string; icon: LucideIcon; to: string }> = [
-  { label: "活動", title: "查看活動報名", body: "法會、導覽與服務活動", icon: CalendarDays, to: "/events" },
-  { label: "導覽", title: "看主殿導覽", body: "主殿故事與現場動線", icon: MapPin, to: "/tour/main-hall" },
-  { label: "抽籤", title: "抽文化籤", body: "一支平安提醒", icon: Sparkles, to: "/fortune" },
-  { label: "查詢", title: "查報名進度", body: "手機或編號查詢", icon: UserCheck, to: "/events?lookup=1" },
-  { label: "客服", title: "聯絡客服", body: "找不到資訊時提問", icon: MessageCircle, to: "/support" }
+  { label: "活動", title: "活動消息", body: "報名、名額與查詢", icon: CalendarDays, to: "/events" },
+  { label: "導覽", title: "宮廟導覽", body: "地址與參拜動線", icon: MapPin, to: "/tour/main-hall" },
+  { label: "抽籤", title: "文化抽籤", body: "一支平安提醒", icon: Sparkles, to: "/fortune" },
+  { label: "擲筊", title: "擲筊問事", body: "一句話再擲杯", icon: ScrollText, to: "/jiao" },
+  { label: "客服", title: "客服協助", body: "留下問題", icon: MessageCircle, to: "/support" }
 ];
 
-const showcaseItems: Array<{
+const templeServiceDockItems: Array<{
   title: string;
-  label: string;
+  body: string;
   image: string;
   icon: LucideIcon;
   to: string;
-  large?: boolean;
 }> = [
-  { title: "萬春宮實景", label: "認識地點", image: templeImage, icon: MapPin, to: "/tour/main-hall", large: true },
-  { title: "活動中心", label: "查看活動", image: imageAssets.events, icon: CalendarDays, to: "/events" },
-  { title: "文化抽籤", label: "抽一支籤", image: imageAssets.fortune, icon: Sparkles, to: "/fortune" },
-  { title: "宮廟導覽", label: "開啟導覽", image: imageAssets.tour, icon: ScrollText, to: "/tour/main-hall" },
-  { title: "LINE 服務選單", label: "看聊天室入口", image: imageAssets.richMenu, icon: UsersRound, to: "/community", large: true },
-  { title: "神佛介紹", label: "認識奉祀", image: imageAssets.home, icon: BookOpen, to: "/deities" },
-  { title: "客服中心", label: "留下問題", image: imageAssets.support, icon: MessageCircle, to: "/support" },
-  { title: "貼圖小舖", label: "查看貼圖", image: imageAssets.sticker, icon: Gift, to: "/stickers" }
+  { title: "廟宇導覽", body: "照片、地址與主殿動線", image: templePhotoGallery[0].src, icon: MapPin, to: "/tour/main-hall" },
+  { title: "活動消息", body: "法會、講堂與報名", image: imageAssets.events, icon: CalendarDays, to: "/events" },
+  { title: "線上互動", body: "文化抽籤與擲筊", image: imageAssets.jiao, icon: Sparkles, to: "/fortune" },
+  { title: "LINE 服務", body: "選單與客服入口", image: imageAssets.richMenu, icon: UserCheck, to: "/community" }
 ];
 
 const visitFacts = [
@@ -71,9 +57,9 @@ const visitFacts = [
 ];
 
 const introLinks = [
-  ["參拜前", "先確認地址與主殿位置", "/tour/main-hall"],
-  ["活動前", "查看近期活動與報名狀態", "/events"],
-  ["需要協助", "直接留下問題給服務人員", "/support"]
+  ["參拜前", "看地址與主殿導覽", "/tour/main-hall"],
+  ["活動前", "查看活動與報名", "/events"],
+  ["想互動", "抽籤或擲筊", "/fortune"]
 ];
 
 export function PublicSitePage() {
@@ -124,6 +110,12 @@ export function PublicSitePage() {
         </details>
       </header>
 
+      <div className="public-announcement-strip" aria-label="本期提醒">
+        <span>本期入口</span>
+        <Link to="/events">近期活動</Link>
+        <Link to="/community">LINE 服務</Link>
+      </div>
+
       <nav className="public-side-menu" aria-label="側邊快速服務">
         <span className="side-menu-label">服務</span>
         {quickAccessItems.map((item) => {
@@ -139,26 +131,26 @@ export function PublicSitePage() {
 
       <main>
         <section
-          className="site-hero site-hero-clean"
-          id="temple"
-          style={{
-            backgroundImage: `url(${templeImage})`
-          }}
+            className="site-hero site-hero-clean"
+            id="temple"
+            style={{
+              backgroundImage: `url(${templePhotoGallery[1].src})`
+            }}
         >
           <div className="site-hero-layout">
             <div className="site-hero-content">
               <span className="tag">臺中中區</span>
               <h1>萬春宮</h1>
-              <p>天上聖母信仰、老城區故事與線上服務入口。</p>
+              <p>天上聖母信仰、老城區廟埕與線上服務入口。</p>
               <div className="hero-actions">
-                <Link className="button primary" to="/community">
-                  LINE 服務 <ChevronRight size={18} />
+                <Link className="button primary" to="/tour/main-hall">
+                  看導覽 <ChevronRight size={18} />
                 </Link>
                 <Link className="hero-secondary-link" to="/events">
                   查看活動
                 </Link>
-                <Link className="hero-secondary-link" to="/tour/main-hall">
-                  主殿導覽
+                <Link className="hero-secondary-link" to="/community">
+                  LINE 服務
                 </Link>
               </div>
             </div>
@@ -174,52 +166,92 @@ export function PublicSitePage() {
           ))}
         </section>
 
-        <section className="public-section homepage-showcase" id="showcase" aria-label="展示入口">
-          <div className="showcase-heading">
-            <div className="section-kicker">展示入口</div>
-            <h2>先看見內容，再選服務</h2>
-            <p>首頁保留介紹與超連結；報名、查詢、客服與抽籤都到各自頁面操作。</p>
+        <section className="public-section temple-service-dock" aria-label="信眾服務分類">
+          <div className="temple-service-heading">
+            <div className="section-kicker">服務分類</div>
+            <h2>
+              少量入口，
+              <br />
+              分頁操作
+            </h2>
+            <p>主頁只做介紹與導流，真正操作放到各自頁面。</p>
           </div>
-          <div className="showcase-grid">
-            {showcaseItems.map((item) => {
+          <div className="temple-service-grid">
+            {templeServiceDockItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
-                  className={`showcase-card${item.large ? " large" : ""}${item.image === imageAssets.richMenu || item.image === imageAssets.sticker ? " contain" : ""}`}
-                  key={`${item.title}-${item.to}`}
+                  className={`temple-service-tile${item.image === imageAssets.richMenu ? " contain" : ""}`}
+                  key={item.title}
                   to={item.to}
                 >
                   <img src={item.image} alt={item.title} />
                   <span>
-                    <Icon size={18} />
-                    {item.label}
+                    <Icon size={17} />
+                    {item.title}
                   </span>
-                  <strong>{item.title}</strong>
+                  <small>{item.body}</small>
                 </Link>
               );
             })}
           </div>
         </section>
 
-        <section className="public-section intro-link-section" aria-label="常用超連結">
-          <div className="intro-link-copy">
-            <div className="section-kicker">快速前往</div>
-            <h2>把真正的操作留給功能頁</h2>
+        <section className="public-section homepage-showcase photo-story-section" id="photos" aria-label="萬春宮照片">
+          <div className="showcase-heading">
+            <div className="section-kicker">照片故事</div>
+            <h2>先看廟，再選服務</h2>
+            <p>用實景照片建立宮廟感，文字保持短句。</p>
           </div>
-          <div className="intro-link-list">
-            {introLinks.map(([title, body, to]) => (
-              <Link key={title} to={to}>
-                <span>{title}</span>
-                <strong>{body}</strong>
-                <ChevronRight size={18} />
-              </Link>
+          <div className="photo-story-grid">
+            {templePhotoGallery.map((photo, index) => (
+              <figure className={index === 0 ? "large" : ""} key={photo.src}>
+                <img src={photo.src} alt={photo.title} />
+                <figcaption>
+                  <strong>{photo.title}</strong>
+                  <a href={photo.sourceUrl} target="_blank" rel="noreferrer">
+                    {photo.label}
+                  </a>
+                </figcaption>
+              </figure>
             ))}
           </div>
         </section>
 
+        <section className="public-section public-line-preview" aria-label="LINE 服務預覽">
+          <figure>
+            <img src={imageAssets.richMenu} alt="LINE 服務選單預覽" />
+          </figure>
+          <div>
+            <div className="section-kicker">LINE 入口</div>
+            <h2>功能收在選單裡</h2>
+            <p>活動、抽籤、擲筊與客服從選單進入，不放滿整個首頁。</p>
+            <div className="hero-actions">
+              <Link className="button primary" to="/community">
+                看聊天室
+              </Link>
+              <Link className="button" to="/events">
+                活動中心
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="public-section compact-service-links" aria-label="常用超連結">
+          {introLinks.map(([title, body, to]) => (
+            <Link key={title} to={to}>
+              <span>{title}</span>
+              <strong>{body}</strong>
+              <ChevronRight size={18} />
+            </Link>
+          ))}
+        </section>
+
         <section className="public-section source-note compact-source-note">
           <ShieldCheck size={22} />
-          <p>公開資訊、活動與 LINE 服務內容仍以廟方正式公告為準。</p>
+          <p>
+            圖片採用臺中觀光開放資料與 Wikimedia Commons 授權素材；公開資訊與活動仍以廟方正式公告為準。
+          </p>
         </section>
       </main>
 

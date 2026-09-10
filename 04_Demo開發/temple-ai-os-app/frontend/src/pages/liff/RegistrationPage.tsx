@@ -4,12 +4,15 @@ import { Shell } from "../../components/Shell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type EventItem, type Registration } from "../../lib/api";
 import { eventPath } from "../../lib/eventLinks";
+import { canUsePreviewFallback, createLocalRegistration, findLocalPreviewEvent, isLocalPreview } from "../../lib/localPreviewData";
+import { hasStoredLiffToken, isLineAuthError, liffEntryUrl } from "../../lib/liff";
 import { getLiffSession } from "../../lib/session";
 
 export function RegistrationPage() {
   const { eventId } = useParams();
   const [event, setEvent] = useState<EventItem | null>(null);
   const [created, setCreated] = useState<Registration | null>(null);
+  const [createdMode, setCreatedMode] = useState<"live" | "demo" | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -23,9 +26,10 @@ export function RegistrationPage() {
   });
 
   useEffect(() => {
-    getLiffSession()
-      .then((session) => setForm((current) => ({ ...current, contact_name: session.display_name })))
-      .catch(() => undefined);
+    const storedDisplayName = typeof window !== "undefined" ? localStorage.getItem("lineDisplayName") : "";
+    if (storedDisplayName) {
+      setForm((current) => ({ ...current, contact_name: storedDisplayName }));
+    }
     loadEvent();
   }, [eventId]);
 
@@ -37,9 +41,22 @@ export function RegistrationPage() {
     }
     setLoading(true);
     setLoadError("");
+    if (isLocalPreview()) {
+      const localEvent = findLocalPreviewEvent(eventId);
+      if (localEvent) {
+        setEvent(localEvent);
+        setLoading(false);
+        return;
+      }
+    }
     try {
       setEvent(await apiFetch<EventItem>(`/api/events/${eventId}`));
     } catch (err) {
+      const localEvent = isLocalPreview() ? findLocalPreviewEvent(eventId) : null;
+      if (localEvent) {
+        setEvent(localEvent);
+        return;
+      }
       setLoadError(err instanceof Error ? err.message : "讀取活動失敗");
     } finally {
       setLoading(false);
@@ -66,6 +83,18 @@ export function RegistrationPage() {
     }
     setSaving(true);
     setError("");
+    if (isLocalPreview()) {
+      setCreated(createLocalRegistration(event, partySize, contactName, phone));
+      setCreatedMode("demo");
+      setSaving(false);
+      return;
+    }
+    if (canUsePreviewFallback() && !hasStoredLiffToken()) {
+      setCreated(createLocalRegistration(event, partySize, contactName, phone));
+      setCreatedMode("demo");
+      setSaving(false);
+      return;
+    }
     try {
       const session = await getLiffSession();
       const result = await apiFetch<Registration>(`/api/events/${eventId}/registrations`, {
@@ -80,8 +109,14 @@ export function RegistrationPage() {
         })
       });
       setCreated(result);
+      setCreatedMode("live");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "報名失敗，請稍後再試。");
+      if (canUsePreviewFallback()) {
+        setCreated(createLocalRegistration(event, partySize, contactName, phone));
+        setCreatedMode("demo");
+        return;
+      }
+      setError(isLineAuthError(err) ? "請從 LINE 開啟此頁後再送出正式報名。" : err instanceof Error ? err.message : "報名失敗，請稍後再試。");
     } finally {
       setSaving(false);
     }
@@ -115,9 +150,12 @@ export function RegistrationPage() {
           }
         />
       ) : event ? (
-        <section className="detail-panel">
-          <h2>{event.title}</h2>
-          <p>{event.summary}</p>
+        <section className="detail-panel registration-visual-summary registration-summary-plain">
+          <div>
+            <span className="tag">{event.category}</span>
+            <h2>{event.title}</h2>
+            <p>{event.summary}</p>
+          </div>
           <div className="event-info-grid">
             <div>
               <span>報名狀態</span>
@@ -134,13 +172,22 @@ export function RegistrationPage() {
       ) : null}
       {created ? (
         <section className="success-panel">
-          <h2>{created.status === "waitlisted" ? "已登記候補" : "報名成功"}</h2>
-          <p>報名編號：{created.registration_id}</p>
-          <p className="notice">報名紀錄已建立；正式活動資訊仍以廟方公告為準。</p>
+          <h2>{createdMode === "demo" ? "示範報名已建立" : created.status === "waitlisted" ? "已登記候補" : "報名成功"}</h2>
+          <p>{createdMode === "demo" ? "示範編號" : "報名編號"}：{created.registration_id}</p>
+          <p className="notice">
+            {createdMode === "demo"
+              ? "這筆只存在目前瀏覽器，用於展示流程；正式報名請從 LINE 開啟後送出。"
+              : "報名紀錄已建立；正式活動資訊仍以廟方公告為準。"}
+          </p>
           <div className="state-actions">
             <Link className="button primary" to="/events?lookup=1">
               查詢報名進度
             </Link>
+            {createdMode === "demo" ? (
+              <a className="button" href={liffEntryUrl(`/register/${eventId || ""}`)}>
+                從 LINE 開啟
+              </a>
+            ) : null}
             <Link className="button" to={eventPath(created.event_id)}>
               回活動詳情
             </Link>
@@ -154,7 +201,7 @@ export function RegistrationPage() {
           <p className="notice">此活動可能尚未開放、已截止或名額已滿；正式資訊仍以廟方公告為準。</p>
         </section>
       ) : (
-        <form className="form-panel" onSubmit={submit}>
+        <form className="form-panel registration-visual-form" onSubmit={submit}>
           <label>
             姓名
             <input
@@ -195,6 +242,9 @@ export function RegistrationPage() {
             備註
             <textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
           </label>
+          {canUsePreviewFallback() && !hasStoredLiffToken() ? (
+            <p className="service-mode-note">目前是展示送出，不會建立正式報名；從 LINE 開啟後才會送進後台。</p>
+          ) : null}
           {error && <p className="error-text" role="alert">{error}</p>}
           <button className="button primary" disabled={saving || !event || !canRegister} type="submit">
             {saving ? "送出中" : "送出報名"}

@@ -1,13 +1,12 @@
 const LOCAL_API_BASE_URL = "http://localhost:8000";
 const DEPLOYED_API_BASE_URL = "https://temple-ai-os-api.onrender.com";
+const isLocalHost =
+  typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const useSameOriginApi =
+  String(import.meta.env.VITE_USE_SAME_ORIGIN_API || "").toLowerCase() === "true" && !isLocalHost;
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (typeof window !== "undefined" &&
-  window.location.hostname !== "localhost" &&
-  window.location.hostname !== "127.0.0.1"
-    ? DEPLOYED_API_BASE_URL
-    : LOCAL_API_BASE_URL);
+  useSameOriginApi ? "" : import.meta.env.VITE_API_BASE_URL || (isLocalHost ? LOCAL_API_BASE_URL : DEPLOYED_API_BASE_URL);
 
 export type ApiResponse<T> = {
   data: T | null;
@@ -210,7 +209,9 @@ export async function apiFetch<T>(
   admin = false
 ): Promise<T> {
   const headers = new Headers(options.headers);
-  headers.set("Content-Type", "application/json");
+  if (options.body !== undefined && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
   if (admin) {
     const adminToken = localStorage.getItem("adminToken");
     if (!adminToken) {

@@ -78,6 +78,7 @@ def test_settings_include_published_site_origins(monkeypatch: pytest.MonkeyPatch
     settings = Settings()
 
     assert "https://wanchun-gong-service.jasonprtsai.chatgpt.site" in settings.origins
+    assert "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site" in settings.origins
     assert "https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site" in settings.origins
 
 

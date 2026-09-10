@@ -7,6 +7,7 @@ const EventDetailPage = lazy(() => import("../pages/liff/EventDetailPage").then(
 const EventsPage = lazy(() => import("../pages/liff/EventsPage").then((module) => ({ default: module.EventsPage })));
 const FortunePage = lazy(() => import("../pages/liff/FortunePage").then((module) => ({ default: module.FortunePage })));
 const HomePage = lazy(() => import("../pages/liff/HomePage").then((module) => ({ default: module.HomePage })));
+const JiaoPage = lazy(() => import("../pages/liff/JiaoPage").then((module) => ({ default: module.JiaoPage })));
 const LegalPage = lazy(() => import("../pages/public/LegalPage").then((module) => ({ default: module.LegalPage })));
 const PublicSitePage = lazy(() => import("../pages/public/PublicSitePage").then((module) => ({ default: module.PublicSitePage })));
 const RegistrationPage = lazy(() => import("../pages/liff/RegistrationPage").then((module) => ({ default: module.RegistrationPage })));
@@ -28,6 +29,7 @@ export default function PublicApp() {
         <Route path="/events/:eventId" element={<EventDetailPage />} />
         <Route path="/register/:eventId" element={<RegistrationPage />} />
         <Route path="/fortune" element={<FortunePage />} />
+        <Route path="/jiao" element={<JiaoPage />} />
         <Route path="/tour/:code" element={<TourSpotPage />} />
         <Route path="/member" element={<Navigate to="/events?lookup=1" replace />} />
         <Route path="/stickers" element={<StickerShopPage />} />

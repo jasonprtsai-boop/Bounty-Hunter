@@ -7,14 +7,14 @@ services:
     envVars:
       - key: APP_ENV
         value: production
-      - key: DEMO_MODE
-        value: "true"
+      - key: WAN_CHUN_GONG_SERVICE_MODE
+        value: database
       - key: API_BASE_URL
         value: https://temple-ai-os-api.onrender.com
       - key: FRONTEND_BASE_URL
-        value: https://wanchun-gong-service.jasonprtsai.chatgpt.site
+        value: https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
       - key: ALLOWED_ORIGINS
-        value: https://wanchun-gong-service.jasonprtsai.chatgpt.site,https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site,http://localhost:5173,http://127.0.0.1:5173
+        value: https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site,https://wanchun-gong-service.jasonprtsai.chatgpt.site,https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site,http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174
       - key: LINE_CHANNEL_ID
         value: "2010991408"
       - key: LINE_LOGIN_CHANNEL_ID
@@ -23,6 +23,12 @@ services:
         value: 2010938588-VJXpaoyH
       - key: LINE_SKIP_SIGNATURE_VALIDATION
         value: "false"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
       - key: ADMIN_USERNAME
         value: temple-owner
       - key: ADMIN_PASSWORD
