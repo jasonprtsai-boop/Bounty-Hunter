@@ -66,7 +66,7 @@ const eventStatusOptions = [
 
 const registrationStatusOptions = [
   { value: "confirmed", label: "已確認" },
-  { value: "pending_review", label: "待人工確認" },
+  { value: "pending_review", label: "待確認" },
   { value: "checked_in", label: "已報到" },
   { value: "waitlisted", label: "候補中" },
   { value: "cancelled", label: "已取消" }

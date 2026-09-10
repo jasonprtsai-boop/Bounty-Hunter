@@ -7693,3 +7693,664 @@ body,
     min-height: 0;
   }
 }
+
+/* Interface readability pass */
+body {
+  font-size: 16px;
+}
+
+.brand strong {
+  font-size: 1rem;
+}
+
+.brand small,
+.bottom-nav small,
+.home-feature-card span,
+.home-feature-card small,
+.home-service-capsules small,
+.secondary-link-row a,
+.event-reference-rail small,
+.featured-event-panel dt,
+.tour-photo-strip figcaption,
+.meta-line span,
+.notice {
+  font-size: 0.92rem;
+}
+
+.tag,
+.status,
+.service-pill {
+  min-height: 30px;
+  padding: 5px 10px;
+  font-size: 0.9rem;
+}
+
+.button,
+input,
+textarea,
+select {
+  font-size: 1rem;
+}
+
+.bottom-nav span:not(.bottom-nav-icon) {
+  font-size: 0.95rem;
+}
+
+.service-drawer summary {
+  font-size: 1rem;
+}
+
+.home-service-capsules strong {
+  font-size: 1.08rem;
+}
+
+.home-ask-drawer summary small,
+.answer small,
+.event-info-grid span,
+.registration-result-card small {
+  font-size: 0.92rem;
+}
+
+.tour-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(300px, 0.42fr);
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.tour-hero-card {
+  aspect-ratio: 16 / 10;
+  min-height: 360px;
+  border: 1px solid #eadfce;
+  border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(82, 54, 30, 0.09);
+}
+
+.tour-hero-card::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(180deg, rgba(52, 41, 34, 0.04), rgba(52, 41, 34, 0.48));
+}
+
+.tour-hero-card figcaption {
+  z-index: 1;
+}
+
+.tour-guide-panel,
+.tour-visit-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid #eadfce;
+  border-radius: 8px;
+  background: #fffdf8;
+  box-shadow: 0 12px 28px rgba(82, 54, 30, 0.08);
+}
+
+.tour-guide-panel h2,
+.tour-visit-card h2 {
+  margin: 0;
+  color: #342922;
+  font-size: clamp(1.7rem, 3vw, 2.65rem);
+  line-height: 1.12;
+}
+
+.tour-guide-panel p {
+  margin: 0;
+  color: #5d5046;
+  font-size: 1.08rem;
+}
+
+.tour-guide-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.tour-guide-facts div {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid #eadfce;
+  border-radius: 8px;
+  background: #fff8ea;
+}
+
+.tour-guide-facts dt {
+  color: #7a1e17;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.tour-guide-facts dd {
+  margin: 0;
+  color: #342922;
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.tour-guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tour-content-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.tour-note-grid-refined {
+  gap: 16px;
+  padding: 0;
+}
+
+.tour-note-grid-refined article {
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-content: start;
+  min-height: 150px;
+  padding: 18px;
+}
+
+.tour-note-grid-refined article span {
+  font-size: 1rem;
+}
+
+.tour-note-grid-refined article p {
+  color: #4f4238;
+  font-size: 1.05rem;
+}
+
+.tour-note-grid-refined .tour-note-mark svg {
+  color: #7a1e17;
+}
+
+.tour-visit-card {
+  align-content: start;
+}
+
+.tour-visit-card > div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.tour-visit-card > div svg {
+  color: #b42318;
+}
+
+.tour-visit-card ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tour-visit-card li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  color: #4f4238;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.tour-visit-card li svg {
+  margin-top: 3px;
+  color: #8a5a12;
+}
+
+.tour-photo-strip-refined {
+  margin-bottom: 18px;
+}
+
+.tour-photo-strip-refined figure,
+.tour-photo-strip-refined img {
+  min-height: 170px;
+}
+
+@media (max-width: 900px) {
+  .tour-overview,
+  .tour-content-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-hero-card {
+    min-height: 280px;
+  }
+
+  .tour-guide-facts {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   WAN CHUN GONG - ENHANCED USER EXPERIENCE & VISUAL IDENTITY
+   ========================================================================== */
+
+/* Gold Tag */
+.tag-gold {
+  background: #fff4df !important;
+  color: #8a5a12 !important;
+  border: 1px solid rgba(211, 162, 58, 0.42) !important;
+  font-weight: 800 !important;
+}
+
+/* 1. Deity Spotlight: Main Deity Mazu */
+.deity-spotlight-panel {
+  margin-bottom: 20px;
+  padding: 0;
+  border: 1px solid rgba(180, 35, 24, 0.22);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fffdf8 0%, #fff6e8 100%);
+  box-shadow: 0 10px 30px rgba(122, 30, 23, 0.08);
+  overflow: hidden;
+}
+
+.deity-spotlight-card {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  padding: clamp(20px, 3vw, 28px);
+}
+
+.deity-spotlight-seal {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  border: 3px solid #b42318;
+  background: #fff4df;
+  box-shadow: inset 0 0 0 2px rgba(180, 35, 24, 0.3), 0 6px 16px rgba(180, 35, 24, 0.12);
+}
+
+.deity-spotlight-seal span {
+  color: #7a1e17;
+  font-family: "Noto Serif TC", "Songti TC", "Microsoft JhengHei", serif;
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.deity-spotlight-content {
+  display: grid;
+  gap: 12px;
+}
+
+.deity-spotlight-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.deity-spotlight-header h2 {
+  margin: 0;
+  color: #342922;
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.deity-spotlight-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #eadfce;
+  color: #6d4b30;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.meta-pill svg {
+  color: #7a1e17;
+}
+
+.deity-spotlight-desc {
+  margin: 0;
+  color: #4f4238;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.deity-spotlight-notes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(211, 162, 58, 0.14);
+  border-left: 4px solid #b5832a;
+  color: #6d4b30;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.deity-spotlight-notes svg {
+  color: #b5832a;
+  flex-shrink: 0;
+}
+
+/* 2. Deity Category Filter Chips */
+.deity-category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.deity-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 14px;
+  border: 1px solid #eadfce;
+  border-radius: 999px;
+  background: #fffdf8;
+  color: #5d5046;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.deity-cat-chip span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #f0e6d6;
+  color: #6d4b30;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.deity-cat-chip:hover {
+  border-color: #d4af37;
+  background: #fff8ea;
+  color: #7a1e17;
+}
+
+.deity-cat-chip.is-active {
+  border-color: #7a1e17;
+  background: #7a1e17;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(122, 30, 23, 0.25);
+}
+
+.deity-cat-chip.is-active span {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.section-count {
+  margin-left: auto;
+  color: #8a7b70;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.notice-calendar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #7a1e17 !important;
+}
+
+.notice-service {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6d4b30 !important;
+}
+
+/* 3. Tour Stepper Navigation */
+.tour-stepper-panel {
+  margin-bottom: 20px;
+  padding: clamp(16px, 2.5vw, 22px);
+  border: 1px solid #eadfce;
+  border-radius: 12px;
+  background: #fffdf8;
+  box-shadow: 0 8px 24px rgba(82, 54, 30, 0.06);
+}
+
+.tour-stepper-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tour-stepper-header svg {
+  color: #7a1e17;
+}
+
+.tour-stepper-header h2 {
+  margin: 0;
+  color: #342922;
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.tour-stepper-header h2 span {
+  color: #7a6e64;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.tour-stepper-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.tour-step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #eadfce;
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #4f4238;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.tour-step-item .step-num {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #eadfce;
+  color: #6d4b30;
+  font-size: 0.8rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.tour-step-item .step-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tour-step-item:hover {
+  border-color: #d4af37;
+  background: #fff4df;
+  color: #7a1e17;
+}
+
+.tour-step-item.is-active {
+  border-color: #7a1e17;
+  background: #7a1e17;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(122, 30, 23, 0.22);
+}
+
+.tour-step-item.is-active .step-num {
+  background: #d4af37;
+  color: #342922;
+}
+
+.tour-guide-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tour-step-navigation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* 4. Fortune Slip Enhancements */
+.fortune-quick-intentions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.fortune-quick-intentions .quick-label {
+  color: #7a6e64;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.intention-chip {
+  padding: 4px 10px;
+  border: 1px dashed #d3a23a;
+  border-radius: 999px;
+  background: #fff8ea;
+  color: #6d4b30;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.intention-chip:hover {
+  border-style: solid;
+  border-color: #7a1e17;
+  background: #7a1e17;
+  color: #fff;
+}
+
+.fortune-result-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.fortune-result-header h2 {
+  margin: 0;
+  flex: 1;
+}
+
+.fortune-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #d3a23a;
+  border-radius: 8px;
+  background: #fff8ea;
+  color: #7a1e17;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fortune-copy-btn:hover {
+  background: #fff4df;
+  border-color: #7a1e17;
+}
+
+.fortune-copy-btn.is-copied {
+  background: #e6f8ee;
+  border-color: #12b76a;
+  color: #027a48;
+}
+
+.fortune-poem-container {
+  padding: 16px 20px;
+  border: 1px solid rgba(211, 162, 58, 0.4);
+  border-left: 5px solid #7a1e17;
+  border-radius: 8px;
+  background: #fffaf0;
+}
+
+.fortune-poem-container .poem {
+  margin: 0;
+  color: #342922;
+  font-family: "Noto Serif TC", "Songti TC", "Microsoft JhengHei", serif;
+  font-size: clamp(1.2rem, 2.8vw, 1.55rem);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .deity-spotlight-card {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .deity-spotlight-header {
+    justify-content: center;
+  }
+
+  .deity-spotlight-meta {
+    justify-content: center;
+  }
+
+  .tour-stepper-nav {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fortune-result-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

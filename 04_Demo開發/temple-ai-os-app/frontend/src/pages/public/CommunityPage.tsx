@@ -29,7 +29,7 @@ const communityFlows: Array<{ title: string; body: string; to: string; icon: Luc
 const guardrails = [
   "正式活動與開放時間以廟方公告為準",
   "不在聊天室處理正式交易或敏感個資",
-  "重大廟務問題請再向正式窗口確認"
+  "重要廟務請再向廟方或服務人員確認"
 ];
 
 function ExternalAction({ href, children }: { href: string; children: React.ReactNode }) {
@@ -51,14 +51,14 @@ export function CommunityPage() {
           <span className="brand-mark">宮</span>
           <span>
             <strong>萬春宮線上服務</strong>
-            <small>LINE 操作入口</small>
+            <small>LINE 官方服務指引</small>
           </span>
         </Link>
         <nav aria-label="社群導覽">
-          <Link to="/site">官網</Link>
-          <Link to="/">線上服務</Link>
-          <Link to="/events">活動</Link>
-          <Link to="/privacy">隱私權</Link>
+          <Link to="/site">官網首頁</Link>
+          <Link to="/">線上服務台</Link>
+          <Link to="/events">活動消息</Link>
+          <Link to="/privacy">隱私權保護</Link>
         </nav>
       </header>
 
@@ -77,12 +77,12 @@ export function CommunityPage() {
               </ExternalAction>
             </div>
             <p className="notice">主要入口：LINE 帳號 @983zhzni</p>
-            <div className="community-entry-strip" aria-label="LINE 常用服務符號">
-              <span>活</span>
-              <span>查</span>
-              <span>籤</span>
-              <span>筊</span>
-              <span>聊</span>
+            <div className="community-entry-strip" aria-label="LINE 常用服務標籤">
+              <span>活動</span>
+              <span>查詢</span>
+              <span>抽籤</span>
+              <span>擲筊</span>
+              <span>客服</span>
             </div>
           </div>
 
@@ -133,7 +133,7 @@ export function CommunityPage() {
         <section className="public-section community-guardrails">
           <div>
             <div className="section-kicker">使用提醒</div>
-            <h2>簡單界線</h2>
+            <h2>使用前請留意</h2>
           </div>
           <div className="guardrail-list">
             {guardrails.map((item) => (
@@ -147,9 +147,9 @@ export function CommunityPage() {
 
         <section className="public-section public-band community-action-band">
           <div>
-            <div className="section-kicker">開始使用</div>
-            <h2>選一個入口就能開始</h2>
-            <p>活動、報名查詢、擲筊與客服分開進入。</p>
+            <div className="section-kicker">信眾服務</div>
+            <h2>即刻體驗各項便民功能</h2>
+            <p>歡迎依需求選擇對應服務，即時查詢活動消息、報名進度或參與文化互動。</p>
           </div>
           <div className="band-actions">
             <Link className="button primary" to="/events">
@@ -166,8 +166,9 @@ export function CommunityPage() {
       </main>
 
       <footer className="public-footer">
-        <span>LINE 帳號：@983zhzni</span>
+        <span>臺中萬春宮 ‧ LINE 官方帳號：@983zhzni</span>
         <nav aria-label="頁尾連結">
+          <Link to="/site">官網首頁</Link>
           <Link to="/privacy">隱私權政策</Link>
           <Link to="/terms">使用條款</Link>
         </nav>

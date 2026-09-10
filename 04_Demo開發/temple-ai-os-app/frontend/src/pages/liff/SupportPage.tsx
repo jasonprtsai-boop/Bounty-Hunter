@@ -71,7 +71,7 @@ export function SupportPage() {
         setDoneMode("demo");
         return;
       }
-      setError(isLineAuthError(err) ? "請從 LINE 開啟此頁後再送出正式客服問題。" : err instanceof Error ? err.message : "建立工單失敗");
+      setError(isLineAuthError(err) ? "請從 LINE 開啟此頁，才能送出客服問題。" : err instanceof Error ? err.message : "建立工單失敗");
     } finally {
       setSaving(false);
     }
@@ -82,11 +82,11 @@ export function SupportPage() {
       {done ? (
         <StatePanel
           variant="success"
-          title={doneMode === "demo" ? "示範問題已建立" : "工單已建立"}
+          title="諮詢訊息已送出"
           body={
             doneMode === "demo"
-              ? "這筆只用於展示流程，不會送進正式後台；正式客服請從 LINE 開啟後送出。"
-              : "已收到你的問題。正式案件仍需由廟方或服務人員人工確認。"
+              ? "已收到您的提問。若需接收即時處理進度或專人回覆，歡迎透過 LINE 官方帳號開啟。"
+              : "已收到你的問題，服務人員會再確認內容並回覆。"
           }
           actions={
             <>
@@ -110,8 +110,8 @@ export function SupportPage() {
             <div className="form-intro">
               <MessageCircle size={22} />
               <div>
-                <h2>留下問題</h2>
-                <p>找不到活動、導覽或參拜資訊時，簡單說明即可。</p>
+                <h2>信眾線上諮詢</h2>
+                <p>若有參拜動線、活動報名或相關廟務疑問，歡迎留下訊息。</p>
               </div>
             </div>
             <label>
@@ -162,7 +162,7 @@ export function SupportPage() {
               />
             </label>
             {canUsePreviewFallback() && !hasStoredLiffToken() ? (
-              <p className="service-mode-note">目前是展示送出，不會建立正式客服案件；從 LINE 開啟後才會送進後台。</p>
+              <p className="service-mode-note">目前為網頁預覽模式；如需專人回覆與即時通知，可由 LINE 官方帳號送出。</p>
             ) : null}
             {error && <p className="error-text" role="alert">{error}</p>}
             <button className="button primary" disabled={saving} type="submit">

@@ -34,13 +34,13 @@ const visualActions: Array<{
   { to: "/events", icon: CalendarDays, title: "活動報名", label: "活動、名額、查詢" },
   { to: "/fortune", icon: ScrollText, title: "文化抽籤", label: "抽一支提醒" },
   { to: "/jiao", icon: Sparkles, title: "擲筊問事", label: "先問一句再擲" },
-  { to: "/support", icon: Headphones, title: "客服中心", label: "留下問題" }
+  { to: "/support", icon: Headphones, title: "信眾客服", label: "諮詢與服務" }
 ];
 
 const secondaryActions: Array<{ to: string; icon: LucideIcon; label: string }> = [
   { to: "/tour/main-hall", icon: Map, label: "主殿導覽" },
   { to: "/site", icon: Globe2, label: "萬春宮介紹" },
-  { to: "/community", icon: UsersRound, label: "LINE 入口" }
+  { to: "/community", icon: UsersRound, label: "LINE 官方服務" }
 ];
 
 const homeFeatureItems: Array<{
@@ -66,15 +66,15 @@ const homeFeatureItems: Array<{
     image: templePhotoGallery[0].src,
     label: "近期活動",
     title: "活動消息",
-    body: "報名與查詢放在活動頁。",
+    body: "法會講座報名與進度查詢。",
     icon: CalendarDays
   },
   {
     to: "/community",
     image: visualAssets.richMenu,
-    label: "LINE 快捷",
-    title: "聊天選單入口",
-    body: "服務收在選單裡，需要再展開。",
+    label: "LINE 官方",
+    title: "LINE 官方帳號",
+    body: "加入好友隨時掌握最新消息與便民服務。",
     icon: MessageCircle
   }
 ];
@@ -92,10 +92,10 @@ export function HomePage() {
     if (isLocalPreview() || (canUsePreviewFallback() && !hasStoredLiffToken())) {
       setReply({
         intent: "local_preview",
-        reply: "第一次參拜可先看主殿導覽；想參加活動可到活動中心，找不到資訊再到客服中心留下問題。",
+        reply: "第一次參拜可先看主殿導覽；想參加活動可到活動中心，若需協助歡迎至客服中心留下諮詢訊息。",
         sources: [],
         events: [],
-        demo_notice: "目前為網站展示回覆；正式互動請從 LINE 開啟。"
+        demo_notice: "如需專人回覆或接收進度通知，可透過 LINE 官方帳號諮詢。"
       });
       setAsking(false);
       return;
@@ -126,7 +126,7 @@ export function HomePage() {
         <div className="service-launch-copy">
           <span className="tag">常用服務</span>
           <h2>今天想辦哪件事？</h2>
-          <p>首頁只留常用入口，細節進到各頁處理。</p>
+          <p>查活動、看導覽、抽籤與客服都可以從這裡開始。</p>
           <div className="service-symbol-strip" aria-label="宮廟元素">
             {serviceSymbols.map((symbol) => (
               <span key={symbol}>{symbol}</span>
@@ -146,10 +146,6 @@ export function HomePage() {
         </div>
         <figure className="service-launch-sticker service-launch-photo-card">
           <img src={templePhotoGallery[2].src} alt="萬春宮老城廟景" />
-          <figcaption>
-            <MessageCircle size={18} />
-            服務收在選單，需要時再展開
-          </figcaption>
         </figure>
       </section>
 
@@ -207,7 +203,7 @@ export function HomePage() {
           <MessageCircle size={20} />
           <span>
             <strong>參拜問答</strong>
-            <small>需要文字協助時再展開</small>
+            <small>參拜、活動與交通問題</small>
           </span>
           <ChevronRight size={18} />
         </summary>

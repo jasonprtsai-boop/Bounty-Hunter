@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, MessageCircle, RefreshCw, ScrollText, ShieldCheck, Sparkles } from "lucide-react";
+import { Check, ChevronRight, Copy, MessageCircle, RefreshCw, ScrollText, ShieldCheck, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Shell } from "../../components/Shell";
 import { StatePanel } from "../../components/StatePanel";
@@ -18,7 +18,15 @@ type FortuneSlip = {
 const ritualSteps = [
   ["香", "先定題", "心裡留一個想被提醒的方向。"],
   ["籤", "抽一支", "取得籤詩、白話與文化解說。"],
-  ["安", "看提醒", "只作今日提醒，不作命運斷言。"]
+  ["安", "看提醒", "作為今日提醒，不做命運判斷。"]
+];
+
+const intentionSuggestions = [
+  "今日平安提醒",
+  "工作事業指引",
+  "學業功名指引",
+  "家庭和睦祝福",
+  "心神平靜安定"
 ];
 
 function FortuneFocusPanel() {
@@ -30,9 +38,9 @@ function FortuneFocusPanel() {
         <strong>先問清楚，再看提醒</strong>
       </div>
       <div className="fortune-focus-points">
-        <span>不判吉凶</span>
-        <span>保留白話</span>
-        <span>重要事回到正式窗口</span>
+        <span>文化解說</span>
+        <span>白話整理</span>
+        <span>以公告為準</span>
       </div>
     </div>
   );
@@ -44,10 +52,12 @@ export function FortunePage() {
   const [error, setError] = useState("");
   const [intention, setIntention] = useState("今天想得到一個平安提醒");
   const [askedIntention, setAskedIntention] = useState("");
+  const [copied, setCopied] = useState(false);
 
   async function draw() {
     setDrawing(true);
     setError("");
+    setCopied(false);
     setAskedIntention(intention.trim() || "未填提醒方向");
     if (isLocalPreview()) {
       setSlip(pickLocalPreviewSlip());
@@ -68,17 +78,50 @@ export function FortunePage() {
     }
   }
 
+  function handleCopy() {
+    if (!slip) return;
+    const text = [
+      `【萬春宮文化籤詩 ‧ ${slip.title}】`,
+      askedIntention ? `祈請方向：${askedIntention}` : "",
+      `籤詩：${slip.poem}`,
+      `白話提醒：${slip.plain_language}`,
+      `文化解說：${slip.cultural_note}`,
+      `溫馨提醒：${slip.reminder}`,
+      `— 臺中萬春宮（藍興媽祖）線上便民服務`
+    ].filter(Boolean).join("\n\n");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      });
+    }
+  }
+
   return (
     <Shell title="文化抽籤">
       <section className={`fortune-landing fortune-refresh${drawing ? " is-drawing" : ""}`}>
         <div className="fortune-copy">
           <span className="tag">文化提醒</span>
           <h2>抽一支今日提醒</h2>
-          <p>以籤詩語感做白話整理，正式事項仍以廟方公告與人工確認為準。</p>
+          <p>以籤詩語感做白話整理；活動與服務資訊請以廟方公告為準。</p>
           <label className="fortune-intention-label">
             想求的提醒
             <textarea value={intention} onChange={(event) => setIntention(event.target.value)} />
           </label>
+          <div className="fortune-quick-intentions" aria-label="常見提醒方向快速選取">
+            <span className="quick-label">快速選取：</span>
+            {intentionSuggestions.map((sug) => (
+              <button
+                key={sug}
+                type="button"
+                className="intention-chip"
+                onClick={() => setIntention(sug)}
+              >
+                {sug}
+              </button>
+            ))}
+          </div>
           <div className="fortune-actions">
             <button className="button primary" type="button" disabled={drawing} onClick={draw}>
               {drawing ? <RefreshCw size={18} /> : <Sparkles size={18} />}
@@ -118,15 +161,28 @@ export function FortunePage() {
       ) : (
         <section className="fortune-result-layout fortune-result-refresh fortune-result-solo" aria-live="polite">
           <article className="detail-panel fortune-result-card">
-            <span className="tag">{slip.slip_id}</span>
-            <h2>{slip.title}</h2>
+            <div className="fortune-result-header">
+              <span className="tag tag-gold">{slip.slip_id}</span>
+              <h2>{slip.title}</h2>
+              <button
+                type="button"
+                className={`fortune-copy-btn${copied ? " is-copied" : ""}`}
+                onClick={handleCopy}
+                aria-label="複製籤詩全文"
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+                <span>{copied ? "已複製籤詩！" : "複製籤詩"}</span>
+              </button>
+            </div>
             {askedIntention ? (
               <p className="fortune-question-result">
                 <MessageCircle size={18} />
-                {askedIntention}
+                <span>求籤方向：{askedIntention}</span>
               </p>
             ) : null}
-            <p className="poem">{slip.poem}</p>
+            <div className="fortune-poem-container">
+              <p className="poem">{slip.poem}</p>
+            </div>
             <div className="fortune-result-section">
               <strong>白話提醒</strong>
               <p>{slip.plain_language}</p>
@@ -151,8 +207,8 @@ export function FortunePage() {
       <section className="detail-panel fortune-note-panel">
         <ShieldCheck size={22} />
         <div>
-          <strong>抽籤頁保留文化解說</strong>
-          <p>籤詩結果不會替你做正式決定；若牽涉活動、捐款、服務或個資，請回到公告、客服或現場窗口確認。</p>
+          <strong>文化提醒與使用說明</strong>
+          <p>籤詩內容提供文化參考；若需要活動、報名或服務協助，請查看公告或詢問服務人員。</p>
         </div>
         <Link className="button" to="/support">
           找客服

@@ -1,4 +1,4 @@
-import { ExternalLink, ShieldCheck, ShoppingBag } from "lucide-react";
+import { ExternalLink, Sparkles, ShoppingBag } from "lucide-react";
 import { Shell } from "../../components/Shell";
 
 const stickerBase = "/assets/stickers/spring-fortune-messenger";
@@ -22,20 +22,20 @@ export function StickerShopPage() {
     <Shell title="貼圖小舖">
       <section className="sticker-hero sticker-hero-compact">
         <div>
-          <span className="tag">春福小使</span>
-          <h2>日常問候、回覆與平安祝福</h2>
-          <p>第一套 8 張靜態貼圖，通過審核後會開放購買。</p>
+          <span className="tag">萬春宮原創角色</span>
+          <h2>春福小使 ‧ 日常平安祝福</h2>
+          <p>以萬春宮媽祖文化為意象設計之原創吉祥角色，陪伴善信在日常對話中互道平安吉祥。</p>
           <div className="inline-actions">
             {canBuy ? (
               <a className="button primary" href={stickerStoreUrl} target="_blank" rel="noreferrer">
                 <ShoppingBag size={18} />
-                <span>前往購買</span>
+                <span>前往 LINE 貼圖小舖購買</span>
                 <ExternalLink size={16} />
               </a>
             ) : (
               <button className="button muted" type="button" disabled>
                 <ShoppingBag size={18} />
-                <span>審核後開放購買</span>
+                <span>即將正式上架 敬請期待</span>
               </button>
             )}
           </div>
@@ -44,25 +44,25 @@ export function StickerShopPage() {
 
       <section className="tool-panel">
         <div className="section-title">
-          <ShieldCheck size={20} />
-          <h2>送審狀態</h2>
+          <Sparkles size={20} />
+          <h2>貼圖特色</h2>
         </div>
         <div className="sticker-status-grid">
           <div>
-            <strong>8</strong>
-            <span>靜態貼圖</span>
+            <strong>日常問候</strong>
+            <span>早安與平安祝福</span>
           </div>
           <div>
-            <strong>PNG</strong>
-            <span>透明背景</span>
+            <strong>廟務互動</strong>
+            <span>報名與即時通知</span>
           </div>
           <div>
-            <strong>370×320</strong>
-            <span>貼圖尺寸</span>
+            <strong>文化意象</strong>
+            <span>傳遞媽祖福氣</span>
           </div>
           <div>
-            <strong>待審核</strong>
-            <span>LINE Creators Market</span>
+            <strong>即將上架</strong>
+            <span>LINE 貼圖小舖</span>
           </div>
         </div>
       </section>

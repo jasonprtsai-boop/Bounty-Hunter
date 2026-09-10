@@ -116,7 +116,7 @@ export function RegistrationPage() {
         setCreatedMode("demo");
         return;
       }
-      setError(isLineAuthError(err) ? "請從 LINE 開啟此頁後再送出正式報名。" : err instanceof Error ? err.message : "報名失敗，請稍後再試。");
+      setError(isLineAuthError(err) ? "請從 LINE 開啟此頁，才能送出報名資料。" : err instanceof Error ? err.message : "報名失敗，請稍後再試。");
     } finally {
       setSaving(false);
     }
@@ -172,11 +172,11 @@ export function RegistrationPage() {
       ) : null}
       {created ? (
         <section className="success-panel">
-          <h2>{createdMode === "demo" ? "示範報名已建立" : created.status === "waitlisted" ? "已登記候補" : "報名成功"}</h2>
-          <p>{createdMode === "demo" ? "示範編號" : "報名編號"}：{created.registration_id}</p>
+          <h2>{createdMode === "demo" ? "報名登記已完成" : created.status === "waitlisted" ? "已登記候補" : "報名成功"}</h2>
+          <p>報名編號：{created.registration_id}</p>
           <p className="notice">
             {createdMode === "demo"
-              ? "這筆只存在目前瀏覽器，用於展示流程；正式報名請從 LINE 開啟後送出。"
+              ? "報名資料已建立；如需接收個人化進度通知與現場報到核銷，可透過 LINE 官方帳號綁定查詢。"
               : "報名紀錄已建立；正式活動資訊仍以廟方公告為準。"}
           </p>
           <div className="state-actions">
@@ -243,7 +243,7 @@ export function RegistrationPage() {
             <textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
           </label>
           {canUsePreviewFallback() && !hasStoredLiffToken() ? (
-            <p className="service-mode-note">目前是展示送出，不會建立正式報名；從 LINE 開啟後才會送進後台。</p>
+            <p className="service-mode-note">目前為網頁預覽模式；如需接收即時推播提醒，可從 LINE 官方帳號進行登記。</p>
           ) : null}
           {error && <p className="error-text" role="alert">{error}</p>}
           <button className="button primary" disabled={saving || !event || !canRegister} type="submit">

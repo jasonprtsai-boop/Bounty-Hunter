@@ -64,7 +64,7 @@ const businessProfileFields = [
   },
   {
     label: "營業時間說明",
-    value: "參拜與活動資訊請以廟方公告為準；重要廟務建議再向正式窗口確認。"
+    value: "參拜與活動資訊請以廟方公告為準；重要廟務建議再向廟方或服務人員確認。"
   }
 ];
 
@@ -120,25 +120,25 @@ const voomPostExamples = [
     title: "線上服務介紹",
     asset: "assets/banners/home.png",
     value:
-      `萬春宮線上服務入口整理完成。\n\n這是一個以 LINE 為入口的宮廟服務流程，將參拜問答、活動報名、報名進度查詢、文化抽籤、擲筊問事與後台管理整合在同一個入口。\n\n本帳號以公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。\n\n服務入口：${publicSiteBaseUrl}/site\n\n#萬春宮服務 #LINE服務 #宮廟線上服務 #廟埕入口`
+      `臺中萬春宮線上便民服務正式上線。\n\n這是一個以 LINE 為核心的宮廟服務平台，將參拜導覽、活動報名、報名進度查詢、文化抽籤、擲筊問事與信眾客服整合為一體。\n\n歡迎十方善信多加利用，共沐媽祖神恩。\n\n服務入口：${publicSiteBaseUrl}/site\n\n#萬春宮 #藍興媽祖 #線上服務 #參拜導覽 #文化傳承`
   },
   {
     title: "活動報名服務",
     asset: "assets/banners/events.png",
     value:
-      `活動報名也可以從 LINE 開始。\n\n使用者在 LINE 收到活動卡片後，可直接開啟 LIFF 表單完成報名，後台同步看到報名狀態與提醒任務。\n\n提醒：正式名額、時間與參加規則仍以廟方公告為準。\n\n活動入口：${publicSiteBaseUrl}/events\n\n#活動報名 #LIFF #LINE服務 #萬春宮服務`
+      `萬春宮各項法會與文化講座開放線上報名。\n\n信眾在 LINE 收到活動消息後，可直接於手機完成線上登記，並隨時查詢登記狀態與接收活動提醒。\n\n提醒：各項活動名額與時間請以廟方最新公告為準。\n\n活動中心：${publicSiteBaseUrl}/events\n\n#萬春宮 #法會報名 #文化講座 #線上便民服務`
   },
   {
     title: "貼圖小舖預告",
     asset: "assets/flex/fortune-card.png",
     value:
-      `春福小使貼圖準備中。\n\n第一套靜態貼圖以「日常祝福、收到、感謝、平安、已報名」為核心語境，讓宮廟服務不只提供資訊，也能保留一點溫度。\n\n貼圖小舖：${publicSiteBaseUrl}/stickers\n\n貼圖正式上架需等待 LINE Creators Market 審核。\n\n#LINE貼圖 #春福小使 #萬春宮服務 #文化服務`
+      `萬春宮原創角色「春福小使」貼圖即將登場。\n\n以「日常問候、心存感謝、平安祈福」為主題設計，讓信眾在日常對話中也能傳遞媽祖福氣與溫暖祝福。\n\n貼圖專區：${publicSiteBaseUrl}/stickers\n\n即將於 LINE 貼圖小舖正式推出，敬請期待。\n\n#春福小使 #萬春宮 #LINE貼圖 #日常問候 #平安祝福`
   },
   {
     title: "文化導覽服務",
     asset: "assets/banners/tour.png",
     value:
-      `從 LINE 開始的文化導覽。\n\n使用者掃描 QR 或點選 Rich Menu 後，可開啟導覽頁，閱讀宮廟歷史、參拜提醒與文化脈絡。未來可延伸到現場 QR/NFC 點位。\n\n導覽入口：${publicSiteBaseUrl}/tour/main-hall\n\n正式導覽文字仍需廟方審稿。\n\n#文化導覽 #QR導覽 #宮廟文化 #萬春宮服務`
+      `走進老城廟埕，開啟萬春宮文化導覽。\n\n信眾透過手機即可閱覽宮廟歷史、正殿動線與殿堂建築特色。現場亦備有文史導覽解說，歡迎蒞臨參拜。\n\n導覽入口：${publicSiteBaseUrl}/tour/main-hall\n\n參拜動線與開放區域請依現場志工與公告引導。\n\n#萬春宮 #文化導覽 #正殿參拜 #臺中媽祖`
   }
 ];
 
@@ -151,7 +151,7 @@ const broadcastExamples = [
   {
     title: "客服回覆追蹤",
     value:
-      "【萬春宮客服回覆】\n你先前留下的問題已有回覆。\n\n請開啟客服頁查看：\nhttps://liff.line.me/2010938588-VJXpaoyH/support\n\n正式廟務、活動與捐款問題仍請以廟方公告或正式窗口為準。"
+      "【萬春宮客服回覆】\n你先前留下的問題已有回覆。\n\n請開啟客服頁查看：\nhttps://liff.line.me/2010938588-VJXpaoyH/support\n\n廟務、活動與捐款問題仍請以廟方公告或服務人員說明為準。"
   },
   {
     title: "服務發布前檢查",

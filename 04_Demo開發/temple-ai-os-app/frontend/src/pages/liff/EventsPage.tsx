@@ -12,7 +12,7 @@ import { templeExteriorImage } from "../../lib/visualAssets";
 
 const statusLabels: Record<string, string> = {
   confirmed: "已完成報名",
-  pending_review: "待人工確認",
+  pending_review: "待確認",
   checked_in: "已報到",
   cancelled: "已取消",
   waitlisted: "候補中"

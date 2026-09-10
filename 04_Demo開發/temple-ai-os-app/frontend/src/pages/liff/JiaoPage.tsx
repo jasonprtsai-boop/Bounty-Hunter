@@ -21,7 +21,7 @@ const results: JiaoResult[] = [
     title: "聖筊",
     short: "一正一反",
     detail: "可以把它理解為方向較明確，可往下一步確認。",
-    next: "若是重要事項，建議再向廟方或正式窗口確認。",
+    next: "若是重要事項，建議再向廟方或服務人員確認。",
     tone: "holy",
     blocks: ["yang", "yin"]
   },
@@ -39,7 +39,7 @@ const results: JiaoResult[] = [
     title: "陰筊",
     short: "兩面皆反",
     detail: "可以先暫緩，或重新確認時機、條件與資訊是否齊全。",
-    next: "正式決定仍建議回到現場公告、活動規則或服務窗口。",
+    next: "請先看現場公告、活動規則，或再向服務人員確認。",
     tone: "quiet",
     blocks: ["yin", "yin"]
   }
@@ -156,7 +156,7 @@ export function JiaoPage() {
         <ShieldCheck size={22} />
         <div>
           <strong>文化互動提醒</strong>
-          <p>本頁用於服務展示與文化說明；正式廟務、活動、捐款或重大決定仍以廟方公告與人工確認為準。</p>
+          <p>本頁提供文化解說；活動、捐款或重要廟務，請以廟方公告與現場服務人員說明為準。</p>
         </div>
         <Link className="button" to="/support">
           找服務人員

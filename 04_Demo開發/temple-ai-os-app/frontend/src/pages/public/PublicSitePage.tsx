@@ -33,7 +33,7 @@ const quickAccessItems: Array<{ label: string; title: string; body: string; icon
   { label: "導覽", title: "宮廟導覽", body: "地址與參拜動線", icon: MapPin, to: "/tour/main-hall" },
   { label: "抽籤", title: "文化抽籤", body: "一支平安提醒", icon: Sparkles, to: "/fortune" },
   { label: "擲筊", title: "擲筊問事", body: "一句話再擲杯", icon: ScrollText, to: "/jiao" },
-  { label: "客服", title: "客服協助", body: "留下問題", icon: MessageCircle, to: "/support" }
+  { label: "客服", title: "信眾客服", body: "諮詢與便民服務", icon: MessageCircle, to: "/support" }
 ];
 
 const templeServiceDockItems: Array<{
@@ -51,15 +51,18 @@ const templeServiceDockItems: Array<{
 
 const visitFacts = [
   ["地點", "臺中市中區成功路212號"],
-  ["主祀", "天上聖母"],
-  ["電話", "04-22245964"],
-  ["入口", "LINE、活動、導覽、客服"]
+  ["主祀", "天上聖母（開基藍興媽祖）"],
+  ["歷史沿革", "康熙六十年（1721）渡臺 ‧ 雍正元年建廟立基"],
+  ["奉祀神明", "主祀聖母、觀音、文昌、關聖等11尊神明"],
+  ["珍貴文物", "道光雕花龍柱、光緒御匾「海晏河清」、青斗石獅"],
+  ["服務項目", "參拜動線導覽、四季法會、文化抽籤、信眾客服"]
 ];
 
 const introLinks = [
-  ["參拜前", "看地址與主殿導覽", "/tour/main-hall"],
-  ["活動前", "查看活動與報名", "/events"],
-  ["想互動", "抽籤或擲筊", "/fortune"]
+  ["參拜導覽", "6大景點參拜動線", "/tour/spots/main-hall"],
+  ["神佛體系", "11尊主配祀神明介紹", "/deities"],
+  ["法會活動", "四季慶典與線上報名", "/events"],
+  ["心靈啟發", "文化抽籤與生活提醒", "/fortune"]
 ];
 
 export function PublicSitePage() {
@@ -85,9 +88,6 @@ export function PublicSitePage() {
               </Link>
             )
           )}
-          <a href={`${ADMIN_SITE_BASE_URL}/admin`} target="_blank" rel="noreferrer">
-            後台
-          </a>
         </nav>
         <details className="public-service-menu">
           <summary>
@@ -111,7 +111,7 @@ export function PublicSitePage() {
       </header>
 
       <div className="public-announcement-strip" aria-label="本期提醒">
-        <span>本期入口</span>
+        <span>最新公告</span>
         <Link to="/events">近期活動</Link>
         <Link to="/community">LINE 服務</Link>
       </div>
@@ -170,11 +170,11 @@ export function PublicSitePage() {
           <div className="temple-service-heading">
             <div className="section-kicker">服務分類</div>
             <h2>
-              少量入口，
+              參拜、活動
               <br />
-              分頁操作
+              與 LINE 服務
             </h2>
-            <p>主頁只做介紹與導流，真正操作放到各自頁面。</p>
+            <p>先看廟宇資訊，再依需求前往導覽、活動、抽籤或客服。</p>
           </div>
           <div className="temple-service-grid">
             {templeServiceDockItems.map((item) => {
@@ -201,7 +201,7 @@ export function PublicSitePage() {
           <div className="showcase-heading">
             <div className="section-kicker">照片故事</div>
             <h2>先看廟，再選服務</h2>
-            <p>用實景照片建立宮廟感，文字保持短句。</p>
+            <p>從廟埕、外觀與在地街區認識萬春宮。</p>
           </div>
           <div className="photo-story-grid">
             {templePhotoGallery.map((photo, index) => (
@@ -223,12 +223,12 @@ export function PublicSitePage() {
             <img src={imageAssets.richMenu} alt="LINE 服務選單預覽" />
           </figure>
           <div>
-            <div className="section-kicker">LINE 入口</div>
-            <h2>功能收在選單裡</h2>
-            <p>活動、抽籤、擲筊與客服從選單進入，不放滿整個首頁。</p>
+            <div className="section-kicker">LINE 官方服務</div>
+            <h2>LINE 服務快速入口</h2>
+            <p>加入後可查活動、看導覽，也能留下問題給服務人員。</p>
             <div className="hero-actions">
               <Link className="button primary" to="/community">
-                看聊天室
+                前往 LINE 服務
               </Link>
               <Link className="button" to="/events">
                 活動中心
@@ -256,12 +256,12 @@ export function PublicSitePage() {
       </main>
 
       <footer className="public-footer">
-        <span>萬春宮線上服務頁</span>
+        <span>臺中萬春宮（藍興媽祖） ‧ 線上便民服務</span>
         <nav aria-label="頁尾連結">
           <Link to="/privacy">隱私權政策</Link>
           <Link to="/terms">使用條款</Link>
           <a href={`${ADMIN_SITE_BASE_URL}/admin`} target="_blank" rel="noreferrer">
-            後台管理
+            工作人員登入
           </a>
         </nav>
       </footer>
