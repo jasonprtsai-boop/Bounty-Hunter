@@ -419,7 +419,7 @@ export function PublicSitePage() {
               </div>
             </div>
             <figure className="line-banner-media">
-              <img src={visualAssets.richMenu} alt="萬春宮 LINE 圖文選單" />
+              <img src={visualAssets.culture.lineService} alt="萬春宮 LINE 數位便民服務" />
             </figure>
           </div>
         </section>

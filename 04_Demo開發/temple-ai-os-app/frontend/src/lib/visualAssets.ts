@@ -60,7 +60,8 @@ export const visualAssets = {
   culture: {
     altar: asset("/assets/culture/altar.jpg"),
     ceremony: asset("/assets/culture/ceremony.jpg"),
-    fortune: asset("/assets/culture/fortune.jpg")
+    fortune: asset("/assets/culture/fortune.jpg"),
+    lineService: asset("/assets/culture/line-service.jpg")
   }
 };
 

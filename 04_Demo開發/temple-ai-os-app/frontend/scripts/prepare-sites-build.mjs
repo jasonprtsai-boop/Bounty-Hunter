@@ -39,6 +39,7 @@ const adminRoutes = [
   "admin/support",
   "admin/notifications",
   "admin/accounts",
+  "admin/settings",
   "admin/release"
 ];
 const appRoutes = surface === "admin" ? adminRoutes : publicRoutes;

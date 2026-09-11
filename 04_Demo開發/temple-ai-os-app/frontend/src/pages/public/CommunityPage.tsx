@@ -47,7 +47,7 @@ export function CommunityPage() {
   return (
     <div className="public-shell community-page">
       <header className="public-nav">
-        <Link to="/site" className="brand">
+        <Link to="/" className="brand">
           <span className="brand-mark">宮</span>
           <span>
             <strong>萬春宮線上服務</strong>
@@ -55,9 +55,9 @@ export function CommunityPage() {
           </span>
         </Link>
         <nav aria-label="社群導覽">
-          <Link to="/site">官網首頁</Link>
-          <Link to="/">線上服務台</Link>
+          <Link to="/">官網首頁</Link>
           <Link to="/events">活動消息</Link>
+          <Link to="/deities">神佛介紹</Link>
           <Link to="/privacy">隱私權保護</Link>
         </nav>
       </header>
@@ -168,7 +168,7 @@ export function CommunityPage() {
       <footer className="public-footer">
         <span>臺中萬春宮 ‧ LINE 官方帳號：@983zhzni</span>
         <nav aria-label="頁尾連結">
-          <Link to="/site">官網首頁</Link>
+          <Link to="/">官網首頁</Link>
           <Link to="/privacy">隱私權政策</Link>
           <Link to="/terms">使用條款</Link>
         </nav>
