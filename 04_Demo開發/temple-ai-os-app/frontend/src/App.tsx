@@ -16,7 +16,6 @@ const DeitiesPage = lazy(() => import("./pages/liff/DeitiesPage").then((module) 
 const EventDetailPage = lazy(() => import("./pages/liff/EventDetailPage").then((module) => ({ default: module.EventDetailPage })));
 const EventsPage = lazy(() => import("./pages/liff/EventsPage").then((module) => ({ default: module.EventsPage })));
 const FortunePage = lazy(() => import("./pages/liff/FortunePage").then((module) => ({ default: module.FortunePage })));
-const HomePage = lazy(() => import("./pages/liff/HomePage").then((module) => ({ default: module.HomePage })));
 const JiaoPage = lazy(() => import("./pages/liff/JiaoPage").then((module) => ({ default: module.JiaoPage })));
 const LegalPage = lazy(() => import("./pages/public/LegalPage").then((module) => ({ default: module.LegalPage })));
 const PublicSitePage = lazy(() => import("./pages/public/PublicSitePage").then((module) => ({ default: module.PublicSitePage })));

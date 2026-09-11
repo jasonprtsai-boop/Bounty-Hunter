@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, MessageCircle, RefreshCw, ScrollText, ShieldCheck, Sparkles } from "lucide-react";
+import { ChevronRight, MessageCircle, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
 import { Shell } from "../../components/Shell";
 import { visualAssets } from "../../lib/visualAssets";
 

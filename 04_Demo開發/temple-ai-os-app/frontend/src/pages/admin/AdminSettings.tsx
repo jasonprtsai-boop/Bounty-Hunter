@@ -7,14 +7,11 @@ import {
   Clock,
   ExternalLink,
   MapPin,
-  RefreshCw,
   RotateCcw,
   Save,
-  ShieldCheck,
   Sparkles
 } from "lucide-react";
 import { Shell } from "../../components/AdminShell";
-import { StatePanel } from "../../components/StatePanel";
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 import {
   defaultTempleSettings,

@@ -1,5 +1,5 @@
 import type { Deity, EventItem, Registration, RegistrationLookupResult } from "./api";
-import { templeExteriorImage, templePhotoGallery } from "./visualAssets";
+import { templePhotoGallery } from "./visualAssets";
 
 export type LocalTourSpot = {
   code: string;

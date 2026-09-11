@@ -14,8 +14,7 @@ import {
   Phone,
   ScrollText,
   ShieldCheck,
-  Sparkles,
-  UserCheck
+  Sparkles
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ADMIN_SITE_BASE_URL } from "../../lib/siteLinks";

@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, CalendarDays, ChevronRight, MapPin, RefreshCw, Search, Sparkles, TicketCheck } from "lucide-react";
+import { BookOpen, ChevronRight, MapPin, RefreshCw, Search, Sparkles, TicketCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { EventCard } from "../../components/EventCard";
 import { Shell } from "../../components/Shell";

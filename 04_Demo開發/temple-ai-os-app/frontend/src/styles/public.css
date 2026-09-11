@@ -2524,64 +2524,6 @@
   opacity: 1;
 }
 
-.site-hero-clean {
-  min-height: clamp(500px, 68vh, 740px);
-  padding: 96px max(20px, calc((100vw - 1440px) / 2)) 70px;
-  background-attachment: scroll;
-  background-position: center;
-}
-
-.site-hero-clean::before {
-  background: rgba(46, 35, 27, 0.42);
-}
-
-.site-hero-clean::after,
-.site-hero-clean .hero-service-panel,
-.site-hero-clean .hero-metrics,
-.site-hero-clean .hero-blessing-strip {
-  display: none;
-}
-
-.site-hero-clean .site-hero-layout {
-  grid-template-columns: 1fr;
-  width: min(1440px, 100%);
-}
-
-.site-hero-clean .site-hero-content {
-  max-width: 720px;
-  padding-left: clamp(10px, 3vw, 42px);
-}
-
-.site-hero-clean .site-hero-content .tag,
-.site-hero-clean h1,
-.site-hero-clean .site-hero-content p,
-.site-hero-clean .hero-actions {
-  animation: none !important;
-  opacity: 1 !important;
-}
-
-.site-hero-clean h1 {
-  margin: 12px 0 14px;
-  color: #fff;
-  font-size: clamp(58px, 8vw, 112px);
-  line-height: 0.96;
-  text-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
-}
-
-.site-hero-clean p {
-  max-width: 30ch;
-  color: #fff7e8;
-  font-size: clamp(18px, 2vw, 24px);
-}
-
-.site-hero-clean .hero-secondary-link {
-  min-height: 44px;
-  padding: 0 6px;
-  color: #fff;
-  text-decoration: none;
-  border-bottom: 2px solid rgba(255, 246, 220, 0.7);
-}
-
 .fact-strip {
   width: min(1440px, calc(100% - 40px));
   margin-top: 20px;
@@ -2830,16 +2772,6 @@
   .public-service-menu summary {
     min-height: 36px;
     padding: 0 11px;
-  }
-
-  .site-hero-clean {
-    min-height: 470px;
-    padding-top: 58px;
-    padding-bottom: 44px;
-  }
-
-  .site-hero-clean h1 {
-    font-size: 56px;
   }
 
   .fact-strip,
@@ -3640,16 +3572,6 @@
   background: rgba(255, 253, 248, 0.96);
 }
 
-.site-hero-clean::before {
-  background: rgba(52, 41, 34, 0.46);
-}
-
-.site-hero-clean .tag {
-  border-color: rgba(255, 241, 206, 0.72);
-  background: #fff1ce;
-  color: var(--temple-red-dark);
-}
-
 .public-section,
 .site-hero,
 .community-hero,
@@ -3903,10 +3825,6 @@
   .community-service-section,
   .community-guardrails {
     width: min(100% - 22px, 1440px);
-  }
-
-  .site-hero-clean {
-    min-height: 430px;
   }
 
   .photo-story-grid,
