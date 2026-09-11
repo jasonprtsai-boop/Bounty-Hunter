@@ -9,6 +9,7 @@ const AdminEvents = lazy(() => import("./pages/admin/AdminEvents").then((module)
 const AdminKnowledge = lazy(() => import("./pages/admin/AdminKnowledge").then((module) => ({ default: module.AdminKnowledge })));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications").then((module) => ({ default: module.AdminNotifications })));
 const AdminRelease = lazy(() => import("./pages/admin/AdminRelease").then((module) => ({ default: module.AdminRelease })));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings").then((module) => ({ default: module.AdminSettings })));
 const AdminSupport = lazy(() => import("./pages/admin/AdminSupport").then((module) => ({ default: module.AdminSupport })));
 const CommunityPage = lazy(() => import("./pages/public/CommunityPage").then((module) => ({ default: module.CommunityPage })));
 const DeitiesPage = lazy(() => import("./pages/liff/DeitiesPage").then((module) => ({ default: module.DeitiesPage })));
@@ -28,7 +29,7 @@ export default function App() {
   return (
     <Suspense fallback={<div className="route-loading">載入中</div>}>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<PublicSitePage />} />
         <Route path="/site" element={<PublicSitePage />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/privacy" element={<LegalPage kind="privacy" />} />
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/admin/support" element={<AdminGate><AdminSupport /></AdminGate>} />
         <Route path="/admin/notifications" element={<AdminGate><AdminNotifications /></AdminGate>} />
         <Route path="/admin/accounts" element={<AdminGate><AdminAccounts /></AdminGate>} />
+        <Route path="/admin/settings" element={<AdminGate><AdminSettings /></AdminGate>} />
         <Route path="/admin/release" element={<AdminGate><AdminRelease /></AdminGate>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

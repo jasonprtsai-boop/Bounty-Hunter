@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
   Bell,
+  Building2,
   CalendarDays,
   ChevronRight,
   Headphones,
@@ -93,6 +94,10 @@ export function AdminDashboard() {
               <Link className="button" to="/admin/deities">
                 <ScrollText size={18} />
                 神佛資料
+              </Link>
+              <Link className="button" to="/admin/settings">
+                <Building2 size={18} />
+                廟務設定
               </Link>
               <Link className="button" to="/admin/release">
                 <Settings size={18} />

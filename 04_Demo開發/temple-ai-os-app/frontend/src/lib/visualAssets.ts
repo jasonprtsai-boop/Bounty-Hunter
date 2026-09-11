@@ -56,7 +56,12 @@ export const visualAssets = {
     jiao: asset("/assets/flex/jiao-card.png")
   },
   richMenu: asset("/assets/rich-menu/main-2500x1686.png"),
-  stickerMain: asset("/assets/stickers/spring-fortune-messenger/main.png")
+  stickerMain: asset("/assets/stickers/spring-fortune-messenger/main.png"),
+  culture: {
+    altar: asset("/assets/culture/altar.jpg"),
+    ceremony: asset("/assets/culture/ceremony.jpg"),
+    fortune: asset("/assets/culture/fortune.jpg")
+  }
 };
 
 export function eventVisualForText(text: string) {

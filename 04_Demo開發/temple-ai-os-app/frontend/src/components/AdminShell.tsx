@@ -2,6 +2,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   BellRing,
   BookOpen,
+  Building2,
   CalendarDays,
   ChevronRight,
   Globe2,
@@ -47,12 +48,14 @@ const adminLinks: NavItem[] = [
 ];
 
 const adminSetupLinks: NavItem[] = [
+  { path: "/admin/settings", icon: Building2, label: "廟務設定", hint: "基本資訊與公告" },
   { path: "/admin/accounts", icon: UserCog, label: "權限", hint: "帳號 / Email" },
-  { path: "/admin/release", icon: Settings, label: "設定", hint: "LINE 與發布" }
+  { path: "/admin/release", icon: Settings, label: "發布", hint: "LINE 與上線" }
 ];
 
 const adminPageDescriptions: Record<string, string> = {
   "/admin": "先看今日待處理事項，再進入活動、客服、內容與發布設定。",
+  "/admin/settings": "設定廟名、全銜、參拜開放時段、首頁置頂即時公告、交通與服務指引。",
   "/admin/events": "建立活動、控制報名狀態、確認名額與公開說明。",
   "/admin/deities": "維護主配祀神、客座神明與護法神明的公開介紹。",
   "/admin/knowledge": "維護問答依據與安全提醒，避免回覆內容過時或不完整。",
