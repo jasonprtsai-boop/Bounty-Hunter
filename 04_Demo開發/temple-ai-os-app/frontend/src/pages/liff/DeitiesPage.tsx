@@ -82,7 +82,6 @@ export function DeitiesPage() {
         </div>
       </section>
 
-      {/* Main Deity Mazu Spotlight (shown on "all" or "主祀神明") */}
       {mazuDeity && (selectedCategory === "all" || selectedCategory === "主祀神明") && (
         <section className="tool-panel deity-spotlight-panel" aria-label="開基主祀神明">
           <div className="deity-spotlight-card">
@@ -118,7 +117,6 @@ export function DeitiesPage() {
         </section>
       )}
 
-      {/* Category Filter Chips */}
       {!loading && !error && deities.length > 0 && (
         <nav className="deity-category-nav" aria-label="神明分類篩選">
           <button
@@ -150,8 +148,6 @@ export function DeitiesPage() {
         <StatePanel variant="error" title="神佛資料暫時無法讀取" body={error} />
       ) : (
         Object.entries(grouped).map(([category, items]) => {
-          // If "all" is selected, don't duplicate Mazu card alone in its own single-card section if spotlight already shows it nicely,
-          // or keep it so the complete taxonomy remains intact. Keeping it provides uniform grid access.
           return (
             <section className="tool-panel deity-section" key={category}>
               <div className="section-title">
