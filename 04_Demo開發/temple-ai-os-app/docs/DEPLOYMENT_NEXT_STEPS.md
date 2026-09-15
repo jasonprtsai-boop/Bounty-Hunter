@@ -5,10 +5,12 @@ Last updated: 2026-08-14
 ## Current public URLs
 
 ```text
-FRONTEND_BASE_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site
+FRONTEND_BASE_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
+ADMIN_BASE_URL=https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site
+LEGACY_ALIAS_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site
 API_BASE_URL=https://temple-ai-os-api.onrender.com
-PRIVACY_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site/privacy
-TERMS_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site/terms
+PRIVACY_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/privacy
+TERMS_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/terms
 LINE_LIFF_ID=2010938588-VJXpaoyH
 LINE_LIFF_URL=https://liff.line.me/2010938588-VJXpaoyH
 LINE_OFFICIAL_ACCOUNT_BASIC_ID=@983zhzni
@@ -93,8 +95,8 @@ Keep:
 ```text
 APP_ENV=production
 API_BASE_URL=https://temple-ai-os-api.onrender.com
-FRONTEND_BASE_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site
-ALLOWED_ORIGINS=https://wanchun-gong-service.jasonprtsai.chatgpt.site
+FRONTEND_BASE_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
+ALLOWED_ORIGINS=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site,https://wanchun-gong-service.jasonprtsai.chatgpt.site,https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site
 LINE_CHANNEL_ID=2010991408
 LINE_LOGIN_CHANNEL_ID=2010938588
 LINE_LIFF_ID=2010938588-VJXpaoyH
@@ -173,11 +175,11 @@ VITE_LINE_STICKER_STORE_URL=<set after LINE Creators Market approval>
 Routes that must work:
 
 ```text
-https://wanchun-gong-service.jasonprtsai.chatgpt.site/site
-https://wanchun-gong-service.jasonprtsai.chatgpt.site/community
-https://wanchun-gong-service.jasonprtsai.chatgpt.site/stickers
-https://wanchun-gong-service.jasonprtsai.chatgpt.site/privacy
-https://wanchun-gong-service.jasonprtsai.chatgpt.site/terms
+https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/site
+https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/community
+https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/stickers
+https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/privacy
+https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/terms
 https://liff.line.me/2010938588-VJXpaoyH
 ```
 
@@ -220,7 +222,7 @@ The webhook POST must reject invalid signatures in production. Do not enable `LI
 Only after frontend URL, backend URL, and access token are configured:
 
 ```text
-FRONTEND_BASE_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site
+FRONTEND_BASE_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
 LINE_CHANNEL_ACCESS_TOKEN=<secret>
 python scripts/create_rich_menu.py
 ```

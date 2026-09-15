@@ -29,7 +29,18 @@ const publicRoutes = [
   "member",
   "stickers",
   "support",
-  "tour/main-hall"
+  "tour/main-hall",
+  "tour/front-arch",
+  "tour/stone-lions",
+  "tour/dragon-pillars",
+  "tour/plaque-relics",
+  "tour/history-wall",
+  "tour/spots/main-hall",
+  "tour/spots/front-arch",
+  "tour/spots/stone-lions",
+  "tour/spots/dragon-pillars",
+  "tour/spots/plaque-relics",
+  "tour/spots/history-wall"
 ];
 const adminRoutes = [
   "admin",

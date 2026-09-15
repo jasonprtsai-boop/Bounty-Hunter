@@ -50,7 +50,7 @@ Suggested asset: `assets/banners/home.png`
 
 本帳號以公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。
 
-服務入口：https://wanchun-gong-service.jasonprtsai.chatgpt.site/site
+服務入口：https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/site
 
 #萬春宮服務 #LINE服務 #宮廟線上服務 #廟埕入口
 ```
@@ -66,7 +66,7 @@ Suggested asset: `assets/banners/events.png`
 
 提醒：正式名額、時間與參加規則仍以廟方公告為準。
 
-活動入口：https://wanchun-gong-service.jasonprtsai.chatgpt.site/events
+活動入口：https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/events
 
 #活動報名 #LIFF #LINE服務 #萬春宮服務
 ```
@@ -80,7 +80,7 @@ Suggested asset: `assets/flex/fortune-card.png`
 
 第一套靜態貼圖以「日常祝福、收到、感謝、平安、已報名」為核心語境，讓宮廟服務不只提供資訊，也能保留一點溫度。
 
-貼圖小舖：https://wanchun-gong-service.jasonprtsai.chatgpt.site/stickers
+貼圖小舖：https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/stickers
 
 貼圖正式上架需等待 LINE Creators Market 審核。
 
@@ -96,7 +96,7 @@ Suggested asset: `assets/banners/tour.png`
 
 使用者掃描 QR 或點選 Rich Menu 後，可開啟導覽頁，閱讀宮廟歷史、參拜提醒與文化脈絡。未來可延伸到現場 QR/NFC 點位。
 
-導覽入口：https://wanchun-gong-service.jasonprtsai.chatgpt.site/tour/main-hall
+導覽入口：https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/tour/main-hall
 
 正式導覽文字仍需廟方審稿。
 
@@ -144,7 +144,7 @@ https://liff.line.me/2010938588-VJXpaoyH/support
 4. 後台管理與通知任務
 
 公開服務頁：
-https://wanchun-gong-service.jasonprtsai.chatgpt.site/site
+https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/site
 ```
 
 ## Pre-release content checklist

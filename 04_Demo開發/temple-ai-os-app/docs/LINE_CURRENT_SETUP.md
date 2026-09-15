@@ -1,13 +1,15 @@
 # LINE current setup
 
-Last updated: 2026-08-14
+Last updated: 2026-09-12
 
 ## Public frontend
 
-- Sites URL: `https://wanchun-gong-service.jasonprtsai.chatgpt.site`
+- Sites URL (Active): `https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site`
+- Admin Sites URL: `https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site`
+- Legacy Alias URL: `https://wanchun-gong-service.jasonprtsai.chatgpt.site` (保留於 CORS 白名單)
 - Access mode: public
-- Privacy policy URL: `https://wanchun-gong-service.jasonprtsai.chatgpt.site/privacy`
-- Terms URL: `https://wanchun-gong-service.jasonprtsai.chatgpt.site/terms`
+- Privacy policy URL: `https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/privacy`
+- Terms URL: `https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/terms`
 
 ## Provider
 
@@ -41,7 +43,7 @@ Sensitive values are intentionally not recorded here:
 - LIFF app name: `萬春宮線上服務`
 - LIFF ID: `2010938588-VJXpaoyH`
 - LIFF URL: `https://liff.line.me/2010938588-VJXpaoyH`
-- Endpoint URL: `https://wanchun-gong-service.jasonprtsai.chatgpt.site`
+- Endpoint URL: `https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site`
 - Size: Full
 - Scopes: `openid`, `profile`
 - Add friend option: On (normal)
@@ -49,6 +51,7 @@ Sensitive values are intentionally not recorded here:
 ## Current operational notes
 
 - Backend is deployed at `https://temple-ai-os-api.onrender.com`; keep using this URL unless the Render service is replaced.
+- Render Free 實例休眠保活：若使用免費方案，可執行 `python scripts/keepalive_ping.py --warm` 於展示前預熱，或以 `python scripts/keepalive_ping.py --daemon` 於後台定時每 10 分鐘發送心跳以防止休眠超時。
 - Render is configured for database service mode with LINE, Supabase, and admin secrets stored in Render.
 - Admin login uses the account/email + password credentials stored in Render. For `ADMIN_TOKENS=temple-staff:xxxx`, enter username `temple-staff` and password `xxxx` in `/admin`; for `ADMIN_USERNAME=staff@example.com`, enter the Email and password.
 - Messaging API webhook URL is `https://temple-ai-os-api.onrender.com/api/line/webhook`; webhook, redelivery, and verification are enabled.

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Ban, CalendarCheck, CheckCircle, ClipboardList, FileSpreadsheet, Pencil, Plus, Save, Search, Trash2, UserCheck, X } from "lucide-react";
+import { Ban, CalendarCheck, CheckCircle, ClipboardList, FileSpreadsheet, Pencil, Plus, Printer, Save, ScrollText, Search, Trash2, UserCheck, X } from "lucide-react";
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
 import { StatePanel } from "../../components/StatePanel";
@@ -154,6 +154,7 @@ export function AdminEvents() {
   const [registrations, setRegistrations] = useState<AdminRegistrationRecord[]>([]);
   const [form, setForm] = useState<EventForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showScrollModal, setShowScrollModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [registrationsLoading, setRegistrationsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -836,6 +837,17 @@ export function AdminEvents() {
               <FileSpreadsheet size={17} />
               <span>匯出名冊</span>
             </button>
+            <button
+              className="button icon-button"
+              type="button"
+              onClick={() => setShowScrollModal(true)}
+              disabled={filteredRegistrations.length === 0}
+              style={{ background: "#991b1b", color: "#fef08a", borderColor: "#b45309" }}
+              title="一鍵排版法會祈安紅紙文疏"
+            >
+              <ScrollText size={17} />
+              <span>列印祈安文疏</span>
+            </button>
           </div>
         </div>
 
@@ -982,6 +994,55 @@ export function AdminEvents() {
         </div>
       </section>
       {confirmDialog}
+
+      {showScrollModal ? (
+        <div className="scroll-modal-overlay" role="dialog" aria-modal="true" aria-label="法會祈安文疏">
+          <div className="scroll-modal-container">
+            <div className="scroll-modal-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <ScrollText size={22} color="#b42318" />
+                <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800 }}>萬春宮法會祈安文疏排版（可直接列印）</h3>
+              </div>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  className="button primary"
+                  type="button"
+                  onClick={() => window.print()}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                >
+                  <Printer size={16} /> 立即列印
+                </button>
+                <button
+                  className="button"
+                  type="button"
+                  onClick={() => setShowScrollModal(false)}
+                >
+                  <X size={16} /> 關閉
+                </button>
+              </div>
+            </div>
+            <div className="scroll-modal-body">
+              <div className="traditional-scroll-sheet">
+                <h2>萬春宮天上聖母 消災祈安植福文疏</h2>
+                <p><strong>伏以</strong></p>
+                <p>神威顯赫 普濟十方 藍興媽祖 慈悲降鑒</p>
+                <p><strong>今據</strong></p>
+                <p>臺灣臺中市萬春宮 恭逢消災延壽植福法會 良時吉慶</p>
+                <p>信眾人等 虔備香花果品 丹忱上奉：</p>
+                {filteredRegistrations.slice(0, 30).map((r, i) => (
+                  <p key={r.registration_id || i}>
+                    善信 <strong>【{r.contact_name || "善信大德"}】</strong> 闔家共 {r.party_size} 人 （{r.phone ? r.phone.replace(/(\d{4})\d{3}(\d{3})/, "$1-***-$2") : "祈安登記"}）
+                  </p>
+                ))}
+                <p><strong>伏願</strong></p>
+                <p>聖母垂慈 護佑弟子等 身心康泰 事業興隆 闔家平安 福壽康寧 百福駢臻 凶星退卻 吉曜臨門</p>
+                <p>天運歲次 丙午年 季秋 吉旦 虔誠九叩上呈</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
     </Shell>
   );
 }

@@ -12,9 +12,9 @@ Last updated: 2026-09-04
 | --- | --- |
 | 商業簡介短標 | 萬春宮線上服務｜LINE 宮廟服務入口 |
 | 商業簡介 | 萬春宮線上服務把 LINE 帳號、參拜問答、活動報名、報名進度查詢、文化抽籤與管理後台整合為一個入口。本帳號以萬春宮公開資料整理服務情境；正式活動、開放時間與服務內容請以廟方公告為準。 |
-| 網站 | https://wanchun-gong-service.jasonprtsai.chatgpt.site |
-| 隱私權政策 | https://wanchun-gong-service.jasonprtsai.chatgpt.site/privacy |
-| 服務條款 | https://wanchun-gong-service.jasonprtsai.chatgpt.site/terms |
+| 網站 | https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site |
+| 隱私權政策 | https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/privacy |
+| 服務條款 | https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/terms |
 | 萬春宮地址 | 臺中市中區成功路212號 |
 | 公開資料電話 | 04-22245964 |
 | 營業時間說明 | 參拜與活動資訊請以廟方公告為準；重要廟務建議再向正式窗口確認。 |

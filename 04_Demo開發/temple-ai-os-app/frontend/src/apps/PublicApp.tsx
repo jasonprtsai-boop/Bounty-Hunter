@@ -30,6 +30,7 @@ export default function PublicApp() {
         <Route path="/fortune" element={<FortunePage />} />
         <Route path="/jiao" element={<JiaoPage />} />
         <Route path="/tour/:code" element={<TourSpotPage />} />
+        <Route path="/tour/spots/:code" element={<TourSpotPage />} />
         <Route path="/member" element={<Navigate to="/events?lookup=1" replace />} />
         <Route path="/stickers" element={<StickerShopPage />} />
         <Route path="/support" element={<SupportPage />} />

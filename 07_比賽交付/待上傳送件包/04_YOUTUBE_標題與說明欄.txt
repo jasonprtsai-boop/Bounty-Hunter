@@ -1,0 +1,23 @@
+建議標題：
+【2026 LINE AI 創新創業競賽】Temple AI OS - 智慧宮廟 AI 服務入口與數位營運平台 Demo
+
+建議說明欄：
+Temple AI OS 是一套以 LINE 官方帳號為入口的智慧宮廟 AI 服務與數位營運平台。
+
+信眾可透過 LINE Rich Menu、Messaging API、Flex Message 與 LIFF，在 LINE 內完成參拜導覽、AI 文化問答、活動查詢、線上報名、報名進度查詢與客服留言。廟方則可透過後台管理活動、查看互動數據、整理 AI 問答熱點與知識缺口，降低人工客服與紙本行政負擔。
+
+本 Demo 以台中萬春宮公開資料建立示範場景，Demo 活動、報名資料與 Dashboard 統計皆為示範資料，非正式合作部署或官方營運資料。
+
+體驗入口：
+LINE 加好友：https://line.me/R/ti/p/%40983zhzni
+LIFF Demo：https://liff.line.me/2010938588-VJXpaoyH
+公開展示站：https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
+
+參賽作品：Temple AI OS
+競賽：2026 LINE AI 創新創業競賽
+
+上傳後檢查：
+1. 隱私權設為「不公開」或「公開」。
+2. 不要設為「私人」。
+3. 用無痕視窗打開影片連結，確認未登入也可播放。
+4. 將最終連結填入 `03_YOUTUBE_DEMO_LINK_待填.txt` 與投件表單。

@@ -13,7 +13,8 @@ This checklist is for Wan Chun Gong LINE service setup. Do not commit LINE secre
 - LINE Login Channel ID: `2010938588`
 - LIFF ID: `2010938588-VJXpaoyH`
 - LIFF URL: `https://liff.line.me/2010938588-VJXpaoyH`
-- Public frontend: `https://wanchun-gong-service.jasonprtsai.chatgpt.site`
+- Public frontend: `https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site`
+- Legacy alias: `https://wanchun-gong-service.jasonprtsai.chatgpt.site`
 
 ## 2. Completed
 
@@ -39,8 +40,8 @@ Backend:
 
 ```text
 LINE_LIFF_ID=2010938588-VJXpaoyH
-FRONTEND_BASE_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site
-ALLOWED_ORIGINS=https://wanchun-gong-service.jasonprtsai.chatgpt.site
+FRONTEND_BASE_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
+ALLOWED_ORIGINS=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site,https://wanchun-gong-service.jasonprtsai.chatgpt.site,https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site
 ```
 
 Frontend after backend deployment:
@@ -58,7 +59,7 @@ VITE_LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Required environment:
 
 ```text
-FRONTEND_BASE_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site
+FRONTEND_BASE_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
 LINE_CHANNEL_ACCESS_TOKEN=<secret>
 ```
 
