@@ -6,12 +6,12 @@ from app.core.config import get_settings
 
 
 RICH_MENU_AREAS = [
-    {"x": 86, "y": 310, "width": 1130, "height": 560},
-    {"x": 1284, "y": 310, "width": 1130, "height": 560},
-    {"x": 86, "y": 958, "width": 540, "height": 560},
-    {"x": 682, "y": 958, "width": 540, "height": 560},
-    {"x": 1278, "y": 958, "width": 540, "height": 560},
-    {"x": 1874, "y": 958, "width": 540, "height": 560},
+    {"x": 110, "y": 240, "width": 720, "height": 630},   # 1. 詢問參拜方式 (Row 1, Col 1)
+    {"x": 890, "y": 240, "width": 720, "height": 630},   # 2. 查看活動報名 (Row 1, Col 2)
+    {"x": 1670, "y": 240, "width": 720, "height": 630},  # 3. 抽文化籤     (Row 1, Col 3)
+    {"x": 110, "y": 920, "width": 720, "height": 630},   # 4. 看主殿導覽   (Row 2, Col 1)
+    {"x": 890, "y": 920, "width": 720, "height": 630},   # 5. 查報名進度   (Row 2, Col 2)
+    {"x": 1670, "y": 920, "width": 720, "height": 630},  # 6. 聯絡客服     (Row 2, Col 3)
 ]
 
 
@@ -20,7 +20,7 @@ def build_main_menu_payload(frontend_base_url: str) -> dict[str, Any]:
     return {
         "size": {"width": 2500, "height": 1686},
         "selected": True,
-        "name": "萬春宮服務主選單",
+        "name": "萬春宮智慧服務選單",
         "chatBarText": "服務選單",
         "areas": [
             {
@@ -33,23 +33,43 @@ def build_main_menu_payload(frontend_base_url: str) -> dict[str, Any]:
             },
             {
                 "bounds": RICH_MENU_AREAS[1],
-                "action": {"type": "uri", "label": "查看活動報名", "uri": f"{base}/events"},
+                "action": {
+                    "type": "uri",
+                    "label": "查看活動報名",
+                    "uri": f"{base}/events",
+                },
             },
             {
                 "bounds": RICH_MENU_AREAS[2],
-                "action": {"type": "uri", "label": "抽文化籤", "uri": f"{base}/fortune"},
+                "action": {
+                    "type": "uri",
+                    "label": "抽文化籤",
+                    "uri": f"{base}/fortune",
+                },
             },
             {
                 "bounds": RICH_MENU_AREAS[3],
-                "action": {"type": "uri", "label": "看主殿導覽", "uri": f"{base}/tour/main-hall"},
+                "action": {
+                    "type": "uri",
+                    "label": "看主殿導覽",
+                    "uri": f"{base}/tour/main-hall",
+                },
             },
             {
                 "bounds": RICH_MENU_AREAS[4],
-                "action": {"type": "uri", "label": "查報名進度", "uri": f"{base}/events?lookup=1"},
+                "action": {
+                    "type": "uri",
+                    "label": "查報名進度",
+                    "uri": f"{base}/events?lookup=1",
+                },
             },
             {
                 "bounds": RICH_MENU_AREAS[5],
-                "action": {"type": "uri", "label": "聯絡客服", "uri": f"{base}/support"},
+                "action": {
+                    "type": "uri",
+                    "label": "聯絡客服",
+                    "uri": f"{base}/support",
+                },
             },
         ],
     }

@@ -799,14 +799,44 @@ def test_admin_rich_menu_publish(monkeypatch) -> None:
     assert response.json()["data"] == {"published": True, "rich_menu_id": "richmenu-test"}
 
 
-def test_rich_menu_payload_links_to_registration_lookup() -> None:
+def test_rich_menu_payload_links_to_events_and_fortune() -> None:
     payload = RichMenuService().main_menu_payload()
     actions = [area["action"] for area in payload["areas"]]
 
     assert any(
+        action["type"] == "message"
+        and action["label"] == "詢問參拜方式"
+        and "第一次來萬春宮" in action["text"]
+        for action in actions
+    )
+    assert any(
+        action["type"] == "uri"
+        and action["label"] == "查看活動報名"
+        and action["uri"].endswith("/events")
+        for action in actions
+    )
+    assert any(
+        action["type"] == "uri"
+        and action["label"] == "抽文化籤"
+        and action["uri"].endswith("/fortune")
+        for action in actions
+    )
+    assert any(
+        action["type"] == "uri"
+        and action["label"] == "看主殿導覽"
+        and action["uri"].endswith("/tour/main-hall")
+        for action in actions
+    )
+    assert any(
         action["type"] == "uri"
         and action["label"] == "查報名進度"
         and action["uri"].endswith("/events?lookup=1")
+        for action in actions
+    )
+    assert any(
+        action["type"] == "uri"
+        and action["label"] == "聯絡客服"
+        and action["uri"].endswith("/support")
         for action in actions
     )
 
@@ -819,15 +849,15 @@ def test_rich_menu_payload_uses_current_image_card_bounds() -> None:
     assert payload["size"] == {"width": 2500, "height": 1686}
     assert payload["chatBarText"] == "服務選單"
     assert len(payload["chatBarText"]) <= 14
-    assert len(payload["areas"]) <= 20
+    assert len(payload["areas"]) == 6
     assert labels == ["詢問參拜方式", "查看活動報名", "抽文化籤", "看主殿導覽", "查報名進度", "聯絡客服"]
     assert bounds == [
-        {"x": 86, "y": 310, "width": 1130, "height": 560},
-        {"x": 1284, "y": 310, "width": 1130, "height": 560},
-        {"x": 86, "y": 958, "width": 540, "height": 560},
-        {"x": 682, "y": 958, "width": 540, "height": 560},
-        {"x": 1278, "y": 958, "width": 540, "height": 560},
-        {"x": 1874, "y": 958, "width": 540, "height": 560},
+        {"x": 110, "y": 240, "width": 720, "height": 630},
+        {"x": 890, "y": 240, "width": 720, "height": 630},
+        {"x": 1670, "y": 240, "width": 720, "height": 630},
+        {"x": 110, "y": 920, "width": 720, "height": 630},
+        {"x": 890, "y": 920, "width": 720, "height": 630},
+        {"x": 1670, "y": 920, "width": 720, "height": 630},
     ]
     for area in bounds:
         assert area["x"] >= 0
