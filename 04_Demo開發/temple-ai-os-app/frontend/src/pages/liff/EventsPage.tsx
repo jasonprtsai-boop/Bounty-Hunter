@@ -140,7 +140,7 @@ export function EventsPage() {
     <Shell title="活動中心">
       <section className="event-page-hero visual-page-hero events-visual-hero">
         <figure>
-          <img src={templeExteriorImage} alt="萬春宮實景" />
+          <img src={templeExteriorImage} alt="萬春宮實景" loading="eager" decoding="async" />
         </figure>
         <div>
           <span className="tag">活動看板</span>
@@ -186,7 +186,7 @@ export function EventsPage() {
       {!loading && !error && featuredEvent ? (
         <section className="featured-event-panel" aria-label="本期主推活動">
           <figure>
-            <img src={templeExteriorImage} alt={featuredEvent.title} />
+            <img src={templeExteriorImage} alt={featuredEvent.title} loading="lazy" decoding="async" />
           </figure>
           <div>
             <span className="tag">本期主推</span>

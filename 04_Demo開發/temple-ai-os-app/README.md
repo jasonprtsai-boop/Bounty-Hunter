@@ -53,7 +53,9 @@ npm run dev:admin
 ```text
 LINE_CHANNEL_SECRET=
 LINE_CHANNEL_ACCESS_TOKEN=
-LINE_LOGIN_CHANNEL_ID=
+LINE_LOGIN_CHANNEL_ID=2011626054
+LINE_LIFF_ID=2011626054-2sedCKKE
+PUBLIC_LIFF_URL=https://liff.line.me/2011626054-2sedCKKE
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_ANON_KEY=
@@ -62,7 +64,7 @@ ADMIN_TOKENS=temple-staff:<password>,staff@example.com:<password>
 ADMIN_ACCOUNTS=
 ADMIN_SESSION_SECRET=
 VITE_API_BASE_URL=
-VITE_LIFF_ID=
+VITE_LIFF_ID=2011626054-2sedCKKE
 VITE_PUBLIC_SITE_BASE_URL=
 VITE_ADMIN_SITE_BASE_URL=
 ```
@@ -78,8 +80,8 @@ VITE_ADMIN_SITE_BASE_URL=
 3. Webhook URL 設為 `https://<render-api>.onrender.com/api/line/webhook`。
 4. 啟用 `Use webhook` 與 Webhook redelivery。
 5. 關閉會干擾服務回覆的自動回覆/關鍵字回覆。
-6. 建立 LINE Login Channel，再新增 LIFF App。
-7. LIFF Endpoint 設為 `https://<vercel-app>.vercel.app`，Scopes 使用 `openid`、`profile`。
+6. LINE Login Channel 使用 `2011626054`。
+7. LIFF App 使用 `2011626054-2sedCKKE`，Endpoint 設為 `https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site`，Scopes 使用 `openid`、`profile`。
 8. 使用 `scripts/create_rich_menu.py` 建立 Rich Menu。
 
 ## Supabase 正式模式

@@ -2,12 +2,12 @@
   "rich_menu": {
     "title": "萬春宮服務選單",
     "areas": [
-      { "label": "詢問參拜方式", "action": "message", "text": "我第一次來萬春宮，想知道參拜流程與交通資訊。" },
-      { "label": "查看活動報名", "action": "uri", "uri": "https://liff.line.me/2010938588-VJXpaoyH/events" },
-      { "label": "抽文化籤", "action": "uri", "uri": "https://liff.line.me/2010938588-VJXpaoyH/fortune" },
-      { "label": "看主殿導覽", "action": "uri", "uri": "https://liff.line.me/2010938588-VJXpaoyH/tour/main-hall" },
-      { "label": "查報名進度", "action": "uri", "uri": "https://liff.line.me/2010938588-VJXpaoyH/events?lookup=1" },
-      { "label": "聯絡客服", "action": "uri", "uri": "https://liff.line.me/2010938588-VJXpaoyH/support" }
+      { "label": "參拜問答", "action": "message", "text": "我第一次來萬春宮，想知道參拜流程與交通資訊。" },
+      { "label": "活動報名", "action": "uri", "uri": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/events" },
+      { "label": "抽文化籤", "action": "uri", "uri": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/fortune" },
+      { "label": "主殿導覽", "action": "uri", "uri": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/tour/main-hall" },
+      { "label": "報名進度", "action": "uri", "uri": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/events?lookup=1" },
+      { "label": "聯絡客服", "action": "uri", "uri": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/support" }
     ]
   },
   "flex_event_card_example": {
@@ -15,7 +15,7 @@
     "subtitle": "2026/08/27 14:00-17:00｜萬春宮",
     "body": "提供登記需求、提醒通知與後台統計；正式服務需由廟方確認。",
     "buttons": [
-      { "label": "前往活動報名", "action": "uri", "uri": "https://liff.line.me/2010938588-VJXpaoyH/events/evt_20260827_zhongyuan" }
+      { "label": "前往活動報名", "action": "uri", "uri": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/events/evt_20260827_zhongyuan" }
     ]
   },
   "reply_examples": [

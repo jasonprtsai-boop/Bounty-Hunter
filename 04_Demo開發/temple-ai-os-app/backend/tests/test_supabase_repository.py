@@ -20,6 +20,7 @@ class FakeSupabaseClient:
         self.inserted_webhook_ids: set[str] = set()
         self.messages: list[object] = []
         self.event_get_count = 0
+        self.registration_queries: list[dict[str, str] | None] = []
 
     def request(
         self,
@@ -93,6 +94,28 @@ class FakeSupabaseClient:
                     }
                 ],
             )
+        if method == "GET" and url.endswith("/event_registrations"):
+            self.registration_queries.append(params)
+            phone_filter = (params or {}).get("phone")
+            if phone_filter in {"eq.0912222333", "eq.0912-222-333"}:
+                return FakeResponse(
+                    200,
+                    [
+                        {
+                            "registration_id": "reg_phone_lookup",
+                            "event_id": "evt_supabase_test",
+                            "user_id": "line_user_1",
+                            "status": "confirmed",
+                            "party_size": 2,
+                            "reminder_opt_in": True,
+                            "created_at": "2026-09-01T10:00:00+00:00",
+                            "contact_name": "小安",
+                            "phone": phone_filter.removeprefix("eq."),
+                            "note": None,
+                        }
+                    ],
+                )
+            return FakeResponse(200, [])
         if method == "POST" and url.endswith("/messages"):
             self.messages.append(json)
             return FakeResponse(201, None)
@@ -111,6 +134,10 @@ class FakeSupabaseClient:
     ) -> FakeResponse:
         if url.endswith("/rpc/register_for_event"):
             body = dict(json)  # type: ignore[arg-type]
+            if body["p_event_id"] == "evt_registration_closed":
+                return FakeResponse(400, text='{"message":"event_registration_closed"}')
+            if body["p_event_id"] == "evt_party_size_exceeded":
+                return FakeResponse(400, text='{"message":"party_size_exceeded"}')
             return FakeResponse(
                 200,
                 [
@@ -266,6 +293,7 @@ def test_supabase_registration_uses_atomic_rpc(monkeypatch: pytest.MonkeyPatch) 
         supabase.RegistrationCreate(
             user_id="line_user_1",
             contact_name="小安",
+            phone="0912-222-333",
             party_size=2,
             reminder_opt_in=True,
         ),
@@ -274,6 +302,53 @@ def test_supabase_registration_uses_atomic_rpc(monkeypatch: pytest.MonkeyPatch) 
     assert registration.registration_id == "reg_rpc_test"
     assert registration.event_id == "evt_supabase_test"
     assert registration.party_size == 2
+    assert registration.phone == "0912222333"
+
+
+def test_supabase_lookup_registration_accepts_formatted_phone(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(supabase.httpx, "Client", FakeSupabaseClient)
+
+    repository = supabase.SupabaseRepository("https://example.supabase.co", "service-role")
+    results = repository.lookup_registrations(phone="0912-222-333")
+
+    assert results[0].registration_id == "reg_phone_lookup"
+    assert isinstance(repository.client, FakeSupabaseClient)
+    phone_queries = [
+        query.get("phone")
+        for query in repository.client.registration_queries
+        if query and query.get("phone")
+    ]
+    assert phone_queries == ["eq.0912222333", "eq.0912-222-333"]
+
+
+@pytest.mark.parametrize(
+    ("event_id", "expected_detail"),
+    [
+        ("evt_registration_closed", "event_registration_closed"),
+        ("evt_party_size_exceeded", "party_size_exceeded"),
+    ],
+)
+def test_supabase_registration_maps_rpc_business_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    event_id: str,
+    expected_detail: str,
+) -> None:
+    monkeypatch.setattr(supabase.httpx, "Client", FakeSupabaseClient)
+
+    repository = supabase.SupabaseRepository("https://example.supabase.co", "service-role")
+
+    with pytest.raises(ValueError, match=expected_detail):
+        repository.create_registration(
+            event_id,
+            supabase.RegistrationCreate(
+                user_id="line_user_1",
+                contact_name="小安",
+                party_size=2,
+                reminder_opt_in=True,
+            ),
+        )
 
 
 def test_supabase_support_ticket_keeps_contact_fields(monkeypatch: pytest.MonkeyPatch) -> None:

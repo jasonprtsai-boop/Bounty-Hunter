@@ -73,7 +73,7 @@ export function DeitiesPage() {
     <Shell title="神佛介紹">
       <section className="event-page-hero visual-page-hero deities-visual-hero">
         <figure>
-          <img src={templeExteriorImage} alt="萬春宮實景" />
+          <img src={templeExteriorImage} alt="萬春宮實景" loading="eager" decoding="async" />
         </figure>
         <div>
           <span className="tag">奉祀體系</span>

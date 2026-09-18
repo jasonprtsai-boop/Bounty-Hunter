@@ -16,6 +16,7 @@ import { Shell } from "../../components/AdminShell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch } from "../../lib/api";
 import { canPublishRelease, getStoredAdminRole } from "../../lib/adminPermissions";
+import { hasConfiguredLiffId, liffEntryUrl } from "../../lib/liff";
 import { PUBLIC_SITE_BASE_URL } from "../../lib/siteLinks";
 
 type RichMenuPublishResult = {
@@ -30,6 +31,9 @@ const stickerPreviewUrl = "/stickers";
 const lineManagerUrl = "https://manager.line.biz/account/@983zhzni";
 const businessProfileUrl = "https://page.line.biz/account-page/2010643275365275/profile";
 const publicSiteBaseUrl = PUBLIC_SITE_BASE_URL;
+const lineServiceEntryUrl = liffEntryUrl("/");
+const eventLookupUrl = liffEntryUrl("/events?lookup=1");
+const supportEntryUrl = liffEntryUrl("/support");
 const releaseChecklistStorageKey = "templeReleaseChecklist";
 
 const businessProfileFields = [
@@ -88,7 +92,7 @@ const accountSettingFields = [
   {
     label: "歡迎訊息",
     value:
-      "歡迎加入萬春宮線上服務。你可以點選下方選單詢問參拜方式、查看活動報名、抽文化籤、看主殿導覽、查報名進度或聯絡客服；擲筊問事可從線上服務入口進入。正式活動、開放時間與服務內容請以廟方公告為準。"
+      "歡迎加入萬春宮線上服務。你可以點選下方選單使用參拜問答、活動報名、抽文化籤、主殿導覽、報名進度或聯絡客服；擲筊問事可從線上服務入口進入。正式活動、開放時間與服務內容請以廟方公告為準。"
   },
   {
     label: "聊天回覆模式",
@@ -107,7 +111,7 @@ const accountSettingFields = [
 const publicLinks = [
   ["公開官網", `${publicSiteBaseUrl}/site`],
   ["LINE 社群入口", `${publicSiteBaseUrl}/community`],
-  ["LIFF 入口", "https://liff.line.me/2010938588-VJXpaoyH"],
+  [hasConfiguredLiffId() ? "LIFF 入口" : "LINE 入口（公開頁備援）", lineServiceEntryUrl],
   ["擲筊問事", `${publicSiteBaseUrl}/jiao`],
   ["加入好友", "https://line.me/R/ti/p/%40983zhzni"],
   ["貼圖小舖", `${publicSiteBaseUrl}/stickers`],
@@ -146,17 +150,17 @@ const broadcastExamples = [
   {
     title: "活動前一天提醒",
     value:
-      "【萬春宮活動提醒】\n你報名的活動將於明天開始。\n\n地點：萬春宮\n請以活動頁與廟方公告為準。\n\n查詢報名進度：\nhttps://liff.line.me/2010938588-VJXpaoyH/events?lookup=1\n\n正式活動、時間與服務內容請以廟方公告為準。"
+      `【萬春宮活動提醒】\n你報名的活動將於明天開始。\n\n地點：萬春宮\n請以活動頁與廟方公告為準。\n\n查詢報名進度：\n${eventLookupUrl}\n\n正式活動、時間與服務內容請以廟方公告為準。`
   },
   {
     title: "客服回覆追蹤",
     value:
-      "【萬春宮客服回覆】\n你先前留下的問題已有回覆。\n\n請開啟客服頁查看：\nhttps://liff.line.me/2010938588-VJXpaoyH/support\n\n廟務、活動與捐款問題仍請以廟方公告或服務人員說明為準。"
+      `【萬春宮客服回覆】\n你先前留下的問題已有回覆。\n\n請開啟客服頁查看：\n${supportEntryUrl}\n\n廟務、活動與捐款問題仍請以廟方公告或服務人員說明為準。`
   },
   {
     title: "服務發布前檢查",
     value:
-      `萬春宮線上服務今日檢查重點：\n1. LINE Rich Menu 服務入口\n2. 參拜問答與活動卡片\n3. LIFF 活動報名\n4. 抽籤與擲筊文化互動\n5. 後台管理與通知任務\n\n公開服務頁：\n${publicSiteBaseUrl}/site`
+      `萬春宮線上服務今日檢查重點：\n1. LINE Rich Menu 服務入口\n2. 參拜問答與活動卡片\n3. 活動報名入口\n4. 抽籤與擲筊文化互動\n5. 後台管理與通知任務\n\n公開服務頁：\n${publicSiteBaseUrl}/site`
   }
 ];
 
@@ -168,7 +172,7 @@ const releaseChecklist = [
   "Messaging API Webhook 驗證成功",
   "Rich Menu 已發布，詢問、活動、抽籤、導覽、查詢與客服入口可開啟；擲筊可從線上服務入口進入",
   "至少一篇 LINE VOOM 服務貼文已建立草稿或排程",
-  "手機 LINE 實測可開 LIFF 與活動頁",
+  "手機 LINE 實測可開有效 LIFF 或公開頁備援入口與活動頁",
   "貼圖素材已確認，等待 LINE Creators Market 送審或審核",
   "發布前已暖機 Render 後端"
 ];
@@ -230,7 +234,7 @@ export function AdminRelease() {
     if (
       !(await requestConfirmation({
         title: "發布 Rich Menu",
-        body: "發布後 LINE 帳號所有好友看到的底部選單會更新，請確認公開網址、LIFF 入口與服務提醒已完成檢查。",
+        body: "發布後 LINE 帳號所有好友看到的底部選單會更新，請確認公開網址、有效 LIFF 或公開頁備援入口與服務提醒已完成檢查。",
         confirmLabel: "發布選單",
         tone: "primary"
       }))

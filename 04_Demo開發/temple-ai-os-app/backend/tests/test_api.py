@@ -159,6 +159,7 @@ def test_create_demo_registration() -> None:
         json={
             "user_id": "demo_registration_new_user",
             "contact_name": "小安",
+            "phone": "0912-222-333",
             "party_size": 1,
             "reminder_opt_in": True,
         },
@@ -166,6 +167,7 @@ def test_create_demo_registration() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["data"]["event_id"] == "evt_demo_culture_talk"
+    assert payload["data"]["phone"] == "0912222333"
     assert payload["meta"]["demo_notice"]
 
 
@@ -178,6 +180,10 @@ def test_lookup_registration_progress_by_phone_or_registration_id() -> None:
     assert {item["masked_phone"] for item in phone_results} == {"0912***678"}
     assert all("event_title" in item for item in phone_results)
     assert all("phone" not in item for item in phone_results)
+
+    formatted_phone_response = client.get("/api/events/registrations/lookup?phone=0912-345-678")
+    assert formatted_phone_response.status_code == 200
+    assert len(formatted_phone_response.json()["data"]) >= 2
 
     id_response = client.get("/api/events/registrations/lookup?registration_id=reg_0004")
     assert id_response.status_code == 200
@@ -235,7 +241,7 @@ async def test_demo_liff_token_is_not_allowed_in_production(
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.setenv("DEMO_MODE", "true")
     monkeypatch.delenv("WAN_CHUN_GONG_SERVICE_MODE", raising=False)
-    monkeypatch.delenv("LINE_LOGIN_CHANNEL_ID", raising=False)
+    monkeypatch.setenv("LINE_LOGIN_CHANNEL_ID", "")
     get_settings.cache_clear()
 
     with pytest.raises(ValueError, match="LINE_LOGIN_CHANNEL_ID"):
@@ -805,13 +811,13 @@ def test_rich_menu_payload_links_to_events_and_fortune() -> None:
 
     assert any(
         action["type"] == "message"
-        and action["label"] == "詢問參拜方式"
+        and action["label"] == "參拜問答"
         and "第一次來萬春宮" in action["text"]
         for action in actions
     )
     assert any(
         action["type"] == "uri"
-        and action["label"] == "查看活動報名"
+        and action["label"] == "活動報名"
         and action["uri"].endswith("/events")
         for action in actions
     )
@@ -823,13 +829,13 @@ def test_rich_menu_payload_links_to_events_and_fortune() -> None:
     )
     assert any(
         action["type"] == "uri"
-        and action["label"] == "看主殿導覽"
+        and action["label"] == "主殿導覽"
         and action["uri"].endswith("/tour/main-hall")
         for action in actions
     )
     assert any(
         action["type"] == "uri"
-        and action["label"] == "查報名進度"
+        and action["label"] == "報名進度"
         and action["uri"].endswith("/events?lookup=1")
         for action in actions
     )
@@ -850,7 +856,7 @@ def test_rich_menu_payload_uses_current_image_card_bounds() -> None:
     assert payload["chatBarText"] == "服務選單"
     assert len(payload["chatBarText"]) <= 14
     assert len(payload["areas"]) == 6
-    assert labels == ["詢問參拜方式", "查看活動報名", "抽文化籤", "看主殿導覽", "查報名進度", "聯絡客服"]
+    assert labels == ["參拜問答", "活動報名", "抽文化籤", "主殿導覽", "報名進度", "聯絡客服"]
     assert bounds == [
         {"x": 110, "y": 240, "width": 720, "height": 630},
         {"x": 890, "y": 240, "width": 720, "height": 630},

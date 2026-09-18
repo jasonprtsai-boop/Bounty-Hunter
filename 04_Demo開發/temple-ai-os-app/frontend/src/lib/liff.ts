@@ -1,3 +1,5 @@
+import { PUBLIC_SITE_BASE_URL } from "./siteLinks";
+
 export type LiffState = {
   ready: boolean;
   inClient: boolean;
@@ -6,14 +8,26 @@ export type LiffState = {
   idToken: string;
 };
 
-const DEFAULT_LIFF_ID = "2010938588-VJXpaoyH";
+const KNOWN_INVALID_LIFF_IDS = new Set(["2010938588-VJXpaoyH"]);
 
 function isLocalHost() {
   return typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
 }
 
+function normalizedLiffId(value: string | undefined) {
+  const id = (value || "").trim();
+  if (!id || KNOWN_INVALID_LIFF_IDS.has(id)) {
+    return "";
+  }
+  return id;
+}
+
 export function getConfiguredLiffId() {
-  return import.meta.env.VITE_LIFF_ID || (isLocalHost() ? "" : DEFAULT_LIFF_ID);
+  return isLocalHost() ? "" : normalizedLiffId(import.meta.env.VITE_LIFF_ID);
+}
+
+export function hasConfiguredLiffId() {
+  return Boolean(getConfiguredLiffId());
 }
 
 export function liffEntryUrl(path?: string) {
@@ -23,7 +37,11 @@ export function liffEntryUrl(path?: string) {
       ? `${window.location.pathname}${window.location.search}${window.location.hash}`
       : "/");
   const normalizedPath = targetPath.startsWith("/") ? targetPath : `/${targetPath}`;
-  return `https://liff.line.me/${getConfiguredLiffId() || DEFAULT_LIFF_ID}${normalizedPath}`;
+  const liffId = getConfiguredLiffId();
+  if (liffId) {
+    return `https://liff.line.me/${liffId}${normalizedPath}`;
+  }
+  return `${PUBLIC_SITE_BASE_URL.replace(/\/$/, "")}${normalizedPath}`;
 }
 
 export function isLineAuthError(error: unknown) {

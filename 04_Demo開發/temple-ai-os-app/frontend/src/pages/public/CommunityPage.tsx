@@ -105,7 +105,7 @@ export function CommunityPage() {
             <figure className="phone-rich-menu-preview">
               <img
                 src={visualAssets.richMenu}
-                alt="LINE 底部選單示意：詢問參拜方式、查看活動報名、抽文化籤、看主殿導覽、查報名進度、聯絡客服。"
+                alt="LINE 底部選單示意：參拜問答、活動報名、抽文化籤、主殿導覽、報名進度、聯絡客服。"
               />
             </figure>
           </div>

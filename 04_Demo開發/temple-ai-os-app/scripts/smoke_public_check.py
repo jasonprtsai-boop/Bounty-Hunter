@@ -11,7 +11,7 @@ import httpx
 
 DEFAULT_FRONTEND_BASE_URL = "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site"
 DEFAULT_API_BASE_URL = "https://temple-ai-os-api.onrender.com"
-DEFAULT_LIFF_URL = "https://liff.line.me/2010938588-VJXpaoyH"
+DEFAULT_LIFF_URL = ""
 DEFAULT_ADD_FRIEND_URL = "https://line.me/R/ti/p/%40983zhzni"
 
 
@@ -95,7 +95,7 @@ def run_check(client: httpx.Client, check: Check, attempts: int = 3) -> None:
 def main() -> None:
     frontend = base_url("PUBLIC_FRONTEND_BASE_URL", DEFAULT_FRONTEND_BASE_URL)
     api = base_url("PUBLIC_API_BASE_URL", DEFAULT_API_BASE_URL)
-    liff_url = os.getenv("PUBLIC_LIFF_URL", DEFAULT_LIFF_URL)
+    liff_url = os.getenv("PUBLIC_LIFF_URL", DEFAULT_LIFF_URL).strip()
     add_friend_url = os.getenv("PUBLIC_LINE_ADD_FRIEND_URL", DEFAULT_ADD_FRIEND_URL)
 
     checks = [
@@ -155,9 +155,15 @@ def main() -> None:
         Check("privacy page", f"{frontend}/privacy", expect_html_route("/privacy")),
         Check("terms page", f"{frontend}/terms", expect_html_route("/terms")),
         Check("Flex event hero image", f"{frontend}/assets/flex/event-card.png", expect_image),
-        Check("LIFF entry URL", liff_url, expect_status(200, 301, 302, 303, 307, 308)),
         Check("LINE add friend URL", add_friend_url, expect_status(200, 301, 302, 303, 307, 308)),
     ]
+    if liff_url:
+        checks.insert(
+            -1,
+            Check("LIFF entry URL", liff_url, expect_status(200, 301, 302, 303, 307, 308)),
+        )
+    else:
+        print("[SKIP] LIFF entry URL: PUBLIC_LIFF_URL is not configured")
 
     with httpx.Client(timeout=30, follow_redirects=True) as client:
         for check in checks:

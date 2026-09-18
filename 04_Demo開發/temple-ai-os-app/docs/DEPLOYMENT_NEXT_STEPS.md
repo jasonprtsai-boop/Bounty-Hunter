@@ -11,8 +11,9 @@ LEGACY_ALIAS_URL=https://wanchun-gong-service.jasonprtsai.chatgpt.site
 API_BASE_URL=https://temple-ai-os-api.onrender.com
 PRIVACY_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/privacy
 TERMS_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/terms
-LINE_LIFF_ID=2010938588-VJXpaoyH
-LINE_LIFF_URL=https://liff.line.me/2010938588-VJXpaoyH
+LINE_LOGIN_CHANNEL_ID=2011626054
+LINE_LIFF_ID=2011626054-2sedCKKE
+PUBLIC_LIFF_URL=https://liff.line.me/2011626054-2sedCKKE
 LINE_OFFICIAL_ACCOUNT_BASIC_ID=@983zhzni
 LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 ```
@@ -24,7 +25,7 @@ LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 - Backend `/health`, `/api/events`, and `/api/temple/profile` verified from the public URL.
 - LINE Login privacy policy URL configured.
 - LINE Login terms URL configured.
-- LIFF app created.
+- Valid LIFF app created under LINE Login channel `2011626054`; current LIFF ID is `2011626054-2sedCKKE`.
 - LINE Official Account created: `萬春宮線上服務`, Basic ID `@983zhzni`.
 - Messaging API enabled for channel `2010991408`.
 - Admin frontend now requires username/password login; the legacy token is no longer bundled in public frontend code.
@@ -98,8 +99,8 @@ API_BASE_URL=https://temple-ai-os-api.onrender.com
 FRONTEND_BASE_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
 ALLOWED_ORIGINS=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site,https://wanchun-gong-service.jasonprtsai.chatgpt.site,https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site
 LINE_CHANNEL_ID=2010991408
-LINE_LOGIN_CHANNEL_ID=2010938588
-LINE_LIFF_ID=2010938588-VJXpaoyH
+LINE_LOGIN_CHANNEL_ID=2011626054
+LINE_LIFF_ID=2011626054-2sedCKKE
 LINE_SKIP_SIGNATURE_VALIDATION=false
 RAG_SERVICE_CACHE_TTL_SECONDS=300
 EVENT_CACHE_TTL_SECONDS=60
@@ -166,7 +167,7 @@ Required frontend environment for rebuilds:
 
 ```text
 VITE_API_BASE_URL=https://temple-ai-os-api.onrender.com
-VITE_LIFF_ID=2010938588-VJXpaoyH
+VITE_LIFF_ID=2011626054-2sedCKKE
 VITE_LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 VITE_LINE_OPENCHAT_URL=
 VITE_LINE_STICKER_STORE_URL=<set after LINE Creators Market approval>
@@ -180,7 +181,7 @@ https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/community
 https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/stickers
 https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/privacy
 https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/terms
-https://liff.line.me/2010938588-VJXpaoyH
+https://liff.line.me/2011626054-2sedCKKE
 ```
 
 ## 6. Sticker release
@@ -236,9 +237,9 @@ Run `scripts/smoke_public_check.py` before a service rehearsal, then complete th
 - Add friend URL opens `@983zhzni`.
 - Public site opens without login.
 - Public backend `/health` returns `status=ok`.
-- LIFF URL opens in LINE.
+- LIFF URL opens in LINE if `VITE_LIFF_ID` / `PUBLIC_LIFF_URL` is configured; otherwise public web routes must open without a LIFF 404.
 - Rich Menu appears after adding the official account.
-- Tapping LIFF buttons opens the deployed frontend in LINE.
+- Tapping LINE menu buttons opens either the valid LIFF app or the deployed public frontend without a 404.
 - LINE webhook Verify succeeds.
 - Text message to the official account reaches `/api/line/webhook`.
 - Service reply is sent through Messaging API.

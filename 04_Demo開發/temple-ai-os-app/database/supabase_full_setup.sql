@@ -474,6 +474,10 @@ create index if not exists event_registrations_event_status_idx
 create index if not exists event_registrations_user_created_idx
   on event_registrations (user_id, created_at desc);
 
+create index if not exists event_registrations_phone_created_idx
+  on event_registrations (phone, created_at desc)
+  where phone is not null;
+
 create index if not exists messages_user_created_idx
   on messages (user_id, created_at desc);
 

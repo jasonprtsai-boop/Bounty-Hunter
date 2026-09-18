@@ -1,0 +1,558 @@
+[
+  {
+    "surface": "backend",
+    "path": "/health",
+    "status": 200,
+    "seconds": 0.69,
+    "final_url": "https://temple-ai-os-api.onrender.com/health",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    },
+    "count": null,
+    "data": {
+      "status": "ok",
+      "app_env": "production"
+    }
+  },
+  {
+    "surface": "backend",
+    "path": "/api/events",
+    "status": 200,
+    "seconds": 0.233,
+    "final_url": "https://temple-ai-os-api.onrender.com/api/events",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    },
+    "count": 6,
+    "events": [
+      {
+        "event_id": "evt_20260806_guansheng",
+        "date": "2026-08-06",
+        "status": "upcoming",
+        "requires_registration": false,
+        "capacity": null,
+        "registered_count": 0
+      },
+      {
+        "event_id": "evt_20260818_mazu_305",
+        "date": "2026-08-18",
+        "status": "upcoming",
+        "requires_registration": false,
+        "capacity": null,
+        "registered_count": 0
+      },
+      {
+        "event_id": "evt_20260827_zhongyuan",
+        "date": "2026-08-27",
+        "status": "open",
+        "requires_registration": true,
+        "capacity": 120,
+        "registered_count": 78
+      },
+      {
+        "event_id": "evt_demo_worship_intro",
+        "date": "2026-09-07",
+        "status": "open",
+        "requires_registration": true,
+        "capacity": 30,
+        "registered_count": 18
+      },
+      {
+        "event_id": "evt_demo_culture_talk",
+        "date": "2026-09-14",
+        "status": "open",
+        "requires_registration": true,
+        "capacity": 50,
+        "registered_count": 34
+      },
+      {
+        "event_id": "evt_demo_calligraphy",
+        "date": "2026-09-20",
+        "status": "open",
+        "requires_registration": true,
+        "capacity": 60,
+        "registered_count": 42
+      }
+    ]
+  },
+  {
+    "surface": "backend",
+    "path": "/api/deities",
+    "status": 200,
+    "seconds": 0.212,
+    "final_url": "https://temple-ai-os-api.onrender.com/api/deities",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    },
+    "count": 7
+  },
+  {
+    "surface": "backend",
+    "path": "/api/temple/profile",
+    "status": 200,
+    "seconds": 0.263,
+    "final_url": "https://temple-ai-os-api.onrender.com/api/temple/profile",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    },
+    "count": null
+  },
+  {
+    "surface": "backend",
+    "path": "/api/tour/spots/main-hall",
+    "status": 200,
+    "seconds": 0.285,
+    "final_url": "https://temple-ai-os-api.onrender.com/api/tour/spots/main-hall",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    },
+    "count": null
+  },
+  {
+    "surface": "backend",
+    "path": "/api/admin/dashboard/summary",
+    "status": 401,
+    "seconds": 0.232,
+    "final_url": "https://temple-ai-os-api.onrender.com/api/admin/dashboard/summary",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    },
+    "count": null
+  },
+  {
+    "surface": "backend",
+    "path": "/api/member/registrations",
+    "status": 401,
+    "seconds": 0.254,
+    "final_url": "https://temple-ai-os-api.onrender.com/api/member/registrations",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    },
+    "count": null
+  },
+  {
+    "surface": "backend",
+    "path": "/openapi.json",
+    "status": 200,
+    "seconds": 2.235,
+    "final_url": "https://temple-ai-os-api.onrender.com/openapi.json",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    },
+    "count": null,
+    "routes": {
+      "/api/line/webhook": [
+        "post"
+      ],
+      "/api/liff/session/verify": [
+        "post"
+      ],
+      "/api/fortune/draw": [
+        "post"
+      ],
+      "/api/tour/spots/{code}": [
+        "get"
+      ],
+      "/api/support/tickets": [
+        "post"
+      ],
+      "/api/chat": [
+        "post"
+      ],
+      "/api/deities": [
+        "get"
+      ],
+      "/api/deities/{deity_id}": [
+        "get"
+      ],
+      "/api/temple/profile": [
+        "get"
+      ],
+      "/api/events": [
+        "get"
+      ],
+      "/api/events/registrations/lookup": [
+        "get"
+      ],
+      "/api/events/{event_id}": [
+        "get"
+      ],
+      "/api/events/{event_id}/registrations": [
+        "post"
+      ],
+      "/api/member/profile": [
+        "get"
+      ],
+      "/api/member/registrations": [
+        "get"
+      ],
+      "/api/admin/auth/login": [
+        "post"
+      ],
+      "/api/admin/auth/me": [
+        "get"
+      ],
+      "/api/admin/accounts": [
+        "get",
+        "post"
+      ],
+      "/api/admin/accounts/{username}": [
+        "put",
+        "delete"
+      ],
+      "/api/admin/dashboard/summary": [
+        "get"
+      ],
+      "/api/admin/events": [
+        "get",
+        "post"
+      ],
+      "/api/admin/events/{event_id}": [
+        "put",
+        "delete"
+      ],
+      "/api/admin/deities": [
+        "get",
+        "post"
+      ],
+      "/api/admin/deities/{deity_id}": [
+        "put",
+        "delete"
+      ],
+      "/api/admin/registrations": [
+        "get"
+      ],
+      "/api/admin/registrations/summary": [
+        "get"
+      ],
+      "/api/admin/registrations/{registration_id}": [
+        "patch"
+      ],
+      "/api/admin/support-tickets": [
+        "get"
+      ],
+      "/api/admin/support-tickets/{ticket_id}": [
+        "patch",
+        "delete"
+      ],
+      "/api/admin/knowledge-documents": [
+        "get",
+        "post"
+      ],
+      "/api/admin/knowledge-documents/{document_id}": [
+        "get",
+        "put",
+        "delete"
+      ],
+      "/api/admin/notification-jobs": [
+        "get",
+        "post"
+      ],
+      "/api/admin/notification-jobs/{job_id}": [
+        "put",
+        "delete"
+      ],
+      "/api/admin/notification-jobs/{job_id}/send-test": [
+        "post"
+      ],
+      "/api/admin/notification-jobs/send-due": [
+        "post"
+      ],
+      "/api/admin/rich-menu/publish": [
+        "post"
+      ],
+      "/api/admin/notifications/{user_id}/send-test": [
+        "post"
+      ],
+      "/health": [
+        "get"
+      ]
+    }
+  },
+  {
+    "surface": "public",
+    "path": "/",
+    "status": 200,
+    "seconds": 2.41,
+    "final_url": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/",
+    "headers": {
+      "content-type": "text/html",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    }
+  },
+  {
+    "surface": "public",
+    "path": "/events",
+    "status": 200,
+    "seconds": 2.554,
+    "final_url": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/events/",
+    "headers": {
+      "content-type": "text/html",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    }
+  },
+  {
+    "surface": "public",
+    "path": "/api/events",
+    "status": 200,
+    "seconds": 0.595,
+    "final_url": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/api/events",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin"
+    },
+    "count": 6,
+    "events": [
+      {
+        "event_id": "evt_20260806_guansheng",
+        "date": "2026-08-06",
+        "status": "upcoming",
+        "requires_registration": false,
+        "capacity": null,
+        "registered_count": 0
+      },
+      {
+        "event_id": "evt_20260818_mazu_305",
+        "date": "2026-08-18",
+        "status": "upcoming",
+        "requires_registration": false,
+        "capacity": null,
+        "registered_count": 0
+      },
+      {
+        "event_id": "evt_20260827_zhongyuan",
+        "date": "2026-08-27",
+        "status": "open",
+        "requires_registration": true,
+        "capacity": 120,
+        "registered_count": 78
+      },
+      {
+        "event_id": "evt_demo_worship_intro",
+        "date": "2026-09-07",
+        "status": "open",
+        "requires_registration": true,
+        "capacity": 30,
+        "registered_count": 18
+      },
+      {
+        "event_id": "evt_demo_culture_talk",
+        "date": "2026-09-14",
+        "status": "open",
+        "requires_registration": true,
+        "capacity": 50,
+        "registered_count": 34
+      },
+      {
+        "event_id": "evt_demo_calligraphy",
+        "date": "2026-09-20",
+        "status": "open",
+        "requires_registration": true,
+        "capacity": 60,
+        "registered_count": 42
+      }
+    ]
+  },
+  {
+    "surface": "public",
+    "path": "/deities",
+    "status": 200,
+    "seconds": 0.381,
+    "final_url": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/deities/",
+    "headers": {
+      "content-type": "text/html",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    }
+  },
+  {
+    "surface": "public",
+    "path": "/fortune",
+    "status": 200,
+    "seconds": 0.619,
+    "final_url": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/fortune/",
+    "headers": {
+      "content-type": "text/html",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    }
+  },
+  {
+    "surface": "public",
+    "path": "/support",
+    "status": 200,
+    "seconds": 0.605,
+    "final_url": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/support/",
+    "headers": {
+      "content-type": "text/html",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    }
+  },
+  {
+    "surface": "public",
+    "path": "/privacy",
+    "status": 200,
+    "seconds": 0.603,
+    "final_url": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/privacy/",
+    "headers": {
+      "content-type": "text/html",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    }
+  },
+  {
+    "surface": "public",
+    "path": "/terms",
+    "status": 200,
+    "seconds": 0.645,
+    "final_url": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/terms/",
+    "headers": {
+      "content-type": "text/html",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    }
+  },
+  {
+    "surface": "public",
+    "path": "/admin",
+    "status": 404,
+    "seconds": 0.107,
+    "final_url": "https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/admin",
+    "headers": {
+      "content-type": "text/plain;charset=UTF-8",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin"
+    }
+  },
+  {
+    "surface": "admin",
+    "path": "/admin",
+    "status": 200,
+    "seconds": 5.374,
+    "final_url": "https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site/admin/",
+    "headers": {
+      "content-type": "text/html",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    }
+  },
+  {
+    "surface": "admin",
+    "path": "/admin/settings",
+    "status": 200,
+    "seconds": 0.678,
+    "final_url": "https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site/",
+    "headers": {
+      "content-type": "text/html",
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "referrer-policy": null
+    }
+  },
+  {
+    "surface": "admin",
+    "path": "/api/admin/auth/me",
+    "status": 401,
+    "seconds": 0.303,
+    "final_url": "https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site/api/admin/auth/me",
+    "headers": {
+      "content-type": "application/json",
+      "cache-control": null,
+      "content-security-policy": null,
+      "x-frame-options": null,
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin"
+    },
+    "count": null
+  },
+  {
+    "surface": "backend",
+    "path": "/api/admin/auth/login",
+    "method": "POST",
+    "status": 403,
+    "detail": "Invalid admin credentials"
+  },
+  {
+    "surface": "backend",
+    "path": "/api/liff/session/verify",
+    "method": "POST",
+    "status": 401,
+    "detail": "invalid_liff_token"
+  }
+]

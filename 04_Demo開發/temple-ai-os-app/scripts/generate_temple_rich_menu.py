@@ -3,8 +3,8 @@
 Theme: 臺中萬春宮 藍興媽祖三百年古蹟殿宇美學 (Imperial Temple Aesthetic)
 - Colors: 硃砂絳紅 (#751818 -> #480E0E), 廟宇泥金 (#D4AF37, #F2C94C), 沉檀深底 (#181311).
 - Layout: 2 x 3 Balanced Matrix (兩排三欄 黃金宮閣排列):
-    Row 1: [詢問參拜方式] [查看活動報名] [抽文化籤]
-    Row 2: [看主殿導覽]   [查報名進度]   [聯絡客服]
+    Row 1: [參拜問答] [活動報名] [抽文化籤]
+    Row 2: [主殿導覽] [報名進度] [聯絡客服]
 - Dimensions: 2500 x 1686 px (Standard LINE Full Rich Menu).
 """
 
@@ -87,7 +87,7 @@ def draw_corner_fretwork(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, in
 # -----------------------------------------------------------------------------
 
 def draw_incense_burner_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, size: int = 70) -> None:
-    """Icon 1: 詢問參拜方式 - 宣德三足香爐與裊裊祥雲香煙 (Dignified Incense Burner)."""
+    """Icon 1: 參拜問答 - 宣德三足香爐與裊裊祥雲香煙 (Dignified Incense Burner)."""
     # 1. Warm golden aura
     for r in range(size + 24, size - 10, -6):
         alpha = int(25 * (1 - (r - size) / 34))
@@ -124,7 +124,7 @@ def draw_incense_burner_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, size: 
 
 
 def draw_sacred_scroll_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, size: int = 70) -> None:
-    """Icon 2: 查看活動報名 - 吉祥金冊卷軸與朱砂法印 (Imperial Decree Scroll)."""
+    """Icon 2: 活動報名 - 吉祥金冊卷軸與朱砂法印 (Imperial Decree Scroll)."""
     for r in range(size + 20, size - 10, -5):
         alpha = int(22 * (1 - (r - size) / 30))
         draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=(245, 197, 66, alpha), width=3)
@@ -184,7 +184,7 @@ def draw_fortune_canister_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, size
 
 
 def draw_temple_shrine_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, size: int = 70) -> None:
-    """Icon 4: 看主殿導覽 - 萬春宮三百年飛簷重簷殿閣 (Majestic Temple Palace Architecture)."""
+    """Icon 4: 主殿導覽 - 萬春宮三百年飛簷重簷殿閣 (Majestic Temple Palace Architecture)."""
     for r in range(size + 24, size - 10, -5):
         alpha = int(24 * (1 - (r - size) / 34))
         draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=(245, 197, 66, alpha), width=3)
@@ -228,7 +228,7 @@ def draw_temple_shrine_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, size: i
 
 
 def draw_jade_seal_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, size: int = 70) -> None:
-    """Icon 5: 查報名進度 - 萬春宮神聖信印與功德卷宗 (Auspicious Seal & Registry Ledger)."""
+    """Icon 5: 報名進度 - 萬春宮神聖信印與功德卷宗 (Auspicious Seal & Registry Ledger)."""
     for r in range(size + 22, size - 10, -5):
         alpha = int(22 * (1 - (r - size) / 32))
         draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=(245, 197, 66, alpha), width=3)
@@ -317,24 +317,13 @@ def build_temple_rich_menu() -> Image.Image:
     draw.rounded_rectangle((plaque_box[0] + 10, plaque_box[1] + 10, plaque_box[2] - 10, plaque_box[3] - 10), radius=18, outline="#F5C542", width=2)
     draw_corner_fretwork(draw, (plaque_box[0] + 12, plaque_box[1] + 12, plaque_box[2] - 12, plaque_box[3] - 12), inset=8, size=24, color="#F5C542", width=2)
 
-    fnt_title = get_font(56, bold=True)
-    fnt_sub = get_font(28, bold=False)
+    fnt_title = get_font(76, bold=True)
 
-    header_title = "臺中萬春宮 藍興媽祖 ｜ 智慧服務主選單"
+    header_title = "萬春宮服務選單"
     b_ht = fnt_title.getbbox(header_title)
     ht_w = b_ht[2] - b_ht[0]
-    draw.text(((width - ht_w) // 2, 58), header_title, font=fnt_title, fill="#FFFDF8")
-
-    sub_title = "三百年開基靈感・慈悲庇祐 ｜ 祈福・參拜・解籤・活動即時服務"
-    b_st = fnt_sub.getbbox(sub_title)
-    st_w = b_st[2] - b_st[0]
-    sub_x = (width - st_w) // 2
-    draw.text((sub_x, 138), sub_title, font=fnt_sub, fill="#DFC694")
-
-    draw.line([(sub_x - 110, 153), (sub_x - 20, 153)], fill="#D4AF37", width=2)
-    draw.ellipse((sub_x - 15, 150, sub_x - 9, 156), fill="#F5C542")
-    draw.line([(sub_x + st_w + 20, 153), (sub_x + st_w + 110, 153)], fill="#D4AF37", width=2)
-    draw.ellipse((sub_x + st_w + 9, 150, sub_x + st_w + 15, 156), fill="#F5C542")
+    draw.text(((width - ht_w) // 2, 68), header_title, font=fnt_title, fill="#FFFDF8")
+    draw.line([(1010, 156), (1490, 156)], fill="#D4AF37", width=4)
 
     # -------------------------------------------------------------
     # 6-CARD 2x3 BALANCED TEMPLE MATRIX
@@ -345,18 +334,14 @@ def build_temple_rich_menu() -> Image.Image:
         # ROW 1
         {
             "box": (110, 240, 830, 870),
-            "title": "詢問參拜方式",
-            "subtitle": "初訪流程・參拜動線指引",
-            "pill": "AI 智慧解惑",
+            "title": "參拜問答",
             "icon_func": draw_incense_burner_icon,
             "top_rgb": (120, 26, 26),
             "bot_rgb": (65, 14, 14),
         },
         {
             "box": (890, 240, 1610, 870),
-            "title": "查看活動報名",
-            "subtitle": "四季法會・祈福慶典登記",
-            "pill": "線上即時報名",
+            "title": "活動報名",
             "icon_func": draw_sacred_scroll_icon,
             "top_rgb": (120, 26, 26),
             "bot_rgb": (65, 14, 14),
@@ -364,8 +349,6 @@ def build_temple_rich_menu() -> Image.Image:
         {
             "box": (1670, 240, 2390, 870),
             "title": "抽文化籤",
-            "subtitle": "聖母靈籤・白話生活智慧",
-            "pill": "祈請聖母指引",
             "icon_func": draw_fortune_canister_icon,
             "top_rgb": (120, 26, 26),
             "bot_rgb": (65, 14, 14),
@@ -373,18 +356,14 @@ def build_temple_rich_menu() -> Image.Image:
         # ROW 2
         {
             "box": (110, 920, 830, 1550),
-            "title": "看主殿導覽",
-            "subtitle": "三百年古蹟・建築藻井巡禮",
-            "pill": "古蹟建築文史",
+            "title": "主殿導覽",
             "icon_func": draw_temple_shrine_icon,
             "top_rgb": (112, 24, 24),
             "bot_rgb": (60, 12, 12),
         },
         {
             "box": (890, 920, 1610, 1550),
-            "title": "查報名進度",
-            "subtitle": "手機序號・登記進度速查",
-            "pill": "序號進度速查",
+            "title": "報名進度",
             "icon_func": draw_jade_seal_icon,
             "top_rgb": (112, 24, 24),
             "bot_rgb": (60, 12, 12),
@@ -392,17 +371,13 @@ def build_temple_rich_menu() -> Image.Image:
         {
             "box": (1670, 920, 2390, 1550),
             "title": "聯絡客服",
-            "subtitle": "廟務執事・人工便民諮詢",
-            "pill": "廟務執事專線",
             "icon_func": draw_palace_lantern_icon,
             "top_rgb": (112, 24, 24),
             "bot_rgb": (60, 12, 12),
         },
     ]
 
-    fnt_card_title = get_font(58, bold=True)
-    fnt_card_sub = get_font(29, bold=True)
-    fnt_pill = get_font(26, bold=True)
+    fnt_card_title = get_font(96, bold=True)
 
     for item in cards_data:
         box = item["box"]
@@ -424,45 +399,22 @@ def build_temple_rich_menu() -> Image.Image:
         draw_corner_fretwork(draw, box, inset=22, size=32, color="#F5C542", width=3)
 
         # 5. Icon Rendered in Upper Center
-        item["icon_func"](draw, cx, y0 + 175, size=75)
+        item["icon_func"](draw, cx, y0 + 190, size=82)
 
         # 6. Primary Title
         t = item["title"]
         b_t = fnt_card_title.getbbox(t)
         tw = b_t[2] - b_t[0]
+        title_y = y0 + 405
         # Text shadow for carved plaque relief feel
-        draw.text(((x0 + x1 - tw) // 2 + 2, y0 + 365 + 2), t, font=fnt_card_title, fill="#2A0808")
-        draw.text(((x0 + x1 - tw) // 2, y0 + 365), t, font=fnt_card_title, fill="#FFFDF8")
-
-        # 7. Subtitle
-        st = item["subtitle"]
-        b_st = fnt_card_sub.getbbox(st)
-        stw = b_st[2] - b_st[0]
-        draw.text(((x0 + x1 - stw) // 2, y0 + 446), st, font=fnt_card_sub, fill="#FDE68A")
-
-        # 8. Bottom Seal / Action Pill
-        pw, ph = 420, 62
-        pill_box = (cx - pw // 2, y0 + 518, cx + pw // 2, y0 + 518 + ph)
-        draw.rounded_rectangle(pill_box, radius=31, fill="#320A0A", outline="#D4AF37", width=2)
-
-        pt = item["pill"]
-        b_pt = fnt_pill.getbbox(pt)
-        ptw = b_pt[2] - b_pt[0]
-        # Calculate combined width of text + arrow to center perfectly
-        arrow_w = 14
-        total_w = ptw + 14 + arrow_w
-        start_x = cx - total_w // 2
-
-        draw.text((start_x, pill_box[1] + 13), pt, font=fnt_pill, fill="#FFF1C5")
-        # Draw custom crisp gold arrow triangle (no font glyph dependency)
-        ax = start_x + ptw + 14
-        ay = pill_box[1] + 31
-        draw.polygon([(ax, ay - 8), (ax + 10, ay), (ax, ay + 8)], fill="#F5C542")
+        draw.text(((x0 + x1 - tw) // 2 + 3, title_y + 3), t, font=fnt_card_title, fill="#2A0808")
+        draw.text(((x0 + x1 - tw) // 2, title_y), t, font=fnt_card_title, fill="#FFFDF8")
+        draw.line([(cx - 120, y0 + 535), (cx + 120, y0 + 535)], fill="#F5C542", width=5)
 
     # -------------------------------------------------------------
     # BOTTOM TOGGLE BAR: "服務選單" (y: 1580 ~ 1686)
     # -------------------------------------------------------------
-    fnt_bar = get_font(30, bold=True)
+    fnt_bar = get_font(38, bold=True)
     bar_txt = "▲  開啟 / 關閉服務選單"
     b_bar = fnt_bar.getbbox(bar_txt)
     bar_w = b_bar[2] - b_bar[0]

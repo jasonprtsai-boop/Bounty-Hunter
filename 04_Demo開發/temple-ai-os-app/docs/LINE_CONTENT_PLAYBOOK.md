@@ -62,13 +62,13 @@ Suggested asset: `assets/banners/events.png`
 ```text
 活動報名也可以從 LINE 開始。
 
-使用者在 LINE 收到活動卡片後，直接開啟 LIFF 表單完成報名，後台同步看到報名狀態與提醒任務。
+使用者在 LINE 收到活動卡片後，可直接開啟有效 LIFF 或公開頁備援入口完成報名，後台同步看到報名狀態與提醒任務。
 
 提醒：正式名額、時間與參加規則仍以廟方公告為準。
 
 活動入口：https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/events
 
-#活動報名 #LIFF #LINE服務 #萬春宮服務
+#活動報名 #LINE服務 #萬春宮服務
 ```
 
 ### Sticker preview
@@ -117,7 +117,7 @@ Use these only for small tests or explicitly opted-in users. For production, rev
 請以活動頁與廟方公告為準。
 
 查看報名紀錄：
-https://liff.line.me/2010938588-VJXpaoyH/member
+https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/events?lookup=1
 
 正式活動、時間與服務內容請以廟方公告為準。
 ```
@@ -129,7 +129,7 @@ https://liff.line.me/2010938588-VJXpaoyH/member
 你先前留下的問題已有回覆。
 
 請開啟客服頁查看：
-https://liff.line.me/2010938588-VJXpaoyH/support
+https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/support
 
 正式廟務、活動與捐款問題仍請以廟方公告或正式窗口為準。
 ```
@@ -140,7 +140,7 @@ https://liff.line.me/2010938588-VJXpaoyH/support
 萬春宮線上服務今日檢查重點：
 1. LINE Rich Menu 服務入口
 2. 參拜問答與活動卡片
-3. LIFF 活動報名
+3. 有效 LIFF 或公開頁備援活動報名
 4. 後台管理與通知任務
 
 公開服務頁：
@@ -155,4 +155,4 @@ https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site/site
 - Rich Menu is published and opens the deployed URLs.
 - At least one LINE VOOM post is drafted or scheduled.
 - No post claims official temple operation, donation handling, payment collection, or guaranteed staff response.
-- A real mobile LINE account has checked Add Friend, Rich Menu, LIFF, and service replies.
+- A real mobile LINE account has checked Add Friend, Rich Menu, valid LIFF or public fallback routes, and service replies.

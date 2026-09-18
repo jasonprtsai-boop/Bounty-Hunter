@@ -474,7 +474,7 @@ class LocalRepository:
             reminder_opt_in=payload.reminder_opt_in,
             created_at=datetime.now(timezone.utc).isoformat(),
             contact_name=payload.contact_name,
-            phone=payload.phone,
+            phone=_phone_digits(payload.phone) or payload.phone,
             note=payload.note,
         )
         self.registrations.append(registration)
@@ -850,6 +850,8 @@ class SupabaseRepository:
                 "invalid_party_size",
                 "duplicate_registration",
                 "event_capacity_exceeded",
+                "event_registration_closed",
+                "party_size_exceeded",
             ]:
                 if detail in text:
                     raise ValueError(detail)
@@ -1038,7 +1040,12 @@ class SupabaseRepository:
     ) -> list[Registration]:
         results: dict[str, Registration] = {}
         registration_key = (registration_id or "").strip()
-        phone_key = (phone or "").strip()
+        phone_raw_key = (phone or "").strip()
+        phone_keys = [
+            key
+            for key in (_phone_digits(phone_raw_key), phone_raw_key)
+            if key
+        ]
         if registration_key:
             rows = self._select(
                 "event_registrations",
@@ -1051,7 +1058,7 @@ class SupabaseRepository:
             for row in rows:
                 item = Registration.model_validate(row)
                 results[item.registration_id] = item
-        if phone_key:
+        for phone_key in dict.fromkeys(phone_keys):
             rows = self._select(
                 "event_registrations",
                 {"phone": f"eq.{phone_key}", "order": "created_at.desc", "limit": "10"},
@@ -1068,7 +1075,7 @@ class SupabaseRepository:
                 "p_event_id": event_id,
                 "p_user_id": payload.user_id,
                 "p_contact_name": payload.contact_name,
-                "p_phone": payload.phone,
+                "p_phone": _phone_digits(payload.phone) or payload.phone,
                 "p_party_size": payload.party_size,
                 "p_reminder_opt_in": payload.reminder_opt_in,
                 "p_note": payload.note,

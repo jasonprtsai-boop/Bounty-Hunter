@@ -257,6 +257,8 @@ export function PublicSitePage() {
                 src={visualAssets.culture.altar}
                 alt="萬春宮正殿金身神龕"
                 className="hero-main-photo"
+                loading="eager"
+                decoding="async"
               />
               <figcaption className="hero-photo-caption">
                 <span className="caption-tag">萬春宮正殿</span>
@@ -280,7 +282,7 @@ export function PublicSitePage() {
               return (
                 <Link className="flagship-service-card" key={card.title} to={card.to}>
                   <figure className="service-card-cover">
-                    <img src={card.image} alt={card.title} />
+                    <img src={card.image} alt={card.title} loading="lazy" decoding="async" />
                     <span className="service-card-tag">{card.tag}</span>
                   </figure>
                   <div className="service-card-info">
@@ -312,7 +314,7 @@ export function PublicSitePage() {
             {heritageHighlights.map((item) => (
               <Link to={item.to} key={item.title} className="heritage-card">
                 <figure className="heritage-cover">
-                  <img src={item.image} alt={item.title} />
+                  <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
                   <span className="tag">{item.category}</span>
                 </figure>
                 <div className="heritage-body">
@@ -418,7 +420,12 @@ export function PublicSitePage() {
               </div>
             </div>
             <figure className="line-banner-media">
-              <img src={visualAssets.culture.lineService} alt="萬春宮 LINE 數位便民服務" />
+              <img
+                src={visualAssets.culture.lineService}
+                alt="萬春宮 LINE 數位便民服務"
+                loading="lazy"
+                decoding="async"
+              />
             </figure>
           </div>
         </section>

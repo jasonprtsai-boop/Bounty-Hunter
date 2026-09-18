@@ -58,10 +58,10 @@ export const visualAssets = {
   richMenu: asset("/assets/rich-menu/main-2500x1686.png"),
   stickerMain: asset("/assets/stickers/spring-fortune-messenger/main.png"),
   culture: {
-    altar: asset("/assets/culture/altar.jpg"),
-    ceremony: asset("/assets/culture/ceremony.jpg"),
-    fortune: asset("/assets/culture/fortune.jpg"),
-    lineService: asset("/assets/culture/line-service.jpg")
+    altar: asset("/assets/culture/altar.webp"),
+    ceremony: asset("/assets/culture/ceremony.webp"),
+    fortune: asset("/assets/culture/fortune.webp"),
+    lineService: asset("/assets/culture/line-service.webp")
   }
 };
 

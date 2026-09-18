@@ -1,0 +1,32 @@
+{
+  "production_database_failure": {
+    "repository": "LocalRepository",
+    "fallback_default": true
+  },
+  "failed_webhook_redelivery": {
+    "deliveries": 2,
+    "reply_attempts": 1,
+    "marked_processed": true
+  },
+  "registration_push_failure": {
+    "handler_outcome": "RuntimeError",
+    "registrations_added": 1
+  },
+  "anonymous_phone_lookup": {
+    "records_returned": 2,
+    "authentication_required": false
+  },
+  "notification_concurrent_dispatch": {
+    "jobs": 1,
+    "dispatchers": 2,
+    "send_calls": 2
+  },
+  "missing_session_secret": {
+    "username_password_configured": true,
+    "uses_known_default_secret": true
+  },
+  "account_revocation_database_failure": {
+    "accepted_actor": "revoked-audit-user",
+    "role": "owner"
+  }
+}

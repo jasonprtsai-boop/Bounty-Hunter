@@ -31,8 +31,8 @@ Sensitive values are intentionally not recorded here:
 
 ## LINE Login
 
-- Channel name: `宮廟官網`
-- Channel ID: `2010938588`
+- Channel name: `Temple AI OS LIFF`
+- Channel ID: `2011626054`
 - Status: Developing
 - Privacy policy URL configured
 - Terms URL configured
@@ -40,13 +40,13 @@ Sensitive values are intentionally not recorded here:
 
 ## LIFF
 
-- LIFF app name: `萬春宮線上服務`
-- LIFF ID: `2010938588-VJXpaoyH`
-- LIFF URL: `https://liff.line.me/2010938588-VJXpaoyH`
+- LIFF app name: `Temple AI OS`
+- LIFF ID: `2011626054-2sedCKKE`
+- LIFF URL: `https://liff.line.me/2011626054-2sedCKKE`
 - Endpoint URL: `https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site`
 - Size: Full
 - Scopes: `openid`, `profile`
-- Add friend option: On (normal)
+- Add friend option: Off
 
 ## Current operational notes
 
@@ -56,7 +56,7 @@ Sensitive values are intentionally not recorded here:
 - Admin login uses the account/email + password credentials stored in Render. For `ADMIN_TOKENS=temple-staff:xxxx`, enter username `temple-staff` and password `xxxx` in `/admin`; for `ADMIN_USERNAME=staff@example.com`, enter the Email and password.
 - Messaging API webhook URL is `https://temple-ai-os-api.onrender.com/api/line/webhook`; webhook, redelivery, and verification are enabled.
 - Rich Menu has been published through the admin API.
-- New Rich Menu source now prioritizes 詢問參拜方式, 查看活動報名, 抽文化籤, 看主殿導覽, 查報名進度, and 聯絡客服; republish after the frontend deployment.
+- New Rich Menu source now prioritizes 詢問參拜方式, 查看活動報名, 抽文化籤, 看主殿導覽, 查報名進度, and 聯絡客服; LIFF-capable links can now use `2011626054-2sedCKKE`. Republish after the frontend deployment.
 - New LINE OA profile image is prepared at `assets/brand/line-oa-profile-v2.png`; upload it in LINE Official Account Manager.
 - New LINE OA profile background is prepared at `assets/brand/line-oa-profile-background-v1.png`; upload it in LINE Official Account Manager.
 - LINE business profile copy, public links, and the release checklist are prepared in `docs/LINE_BUSINESS_PROFILE_SETUP.md` and mirrored on `/admin/release`.

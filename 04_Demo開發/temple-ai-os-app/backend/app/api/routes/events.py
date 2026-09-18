@@ -46,8 +46,16 @@ def _masked_phone(value: str | None) -> str | None:
     return f"{digits[:4]}***{digits[-3:]}"
 
 
-def _registration_lookup_result(registration: Registration) -> RegistrationLookupResult | None:
-    event = get_repository().get_event(registration.event_id)
+def _phone_digits(value: str | None) -> str | None:
+    digits = "".join(character for character in value or "" if character.isdigit())
+    return digits or None
+
+
+def _registration_lookup_result(
+    registration: Registration,
+    event_lookup: dict[str, Event],
+) -> RegistrationLookupResult | None:
+    event = event_lookup.get(registration.event_id)
     if not event:
         return None
     return RegistrationLookupResult(
@@ -83,15 +91,17 @@ async def lookup_registrations(
     phone: str | None = Query(default=None, min_length=6, max_length=32),
     registration_id: str | None = Query(default=None, min_length=3, max_length=64),
 ) -> ApiResponse[list[RegistrationLookupResult]]:
-    phone_key = phone.strip() if phone else None
+    phone_key = phone.strip() if phone and _phone_digits(phone) else None
     registration_key = registration_id.strip() if registration_id else None
     if not phone_key and not registration_key:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="lookup_key_required")
 
+    repo = get_repository()
+    event_lookup = {event.event_id: event for event in repo.list_events()}
     results = [
         result
-        for item in get_repository().lookup_registrations(phone_key, registration_key)
-        if (result := _registration_lookup_result(item)) is not None
+        for item in repo.lookup_registrations(phone_key, registration_key)
+        if (result := _registration_lookup_result(item, event_lookup)) is not None
     ]
     return ApiResponse(
         data=results,

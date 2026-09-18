@@ -9,10 +9,10 @@ This checklist is for Wan Chun Gong LINE service setup. Do not commit LINE secre
 - Official Account Basic ID: `@983zhzni`
 - Add friend URL: `https://line.me/R/ti/p/%40983zhzni`
 - Messaging API Channel ID: `2010991408`
-- LINE Login Channel: `宮廟官網`
-- LINE Login Channel ID: `2010938588`
-- LIFF ID: `2010938588-VJXpaoyH`
-- LIFF URL: `https://liff.line.me/2010938588-VJXpaoyH`
+- LINE Login Channel: `Temple AI OS LIFF`
+- LINE Login Channel ID: `2011626054`
+- LIFF ID: `2011626054-2sedCKKE`
+- LIFF URL: `https://liff.line.me/2011626054-2sedCKKE`
 - Public frontend: `https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site`
 - Legacy alias: `https://wanchun-gong-service.jasonprtsai.chatgpt.site`
 
@@ -21,8 +21,8 @@ This checklist is for Wan Chun Gong LINE service setup. Do not commit LINE secre
 - Frontend is public.
 - LINE Login privacy policy URL is set.
 - LINE Login terms URL is set.
-- LIFF app is created.
-- Add friend option is On (normal).
+- Valid LIFF app is active under LINE Login channel `2011626054`.
+- Add friend option is Off for the LIFF app.
 
 ## 3. Messaging API channel
 
@@ -39,7 +39,9 @@ This checklist is for Wan Chun Gong LINE service setup. Do not commit LINE secre
 Backend:
 
 ```text
-LINE_LIFF_ID=2010938588-VJXpaoyH
+LINE_LOGIN_CHANNEL_ID=2011626054
+LINE_LIFF_ID=2011626054-2sedCKKE
+PUBLIC_LIFF_URL=https://liff.line.me/2011626054-2sedCKKE
 FRONTEND_BASE_URL=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site
 ALLOWED_ORIGINS=https://temple-ai-os-demo-20260828.jeremy40713.chatgpt.site,https://wanchun-gong-service.jasonprtsai.chatgpt.site,https://temple-ai-os-admin-20260828.jeremy40713.chatgpt.site
 ```
@@ -48,7 +50,7 @@ Frontend after backend deployment:
 
 ```text
 VITE_API_BASE_URL=https://<render-api>.onrender.com
-VITE_LIFF_ID=2010938588-VJXpaoyH
+VITE_LIFF_ID=2011626054-2sedCKKE
 VITE_LINE_ADD_FRIEND_URL=https://line.me/R/ti/p/%40983zhzni
 ```
 
@@ -66,9 +68,9 @@ LINE_CHANNEL_ACCESS_TOKEN=<secret>
 ## 6. Validation
 
 - The add friend URL opens `萬春宮線上服務`.
-- LIFF URL opens in LINE.
+- LIFF URL opens in LINE if configured; otherwise the public web fallback opens without a LIFF 404.
 - Rich Menu appears after adding the official account.
-- Tapping LIFF buttons opens the deployed frontend.
+- Tapping LINE menu buttons opens either the valid LIFF app or the deployed public frontend.
 - LIFF profile loads after login.
 - LINE webhook Verify succeeds.
 - Text messages reach the backend webhook.

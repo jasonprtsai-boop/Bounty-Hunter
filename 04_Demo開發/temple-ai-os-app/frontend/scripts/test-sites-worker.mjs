@@ -14,10 +14,12 @@ const { default: worker } = await import(`${pathToFileURL(workerPath).href}?t=${
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
+  ".jpg": "image/jpeg",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".png": "image/png",
-  ".svg": "image/svg+xml"
+  ".svg": "image/svg+xml",
+  ".webp": "image/webp"
 };
 
 function resolveAsset(pathname) {
@@ -92,6 +94,9 @@ for (const pathname of expectedRoutes) {
   if (response.status !== 200) {
     throw new Error(`${pathname} returned ${response.status}`);
   }
+  if (response.headers.get("cache-control") !== "public, max-age=0, must-revalidate") {
+    throw new Error(`${pathname} returned unexpected cache-control`);
+  }
   const html = await response.text();
   if (!html.includes('<div id="root"></div>')) {
     throw new Error(`${pathname} did not return the app shell`);
@@ -130,6 +135,9 @@ try {
   if (proxyResponse.status !== 200) {
     throw new Error(`/api/events proxy returned ${proxyResponse.status}`);
   }
+  if (proxyResponse.headers.get("cache-control") !== "no-store") {
+    throw new Error("/api/events proxy returned unexpected cache-control");
+  }
   const proxyPayload = await proxyResponse.json();
   if (proxyPayload.data?.[0]?.event_id !== "evt_test_proxy") {
     throw new Error("/api/events proxy returned unexpected payload");
@@ -151,6 +159,22 @@ for (const pathname of [
   if (bytes.byteLength < 1024) {
     throw new Error(`${pathname} returned an unexpectedly small file`);
   }
+  if (response.headers.get("cache-control") !== "public, max-age=604800, stale-while-revalidate=86400") {
+    throw new Error(`${pathname} returned unexpected static asset cache-control`);
+  }
+}
+
+const appShell = await readFile(resolve(dist, "index.html"), "utf8");
+const immutableMatch = appShell.match(/\/assets\/[^"']+-[a-zA-Z0-9_-]{8,}\.(?:js|css)/);
+if (!immutableMatch) {
+  throw new Error("Could not find a hashed app asset in index.html");
+}
+const immutableResponse = await worker.fetch(new Request(`https://example.test${immutableMatch[0]}`), env);
+if (immutableResponse.status !== 200) {
+  throw new Error(`${immutableMatch[0]} returned ${immutableResponse.status}`);
+}
+if (immutableResponse.headers.get("cache-control") !== "public, max-age=31536000, immutable") {
+  throw new Error(`${immutableMatch[0]} returned unexpected immutable cache-control`);
 }
 
 console.log(`${surface} Sites worker routes OK`);

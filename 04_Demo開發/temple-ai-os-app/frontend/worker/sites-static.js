@@ -5,11 +5,28 @@ const SECURITY_HEADERS = {
 };
 const SITE_SURFACE = "__SITE_SURFACE__";
 const DEFAULT_API_UPSTREAM = "https://temple-ai-os-api.onrender.com";
+const IMMUTABLE_ASSET_PATTERN = /^\/assets\/[^/]+-[a-zA-Z0-9_-]{8,}\.[a-zA-Z0-9]+$/;
 
-function withHeaders(response) {
+function cacheControlForAssetPath(pathname) {
+  if (pathname === "/index.html" || pathname.endsWith("/index.html")) {
+    return "public, max-age=0, must-revalidate";
+  }
+  if (IMMUTABLE_ASSET_PATTERN.test(pathname)) {
+    return "public, max-age=31536000, immutable";
+  }
+  if (pathname.startsWith("/assets/")) {
+    return "public, max-age=604800, stale-while-revalidate=86400";
+  }
+  return "public, max-age=3600";
+}
+
+function withHeaders(response, cacheControl) {
   const headers = new Headers(response.headers);
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     headers.set(key, value);
+  }
+  if (cacheControl) {
+    headers.set("cache-control", response.status >= 400 ? "no-store" : cacheControl);
   }
   return new Response(response.body, {
     status: response.status,
@@ -56,21 +73,22 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api" || url.pathname.startsWith("/api/")) {
-      return withHeaders(await fetchApi(request, env));
+      return withHeaders(await fetchApi(request, env), "no-store");
     }
     if (shouldBlockPath(url.pathname)) {
-      return withHeaders(new Response("Not found", { status: 404 }));
+      return withHeaders(new Response("Not found", { status: 404 }), "no-store");
     }
 
     const assetRequest = shouldFallbackToIndex(url.pathname)
       ? new Request(new URL("/index.html", request.url), request)
       : request;
+    const assetPathname = new URL(assetRequest.url).pathname;
     let response = await fetchAsset(assetRequest, env);
 
     if (response.status === 404 && shouldFallbackToIndex(url.pathname)) {
       response = await fetchAsset(new Request(new URL("/index.html", request.url), request), env);
     }
 
-    return withHeaders(response);
+    return withHeaders(response, cacheControlForAssetPath(assetPathname));
   }
 };
