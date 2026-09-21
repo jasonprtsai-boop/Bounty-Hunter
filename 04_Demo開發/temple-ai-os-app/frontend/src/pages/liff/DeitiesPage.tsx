@@ -3,7 +3,7 @@ import { BookOpen, Calendar, MapPin, Sparkles } from "lucide-react";
 import { Shell } from "../../components/Shell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type Deity } from "../../lib/api";
-import { canUsePreviewFallback, isLocalPreview, localPreviewDeities } from "../../lib/localPreviewData";
+import { localPreviewDeities } from "../../lib/localPreviewData";
 import { templeExteriorImage } from "../../lib/visualAssets";
 
 function deityMark(name: string) {
@@ -22,27 +22,40 @@ function deityMark(name: string) {
 }
 
 export function DeitiesPage() {
-  const [deities, setDeities] = useState<Deity[]>([]);
+  const [deities, setDeities] = useState<Deity[]>(localPreviewDeities);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (isLocalPreview()) {
-      setDeities(localPreviewDeities);
-      setLoading(false);
-      return;
-    }
-    apiFetch<Deity[]>("/api/deities")
-      .then(setDeities)
-      .catch((err) => {
-        if (canUsePreviewFallback()) {
-          setDeities(localPreviewDeities);
-          return;
+    let mounted = true;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 3500);
+
+    apiFetch<Deity[]>("/api/deities", { signal: controller.signal })
+      .then((items) => {
+        if (mounted && Array.isArray(items) && items.length > 0) {
+          setDeities(items);
+          setError("");
         }
-        setError(err instanceof Error ? err.message : "神佛資料暫時無法讀取");
       })
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (mounted && (!deities || deities.length === 0)) {
+          setError(err instanceof Error ? err.message : "神佛資料暫時無法讀取");
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          window.clearTimeout(timeout);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
   }, []);
 
   const categories = useMemo(() => {

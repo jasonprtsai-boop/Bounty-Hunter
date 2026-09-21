@@ -4,7 +4,7 @@ import { BookOpen, ChevronLeft, ChevronRight, Compass, MapPin, Navigation, Shiel
 import { Shell } from "../../components/Shell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch } from "../../lib/api";
-import { canUsePreviewFallback, findLocalPreviewTourSpot, isLocalPreview, localPreviewTourSpots, type LocalTourSpot } from "../../lib/localPreviewData";
+import { findLocalPreviewTourSpot, localPreviewTourSpots, type LocalTourSpot } from "../../lib/localPreviewData";
 import { templeExteriorImage, templePhotoGallery } from "../../lib/visualAssets";
 
 const visitTips = [
@@ -16,8 +16,8 @@ const visitTips = [
 export function TourSpotPage() {
   const { code } = useParams();
   const currentCode = code || "main-hall";
-  const [spot, setSpot] = useState<LocalTourSpot | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [spot, setSpot] = useState<LocalTourSpot | null>(() => findLocalPreviewTourSpot(currentCode));
+  const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
 
   const allSpots = localPreviewTourSpots;
@@ -30,22 +30,26 @@ export function TourSpotPage() {
   }, [currentCode]);
 
   async function loadSpot() {
-    setLoading(true);
-    setLoadError("");
-    if (isLocalPreview()) {
-      setSpot(findLocalPreviewTourSpot(currentCode));
+    const local = findLocalPreviewTourSpot(currentCode);
+    if (local) {
+      setSpot(local);
       setLoading(false);
-      return;
     }
+    setLoadError("");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 3500);
+
     try {
-      setSpot(await apiFetch<LocalTourSpot>(`/api/tour/spots/${currentCode}`));
-    } catch (err) {
-      if (canUsePreviewFallback()) {
-        setSpot(findLocalPreviewTourSpot(currentCode));
-        return;
+      const data = await apiFetch<LocalTourSpot>(`/api/tour/spots/${currentCode}`, { signal: controller.signal });
+      if (data) {
+        setSpot(data);
       }
-      setLoadError(err instanceof Error ? err.message : "讀取導覽資料失敗");
+    } catch (err) {
+      if (!local) {
+        setLoadError(err instanceof Error ? err.message : "讀取導覽資料失敗");
+      }
     } finally {
+      window.clearTimeout(timeout);
       setLoading(false);
     }
   }

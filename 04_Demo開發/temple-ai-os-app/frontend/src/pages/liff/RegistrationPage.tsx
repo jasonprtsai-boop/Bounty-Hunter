@@ -10,10 +10,10 @@ import { getLiffSession } from "../../lib/session";
 
 export function RegistrationPage() {
   const { eventId } = useParams();
-  const [event, setEvent] = useState<EventItem | null>(null);
+  const [event, setEvent] = useState<EventItem | null>(() => findLocalPreviewEvent(eventId));
   const [created, setCreated] = useState<Registration | null>(null);
   const [createdMode, setCreatedMode] = useState<"live" | "demo" | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -39,26 +39,26 @@ export function RegistrationPage() {
       setLoading(false);
       return;
     }
-    setLoading(true);
-    setLoadError("");
-    if (isLocalPreview()) {
-      const localEvent = findLocalPreviewEvent(eventId);
-      if (localEvent) {
-        setEvent(localEvent);
-        setLoading(false);
-        return;
-      }
+    const localEvent = findLocalPreviewEvent(eventId);
+    if (localEvent) {
+      setEvent(localEvent);
+      setLoading(false);
     }
+    setLoadError("");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 3500);
+
     try {
-      setEvent(await apiFetch<EventItem>(`/api/events/${eventId}`));
-    } catch (err) {
-      const localEvent = isLocalPreview() ? findLocalPreviewEvent(eventId) : null;
-      if (localEvent) {
-        setEvent(localEvent);
-        return;
+      const data = await apiFetch<EventItem>(`/api/events/${eventId}`, { signal: controller.signal });
+      if (data) {
+        setEvent(data);
       }
-      setLoadError(err instanceof Error ? err.message : "讀取活動失敗");
+    } catch (err) {
+      if (!localEvent) {
+        setLoadError(err instanceof Error ? err.message : "讀取活動失敗");
+      }
     } finally {
+      window.clearTimeout(timeout);
       setLoading(false);
     }
   }

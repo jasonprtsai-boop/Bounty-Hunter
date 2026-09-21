@@ -825,31 +825,31 @@ def test_rich_menu_payload_links_to_events_and_fortune() -> None:
     assert any(
         action["type"] == "uri"
         and action["label"] == "活動報名"
-        and action["uri"].endswith("/events")
+        and action["uri"].rstrip("/").endswith("/events")
         for action in actions
     )
     assert any(
         action["type"] == "uri"
         and action["label"] == "抽文化籤"
-        and action["uri"].endswith("/fortune")
+        and action["uri"].rstrip("/").endswith("/fortune")
         for action in actions
     )
     assert any(
         action["type"] == "uri"
         and action["label"] == "主殿導覽"
-        and action["uri"].endswith("/tour/main-hall")
+        and action["uri"].rstrip("/").endswith("/tour/main-hall")
         for action in actions
     )
     assert any(
         action["type"] == "uri"
         and action["label"] == "報名進度"
-        and action["uri"].endswith("/events?lookup=1")
+        and "/events/?lookup=1" in action["uri"]
         for action in actions
     )
     assert any(
         action["type"] == "uri"
         and action["label"] == "聯絡客服"
-        and action["uri"].endswith("/support")
+        and action["uri"].rstrip("/").endswith("/support")
         for action in actions
     )
 

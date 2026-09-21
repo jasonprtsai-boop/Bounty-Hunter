@@ -36,7 +36,7 @@ def build_main_menu_payload(frontend_base_url: str) -> dict[str, Any]:
                 "action": {
                     "type": "uri",
                     "label": "活動報名",
-                    "uri": f"{base}/events",
+                    "uri": f"{base}/events/",
                 },
             },
             {
@@ -44,7 +44,7 @@ def build_main_menu_payload(frontend_base_url: str) -> dict[str, Any]:
                 "action": {
                     "type": "uri",
                     "label": "抽文化籤",
-                    "uri": f"{base}/fortune",
+                    "uri": f"{base}/fortune/",
                 },
             },
             {
@@ -52,7 +52,7 @@ def build_main_menu_payload(frontend_base_url: str) -> dict[str, Any]:
                 "action": {
                     "type": "uri",
                     "label": "主殿導覽",
-                    "uri": f"{base}/tour/main-hall",
+                    "uri": f"{base}/tour/main-hall/",
                 },
             },
             {
@@ -60,7 +60,7 @@ def build_main_menu_payload(frontend_base_url: str) -> dict[str, Any]:
                 "action": {
                     "type": "uri",
                     "label": "報名進度",
-                    "uri": f"{base}/events?lookup=1",
+                    "uri": f"{base}/events/?lookup=1",
                 },
             },
             {
@@ -68,7 +68,7 @@ def build_main_menu_payload(frontend_base_url: str) -> dict[str, Any]:
                 "action": {
                     "type": "uri",
                     "label": "聯絡客服",
-                    "uri": f"{base}/support",
+                    "uri": f"{base}/support/",
                 },
             },
         ],

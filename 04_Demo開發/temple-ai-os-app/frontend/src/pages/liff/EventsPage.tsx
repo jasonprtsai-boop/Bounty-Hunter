@@ -34,8 +34,8 @@ const eventCategoryLinks: Array<{
 
 export function EventsPage() {
   const location = useLocation();
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState<EventItem[]>(localPreviewEvents);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [lookupPhone, setLookupPhone] = useState("");
   const [lookupCode, setLookupCode] = useState("");
@@ -44,24 +44,19 @@ export function EventsPage() {
   const [lookupResults, setLookupResults] = useState<RegistrationLookupResult[] | null>(null);
 
   useEffect(() => {
-    if (isLocalPreview()) {
-      setEvents(localPreviewEvents);
-      setLoading(false);
-      return undefined;
-    }
     let mounted = true;
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 5000);
+    const timeout = window.setTimeout(() => controller.abort(), 3500);
 
     apiFetch<EventItem[]>("/api/events", { signal: controller.signal })
       .then((items) => {
-        if (mounted) {
+        if (mounted && Array.isArray(items) && items.length > 0) {
           setEvents(items);
           setError("");
         }
       })
       .catch((eventError) => {
-        if (mounted) {
+        if (mounted && (!events || events.length === 0)) {
           if (canUsePreviewFallback()) {
             setEvents(localPreviewEvents);
             setError("");

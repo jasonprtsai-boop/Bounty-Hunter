@@ -5,7 +5,7 @@ import { Shell } from "../../components/Shell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type EventItem } from "../../lib/api";
 import { eventRouteKey } from "../../lib/eventLinks";
-import { canUsePreviewFallback, findLocalPreviewEvent, isLocalPreview } from "../../lib/localPreviewData";
+import { findLocalPreviewEvent } from "../../lib/localPreviewData";
 
 const statusLabels: Record<string, string> = {
   open: "可報名",
@@ -18,8 +18,8 @@ const statusLabels: Record<string, string> = {
 
 export function EventDetailPage() {
   const { eventId } = useParams();
-  const [event, setEvent] = useState<EventItem | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [event, setEvent] = useState<EventItem | null>(() => findLocalPreviewEvent(eventId));
+  const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [now, setNow] = useState(() => Date.now());
 
@@ -39,26 +39,26 @@ export function EventDetailPage() {
       setLoading(false);
       return;
     }
-    setLoading(true);
-    setLoadError("");
-    if (isLocalPreview()) {
-      const localEvent = findLocalPreviewEvent(eventId);
-      if (localEvent) {
-        setEvent(localEvent);
-        setLoading(false);
-        return;
-      }
+    const localEvent = findLocalPreviewEvent(eventId);
+    if (localEvent) {
+      setEvent(localEvent);
+      setLoading(false);
     }
+    setLoadError("");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 3500);
+
     try {
-      setEvent(await apiFetch<EventItem>(`/api/events/${eventId}`));
-    } catch (err) {
-      const localEvent = canUsePreviewFallback() ? findLocalPreviewEvent(eventId) : null;
-      if (localEvent) {
-        setEvent(localEvent);
-        return;
+      const data = await apiFetch<EventItem>(`/api/events/${eventId}`, { signal: controller.signal });
+      if (data) {
+        setEvent(data);
       }
-      setLoadError(err instanceof Error ? err.message : "讀取活動失敗");
+    } catch (err) {
+      if (!localEvent) {
+        setLoadError(err instanceof Error ? err.message : "讀取活動失敗");
+      }
     } finally {
+      window.clearTimeout(timeout);
       setLoading(false);
     }
   }
