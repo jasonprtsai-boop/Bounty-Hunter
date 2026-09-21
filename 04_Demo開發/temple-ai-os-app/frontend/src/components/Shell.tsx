@@ -49,12 +49,18 @@ export function Shell({ title, children }: ShellProps) {
             <small>LINE 服務入口</small>
           </span>
         </Link>
-        <div className="topbar-context symbol-context" aria-label="宮廟服務符號">
-          <span>香</span>
-          <span>籤</span>
-          <span>筊</span>
-          <span>安</span>
-        </div>
+        <nav className="public-nav-links" aria-label="官網導覽">
+          <Link to="/">首頁</Link>
+          <a href="/#services">服務導覽</a>
+          <a href="/#heritage">古蹟看點</a>
+          <a href="/#guide">參拜指南</a>
+          <Link to="/events" className={location.pathname.startsWith("/events") ? "active" : ""}>
+            法會活動
+          </Link>
+          <Link to="/deities" className={location.pathname.startsWith("/deities") ? "active" : ""}>
+            神佛介紹
+          </Link>
+        </nav>
       </header>
       <QuickSideMenu />
       <main className="main">

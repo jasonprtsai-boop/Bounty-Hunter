@@ -55,11 +55,13 @@ export function CommunityPage() {
             <small>LINE 官方服務指引</small>
           </span>
         </Link>
-        <nav aria-label="社群導覽">
-          <Link to="/">官網首頁</Link>
-          <Link to="/events">活動消息</Link>
+        <nav className="public-nav-links" aria-label="官網導覽">
+          <Link to="/">首頁</Link>
+          <a href="/#services">服務導覽</a>
+          <a href="/#heritage">古蹟看點</a>
+          <a href="/#guide">參拜指南</a>
+          <Link to="/events">法會活動</Link>
           <Link to="/deities">神佛介紹</Link>
-          <Link to="/privacy">隱私權保護</Link>
         </nav>
       </header>
       <QuickSideMenu />

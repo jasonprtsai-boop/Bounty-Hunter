@@ -76,10 +76,13 @@ export function LegalPage({ kind }: LegalPageProps) {
             <small>{title}</small>
           </span>
         </Link>
-        <nav aria-label="法務頁導覽">
-          <Link to="/site">官網首頁</Link>
-          <Link to="/community">LINE 服務</Link>
-          <Link to={isPrivacy ? "/terms" : "/privacy"}>{isPrivacy ? "使用條款" : "隱私權"}</Link>
+        <nav className="public-nav-links" aria-label="官網導覽">
+          <Link to="/">首頁</Link>
+          <a href="/#services">服務導覽</a>
+          <a href="/#heritage">古蹟看點</a>
+          <a href="/#guide">參拜指南</a>
+          <Link to="/events">法會活動</Link>
+          <Link to="/deities">神佛介紹</Link>
         </nav>
       </header>
       <QuickSideMenu />
