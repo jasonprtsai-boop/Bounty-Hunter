@@ -37,6 +37,10 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist/client"
     },
+    define: {
+      __APP_BUILD_TIME__: JSON.stringify(Date.now()),
+      __APP_VERSION__: JSON.stringify("0.1.0")
+    },
     server: {
       port: 5173,
       strictPort: false

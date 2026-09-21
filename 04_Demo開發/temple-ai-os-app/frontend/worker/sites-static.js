@@ -8,8 +8,14 @@ const DEFAULT_API_UPSTREAM = "https://temple-ai-os-api.onrender.com";
 const IMMUTABLE_ASSET_PATTERN = /^\/assets\/[^/]+-[a-zA-Z0-9_-]{8,}\.[a-zA-Z0-9]+$/;
 
 function cacheControlForAssetPath(pathname) {
-  if (pathname === "/index.html" || pathname.endsWith("/index.html")) {
-    return "public, max-age=0, must-revalidate";
+  if (
+    pathname === "/index.html" ||
+    pathname.endsWith("/index.html") ||
+    pathname === "/version.json" ||
+    pathname.endsWith("/version.json") ||
+    !pathname.startsWith("/assets/")
+  ) {
+    return "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0";
   }
   if (IMMUTABLE_ASSET_PATTERN.test(pathname)) {
     return "public, max-age=31536000, immutable";
@@ -17,7 +23,7 @@ function cacheControlForAssetPath(pathname) {
   if (pathname.startsWith("/assets/")) {
     return "public, max-age=604800, stale-while-revalidate=86400";
   }
-  return "public, max-age=3600";
+  return "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0";
 }
 
 function withHeaders(response, cacheControl) {
@@ -27,6 +33,11 @@ function withHeaders(response, cacheControl) {
   }
   if (cacheControl) {
     headers.set("cache-control", response.status >= 400 ? "no-store" : cacheControl);
+    if (cacheControl.includes("no-cache") || cacheControl.includes("no-store") || response.status >= 400) {
+      headers.set("pragma", "no-cache");
+      headers.set("expires", "0");
+      headers.set("surrogate-control", "no-store");
+    }
   }
   return new Response(response.body, {
     status: response.status,

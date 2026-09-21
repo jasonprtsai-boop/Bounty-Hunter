@@ -94,8 +94,11 @@ for (const pathname of expectedRoutes) {
   if (response.status !== 200) {
     throw new Error(`${pathname} returned ${response.status}`);
   }
-  if (response.headers.get("cache-control") !== "public, max-age=0, must-revalidate") {
-    throw new Error(`${pathname} returned unexpected cache-control`);
+  if (response.headers.get("cache-control") !== "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0") {
+    throw new Error(`${pathname} returned unexpected cache-control: ${response.headers.get("cache-control")}`);
+  }
+  if (response.headers.get("pragma") !== "no-cache") {
+    throw new Error(`${pathname} returned unexpected pragma header`);
   }
   const html = await response.text();
   if (!html.includes('<div id="root"></div>')) {

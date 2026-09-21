@@ -75,4 +75,17 @@ for (const route of appRoutes) {
   await copyFile(appShell, rootRouteIndex);
 }
 
+const versionPayload = JSON.stringify(
+  {
+    version: "0.1.0",
+    buildTime: Date.now(),
+    buildDate: new Date().toISOString(),
+    surface
+  },
+  null,
+  2
+);
+await writeFile(resolve(distRoot, "version.json"), versionPayload);
+await writeFile(resolve(clientDist, "version.json"), versionPayload);
+
 console.log(`Prepared ${surface} Sites worker: ${target}`);

@@ -6,3 +6,6 @@ declare module "@surface-app" {
   const App: ComponentType;
   export default App;
 }
+
+declare const __APP_BUILD_TIME__: number;
+declare const __APP_VERSION__: string;
