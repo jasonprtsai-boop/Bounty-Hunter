@@ -1,6 +1,7 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { CalendarDays, ChevronDown, Headphones, Home, Map, ScrollText, Sparkles } from "lucide-react";
+import { CalendarDays, Headphones, Home, Map, ScrollText, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { QuickSideMenu } from "./QuickSideMenu";
 
 type ShellProps = {
   title: string;
@@ -54,28 +55,8 @@ export function Shell({ title, children }: ShellProps) {
           <span>筊</span>
           <span>安</span>
         </div>
-        <div className="topbar-actions">
-          <details className="service-drawer">
-            <summary>
-              服務 <ChevronDown size={16} />
-            </summary>
-            <div className="service-drawer-panel">
-              {liffLinks.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link key={item.path} to={item.path}>
-                    <Icon size={18} />
-                    <span>
-                      <strong>{item.label}</strong>
-                      <small>{item.hint}</small>
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </details>
-        </div>
       </header>
+      <QuickSideMenu />
       <main className="main">
         <h1>{title}</h1>
         {children}

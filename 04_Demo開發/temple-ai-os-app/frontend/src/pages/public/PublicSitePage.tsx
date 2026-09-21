@@ -4,7 +4,6 @@ import {
   Bell,
   BookOpen,
   CalendarDays,
-  ChevronDown,
   ChevronRight,
   Clock,
   ExternalLink,
@@ -17,6 +16,7 @@ import {
   Sparkles
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { QuickSideMenu } from "../../components/QuickSideMenu";
 import { ADMIN_SITE_BASE_URL } from "../../lib/siteLinks";
 import { templePhotoGallery, visualAssets } from "../../lib/visualAssets";
 import { defaultTempleSettings, getTempleSettings, type TempleSettings } from "../../lib/templeSettings";
@@ -171,25 +171,6 @@ export function PublicSitePage() {
             )
           )}
         </nav>
-        <details className="public-service-menu">
-          <summary>
-            便民服務 <ChevronDown size={16} />
-          </summary>
-          <div className="public-menu-panel">
-            {quickAccessItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link key={item.to} to={item.to}>
-                  <Icon size={19} />
-                  <span>
-                    <strong>{item.title}</strong>
-                    <small>{item.body}</small>
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </details>
       </header>
 
       {/* Top Announcement Bar (Configurable in Admin) */}
@@ -207,19 +188,8 @@ export function PublicSitePage() {
         </aside>
       )}
 
-      {/* Floating Side Quick Navigation */}
-      <nav className="public-side-menu" aria-label="側邊快捷服務">
-        <span className="side-menu-label">快捷</span>
-        {quickAccessItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link key={item.to} to={item.to} aria-label={item.title}>
-              <Icon size={18} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Unified Quick Navigation (Desktop Dock + Mobile Drawer) */}
+      <QuickSideMenu />
 
       <main>
         {/* Flagship Hero Section: Clean Split, No Overlaps, No Avatars */}

@@ -12,6 +12,7 @@ import {
   UsersRound
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { QuickSideMenu } from "../../components/QuickSideMenu";
 import { visualAssets } from "../../lib/visualAssets";
 import "../../styles/public.css";
 
@@ -61,6 +62,7 @@ export function CommunityPage() {
           <Link to="/privacy">隱私權保護</Link>
         </nav>
       </header>
+      <QuickSideMenu />
 
       <main>
         <section className="community-hero community-ops-hero">

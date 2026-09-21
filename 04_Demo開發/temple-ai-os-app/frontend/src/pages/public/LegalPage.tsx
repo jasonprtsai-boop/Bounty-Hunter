@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
+import { QuickSideMenu } from "../../components/QuickSideMenu";
 import "../../styles/public.css";
 
 type LegalPageProps = {
@@ -81,6 +82,7 @@ export function LegalPage({ kind }: LegalPageProps) {
           <Link to={isPrivacy ? "/terms" : "/privacy"}>{isPrivacy ? "使用條款" : "隱私權"}</Link>
         </nav>
       </header>
+      <QuickSideMenu />
 
       <main className="legal-main">
         <section className="legal-hero">
