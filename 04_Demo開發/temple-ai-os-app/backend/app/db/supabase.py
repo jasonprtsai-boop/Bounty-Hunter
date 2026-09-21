@@ -48,6 +48,33 @@ def _phone_digits(value: str | None) -> str:
     return "".join(character for character in value or "" if character.isdigit())
 
 
+def _bounded_limit(limit: int | None) -> int | None:
+    if limit is None:
+        return None
+    return max(1, min(int(limit), 500))
+
+
+def _page_items(items: list[Any], limit: int | None, offset: int = 0) -> list[Any]:
+    start = max(0, int(offset or 0))
+    bounded_limit = _bounded_limit(limit)
+    if bounded_limit is None:
+        return items[start:]
+    return items[start : start + bounded_limit]
+
+
+def _apply_pagination_params(
+    params: dict[str, str],
+    limit: int | None,
+    offset: int = 0,
+) -> dict[str, str]:
+    bounded_limit = _bounded_limit(limit)
+    if bounded_limit is not None:
+        params["limit"] = str(bounded_limit)
+    if offset > 0:
+        params["offset"] = str(max(0, int(offset)))
+    return params
+
+
 def _validate_registration_window(open_at: str | None, close_at: str | None) -> None:
     if not open_at or not close_at:
         return
@@ -399,10 +426,36 @@ class LocalRepository:
         self.users.append(user)
         return user
 
-    def list_registrations(self, user_id: str | None = None) -> list[Registration]:
+    def list_registrations(
+        self,
+        user_id: str | None = None,
+        event_id: str | None = None,
+        event_ids: list[str] | None = None,
+        status: str | None = None,
+        created_from: str | None = None,
+        created_to: str | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[Registration]:
+        items = self.registrations
         if user_id:
-            return [item for item in self.registrations if item.user_id == user_id]
-        return self.registrations
+            items = [item for item in items if item.user_id == user_id]
+        if event_id:
+            items = [item for item in items if item.event_id == event_id]
+        elif event_ids is not None:
+            allowed_event_ids = set(event_ids)
+            items = [item for item in items if item.event_id in allowed_event_ids]
+        if status:
+            if status == "active":
+                items = [item for item in items if item.status != "cancelled"]
+            else:
+                items = [item for item in items if item.status == status]
+        if created_from:
+            items = [item for item in items if (item.created_at or "")[:10] >= created_from]
+        if created_to:
+            items = [item for item in items if (item.created_at or "")[:10] <= created_to]
+        items = sorted(items, key=lambda item: item.created_at or "", reverse=True)
+        return _page_items(items, limit, offset)
 
     def update_registration(self, registration_id: str, payload: RegistrationUpdate) -> Registration | None:
         registration = next((item for item in self.registrations if item.registration_id == registration_id), None)
@@ -506,8 +559,20 @@ class LocalRepository:
         self.tickets.append(ticket)
         return ticket
 
-    def list_support_tickets(self) -> list[SupportTicket]:
-        return self.tickets
+    def list_support_tickets(
+        self,
+        status: str | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[SupportTicket]:
+        items = self.tickets
+        if status:
+            if status == "active":
+                items = [item for item in items if item.status != "resolved"]
+            else:
+                items = [item for item in items if item.status == status]
+        items = sorted(items, key=lambda item: item.created_at, reverse=True)
+        return _page_items(items, limit, offset)
 
     def update_support_ticket(
         self, ticket_id: str, payload: SupportTicketUpdate
@@ -527,8 +592,23 @@ class LocalRepository:
         self.tickets = [item for item in self.tickets if item.ticket_id != ticket_id]
         return True
 
-    def list_notification_jobs(self) -> list[NotificationJob]:
-        return self.notification_jobs
+    def list_notification_jobs(
+        self,
+        status: str | None = None,
+        event_id: str | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[NotificationJob]:
+        items = self.notification_jobs
+        if status:
+            if status == "active":
+                items = [item for item in items if item.status != "sent"]
+            else:
+                items = [item for item in items if item.status == status]
+        if event_id:
+            items = [item for item in items if item.event_id == event_id]
+        items = sorted(items, key=lambda item: item.scheduled_at or item.job_id, reverse=True)
+        return _page_items(items, limit, offset)
 
     def get_notification_job(self, job_id: str) -> NotificationJob | None:
         return next((item for item in self.notification_jobs if item.job_id == job_id), None)
@@ -1019,10 +1099,39 @@ class SupabaseRepository:
         )
         return LineUser.model_validate(rows[0])
 
-    def list_registrations(self, user_id: str | None = None) -> list[Registration]:
+    def list_registrations(
+        self,
+        user_id: str | None = None,
+        event_id: str | None = None,
+        event_ids: list[str] | None = None,
+        status: str | None = None,
+        created_from: str | None = None,
+        created_to: str | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[Registration]:
         params = {"order": "created_at.desc"}
         if user_id:
             params["user_id"] = f"eq.{user_id}"
+        if event_id:
+            params["event_id"] = f"eq.{event_id}"
+        elif event_ids is not None:
+            if not event_ids:
+                return []
+            params["event_id"] = f"in.({','.join(event_ids)})"
+        if status:
+            params["status"] = "neq.cancelled" if status == "active" else f"eq.{status}"
+        created_filters: list[str] = []
+        if created_from:
+            created_filters.append(f"created_at.gte.{created_from}")
+        if created_to:
+            created_filters.append(f"created_at.lte.{created_to}")
+        if len(created_filters) == 1:
+            column, operator, value = created_filters[0].split(".", 2)
+            params[column] = f"{operator}.{value}"
+        elif created_filters:
+            params["and"] = f"({','.join(created_filters)})"
+        _apply_pagination_params(params, limit, offset)
         return [Registration.model_validate(row) for row in self._select("event_registrations", params)]
 
     def update_registration(self, registration_id: str, payload: RegistrationUpdate) -> Registration | None:
@@ -1110,8 +1219,17 @@ class SupabaseRepository:
         row = {key: value for key, value in row.items() if value is not None}
         return SupportTicket.model_validate(self._insert_returning("support_tickets", row))
 
-    def list_support_tickets(self) -> list[SupportTicket]:
-        rows = self._select("support_tickets", {"order": "created_at.desc"})
+    def list_support_tickets(
+        self,
+        status: str | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[SupportTicket]:
+        params = {"order": "created_at.desc"}
+        if status:
+            params["status"] = "neq.resolved" if status == "active" else f"eq.{status}"
+        _apply_pagination_params(params, limit, offset)
+        rows = self._select("support_tickets", params)
         return [SupportTicket.model_validate(row) for row in rows]
 
     def update_support_ticket(
@@ -1128,8 +1246,20 @@ class SupabaseRepository:
     def delete_support_ticket(self, ticket_id: str) -> bool:
         return self._delete_returning("support_tickets", "ticket_id", ticket_id)
 
-    def list_notification_jobs(self) -> list[NotificationJob]:
-        rows = self._select("notification_jobs", {"order": "created_at.desc"})
+    def list_notification_jobs(
+        self,
+        status: str | None = None,
+        event_id: str | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[NotificationJob]:
+        params = {"order": "created_at.desc"}
+        if status:
+            params["status"] = "neq.sent" if status == "active" else f"eq.{status}"
+        if event_id:
+            params["event_id"] = f"eq.{event_id}"
+        _apply_pagination_params(params, limit, offset)
+        rows = self._select("notification_jobs", params)
         return [NotificationJob.model_validate(row) for row in rows]
 
     def get_notification_job(self, job_id: str) -> NotificationJob | None:

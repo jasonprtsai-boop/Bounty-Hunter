@@ -21,6 +21,9 @@ build/
 logs/
 *.log
 *.tsbuildinfo
+.codex-finalizer/
+output/sites-publish-*/*.tar.gz
+**/dist/*.tar.gz
 
 # Local Sites deployment checkout
 **/frontend-admin-site/

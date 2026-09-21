@@ -689,6 +689,13 @@ def test_admin_registration_roster_and_status_controls() -> None:
     assert rows[0]["contact_name"] == "王小安"
     assert rows[0]["phone"] == "0912000999"
 
+    limited_roster = client.get(
+        f"/api/admin/registrations?event_id={event_id}&registration_status=active&limit=1&offset=0",
+        headers=ADMIN_HEADERS,
+    )
+    assert limited_roster.status_code == 200
+    assert [row["registration_id"] for row in limited_roster.json()["data"]] == [registration_id]
+
     checked_in = client.patch(
         f"/api/admin/registrations/{registration_id}",
         headers=ADMIN_HEADERS,
@@ -906,6 +913,13 @@ def test_support_ticket_admin_flow() -> None:
     assert update_response.status_code == 200
     assert update_response.json()["data"]["status"] == "resolved"
 
+    resolved_list = client.get(
+        "/api/admin/support-tickets?status=resolved&limit=500",
+        headers=ADMIN_HEADERS,
+    )
+    assert resolved_list.status_code == 200
+    assert any(ticket["ticket_id"] == ticket_id for ticket in resolved_list.json()["data"])
+
     delete_response = client.delete(
         f"/api/admin/support-tickets/{ticket_id}",
         headers=ADMIN_HEADERS,
@@ -1022,6 +1036,10 @@ def test_admin_notification_job_flow() -> None:
     )
     assert update_response.status_code == 200
     assert update_response.json()["data"]["status"] == "ready"
+
+    ready_jobs = client.get("/api/admin/notification-jobs?status=ready&limit=500", headers=ADMIN_HEADERS)
+    assert ready_jobs.status_code == 200
+    assert any(job["job_id"] == job_id for job in ready_jobs.json()["data"])
 
     send_response = client.post(
         f"/api/admin/notification-jobs/{job_id}/send-test",

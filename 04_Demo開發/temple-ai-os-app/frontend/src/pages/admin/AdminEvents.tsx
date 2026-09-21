@@ -3,7 +3,7 @@ import { Ban, CalendarCheck, CheckCircle, ClipboardList, FileSpreadsheet, Pencil
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
 import { StatePanel } from "../../components/StatePanel";
-import { apiFetch, type AdminRegistrationRecord, type AdminRegistrationSummary, type EventItem } from "../../lib/api";
+import { ADMIN_LIST_LIMIT, apiFetch, pathWithQuery, type AdminRegistrationRecord, type AdminRegistrationSummary, type EventItem } from "../../lib/api";
 import { canManageOperations, getStoredAdminRole } from "../../lib/adminPermissions";
 import { exportRowsToExcel } from "../../lib/excelExport";
 
@@ -178,8 +178,18 @@ export function AdminEvents() {
 
   useEffect(() => {
     loadEvents();
-    loadRegistrations();
   }, []);
+
+  useEffect(() => {
+    loadRegistrations();
+  }, [
+    registrationEventFilter,
+    registrationStatusFilter,
+    registrationDateFrom,
+    registrationDateTo,
+    registrationCreatedFrom,
+    registrationCreatedTo
+  ]);
 
   async function loadEvents() {
     setLoading(true);
@@ -197,7 +207,21 @@ export function AdminEvents() {
     setRegistrationsLoading(true);
     setRegistrationsError("");
     try {
-      setRegistrations(await apiFetch<AdminRegistrationRecord[]>("/api/admin/registrations", {}, true));
+      setRegistrations(
+        await apiFetch<AdminRegistrationRecord[]>(
+          pathWithQuery("/api/admin/registrations", {
+            limit: ADMIN_LIST_LIMIT,
+            event_id: registrationEventFilter === "all" ? undefined : registrationEventFilter,
+            registration_status: registrationStatusFilter === "all" ? undefined : registrationStatusFilter,
+            date_from: registrationDateFrom,
+            date_to: registrationDateTo,
+            created_from: registrationCreatedFrom,
+            created_to: registrationCreatedTo
+          }),
+          {},
+          true
+        )
+      );
     } catch (err) {
       setRegistrationsError(err instanceof Error ? err.message : "讀取報名名冊失敗");
     } finally {
@@ -348,6 +372,7 @@ export function AdminEvents() {
         current.map((item) => (item.registration_id === saved.registration_id ? saved : item))
       );
       await loadEvents();
+      await loadRegistrations();
       setMessage(`報名狀態已更新為「${registrationStatusLabel(saved.status)}」`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "報名狀態更新失敗");

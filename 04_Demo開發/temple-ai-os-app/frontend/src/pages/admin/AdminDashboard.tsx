@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
   Bell,
   Building2,
@@ -16,6 +15,10 @@ import { MetricCard } from "../../components/MetricCard";
 import { Shell } from "../../components/AdminShell";
 import { StatePanel } from "../../components/StatePanel";
 import { apiFetch, type DashboardSummary } from "../../lib/api";
+
+const AdminEventMetricsChart = lazy(() =>
+  import("./AdminEventMetricsChart").then((module) => ({ default: module.AdminEventMetricsChart }))
+);
 
 const labels: Record<string, string> = {
   line_friends: "LINE 好友",
@@ -159,16 +162,9 @@ export function AdminDashboard() {
                 <span>查看活動</span>
               </Link>
             </div>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={summary.event_metrics}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="title" tick={{ fontSize: 11 }} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="views" fill="#D3A23A" name="瀏覽" />
-                <Bar dataKey="registrations" fill="#B42318" name="報名" />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<div className="route-loading">圖表載入中</div>}>
+              <AdminEventMetricsChart data={summary.event_metrics} />
+            </Suspense>
           </section>
           <section className="two-column">
             <div className="tool-panel">

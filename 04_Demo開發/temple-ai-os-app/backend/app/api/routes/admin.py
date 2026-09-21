@@ -48,6 +48,8 @@ from app.services.rich_menu_service import RichMenuService
 auth_router = APIRouter()
 router = APIRouter(dependencies=[Depends(require_admin_token)])
 SAFE_DOCUMENT_ID = re.compile(r"^[A-Za-z0-9_\-\u4e00-\u9fff]+$")
+DEFAULT_ADMIN_LIST_LIMIT = 250
+MAX_ADMIN_LIST_LIMIT = 500
 
 
 def _require_owner(principal: AdminPrincipal) -> None:
@@ -85,8 +87,11 @@ def _document_id_from_title(title: str) -> str:
     return candidate[:80] or "admin_knowledge"
 
 
-def _admin_registration_record(registration: Registration) -> AdminRegistrationRecord:
-    event = get_repository().get_event(registration.event_id)
+def _admin_registration_record(
+    registration: Registration,
+    event_lookup: dict[str, Event],
+) -> AdminRegistrationRecord:
+    event = event_lookup.get(registration.event_id)
     return AdminRegistrationRecord(
         **registration.model_dump(),
         event_title=event.title if event else "活動資料已移除",
@@ -341,21 +346,34 @@ async def admin_list_registrations(
     date_to: str | None = Query(default=None),
     created_from: str | None = Query(default=None),
     created_to: str | None = Query(default=None),
+    limit: int = Query(default=DEFAULT_ADMIN_LIST_LIMIT, ge=1, le=MAX_ADMIN_LIST_LIMIT),
+    offset: int = Query(default=0, ge=0),
 ) -> ApiResponse[list[AdminRegistrationRecord]]:
-    registrations = get_repository().list_registrations()
-    if event_id:
-        registrations = [item for item in registrations if item.event_id == event_id]
-    if registration_status:
-        registrations = [item for item in registrations if item.status == registration_status]
-    records = [_admin_registration_record(item) for item in registrations]
-    if date_from:
-        records = [item for item in records if item.event_date >= date_from]
-    if date_to:
-        records = [item for item in records if item.event_date <= date_to]
-    if created_from:
-        records = [item for item in records if (item.created_at or "")[:10] >= created_from]
-    if created_to:
-        records = [item for item in records if (item.created_at or "")[:10] <= created_to]
+    repo = get_repository()
+    events = repo.list_events()
+    event_lookup = {event.event_id: event for event in events}
+    event_ids: list[str] | None = None
+    if date_from or date_to:
+        event_ids = [
+            event.event_id
+            for event in events
+            if (not date_from or event.date >= date_from)
+            and (not date_to or event.date <= date_to)
+        ]
+        if event_id and event_id not in set(event_ids):
+            return ApiResponse(data=[])
+
+    status_filter = registration_status if registration_status and registration_status != "all" else None
+    registrations = repo.list_registrations(
+        event_id=event_id,
+        event_ids=None if event_id else event_ids,
+        status=status_filter,
+        created_from=created_from,
+        created_to=created_to,
+        limit=limit,
+        offset=offset,
+    )
+    records = [_admin_registration_record(item, event_lookup) for item in registrations]
     if keyword:
         normalized_keyword = keyword.strip().lower()
         records = [
@@ -414,12 +432,24 @@ async def admin_update_registration(
         raise HTTPException(status_code=status_code, detail=detail) from exc
     if not registration:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="registration_not_found")
-    return ApiResponse(data=_admin_registration_record(registration))
+    event_lookup = {event.event_id: event for event in get_repository().list_events()}
+    return ApiResponse(data=_admin_registration_record(registration, event_lookup))
 
 
 @router.get("/support-tickets", response_model=ApiResponse[list[SupportTicket]])
-async def admin_support_tickets() -> ApiResponse[list[SupportTicket]]:
-    return ApiResponse(data=get_repository().list_support_tickets())
+async def admin_support_tickets(
+    ticket_status: str | None = Query(default=None, alias="status"),
+    limit: int = Query(default=DEFAULT_ADMIN_LIST_LIMIT, ge=1, le=MAX_ADMIN_LIST_LIMIT),
+    offset: int = Query(default=0, ge=0),
+) -> ApiResponse[list[SupportTicket]]:
+    status_filter = ticket_status if ticket_status and ticket_status != "all" else None
+    return ApiResponse(
+        data=get_repository().list_support_tickets(
+            status=status_filter,
+            limit=limit,
+            offset=offset,
+        )
+    )
 
 
 @router.patch("/support-tickets/{ticket_id}", response_model=ApiResponse[SupportTicket])
@@ -511,10 +541,22 @@ async def admin_delete_knowledge_document(
 
 @router.get("/notification-jobs", response_model=ApiResponse[list[NotificationJob]])
 async def admin_notification_jobs(
+    notification_status: str | None = Query(default=None, alias="status"),
+    event_id: str | None = Query(default=None),
+    limit: int = Query(default=DEFAULT_ADMIN_LIST_LIMIT, ge=1, le=MAX_ADMIN_LIST_LIMIT),
+    offset: int = Query(default=0, ge=0),
     principal: AdminPrincipal = Depends(require_admin_token),
 ) -> ApiResponse[list[NotificationJob]]:
     _require_operations_manager(principal)
-    return ApiResponse(data=get_repository().list_notification_jobs())
+    status_filter = notification_status if notification_status and notification_status != "all" else None
+    return ApiResponse(
+        data=get_repository().list_notification_jobs(
+            status=status_filter,
+            event_id=event_id,
+            limit=limit,
+            offset=offset,
+        )
+    )
 
 
 @router.post(

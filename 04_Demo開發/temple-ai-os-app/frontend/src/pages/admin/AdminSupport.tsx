@@ -3,7 +3,7 @@ import { CheckCircle2, Clock3, FileSpreadsheet, Headphones, Search, Trash2 } fro
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
 import { StatePanel } from "../../components/StatePanel";
-import { apiFetch } from "../../lib/api";
+import { ADMIN_LIST_LIMIT, apiFetch, pathWithQuery } from "../../lib/api";
 import { canDeleteSupportTickets, getStoredAdminRole } from "../../lib/adminPermissions";
 import { exportRowsToExcel } from "../../lib/excelExport";
 
@@ -57,13 +57,22 @@ export function AdminSupport() {
 
   useEffect(() => {
     loadTickets();
-  }, []);
+  }, [statusFilter]);
 
   async function loadTickets() {
     setLoading(true);
     setLoadError("");
     try {
-      setTickets(await apiFetch<Ticket[]>("/api/admin/support-tickets", {}, true));
+      setTickets(
+        await apiFetch<Ticket[]>(
+          pathWithQuery("/api/admin/support-tickets", {
+            limit: ADMIN_LIST_LIMIT,
+            status: statusFilter === "all" ? undefined : statusFilter
+          }),
+          {},
+          true
+        )
+      );
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : "讀取客服工單失敗");
     } finally {
@@ -81,6 +90,7 @@ export function AdminSupport() {
         true
       );
       setTickets((current) => current.map((item) => (item.ticket_id === ticketId ? ticket : item)));
+      await loadTickets();
       setMessage("已更新");
     } catch (err) {
       setError(err instanceof Error ? err.message : "更新失敗");

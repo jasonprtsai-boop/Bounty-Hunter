@@ -3,7 +3,7 @@ import { Bell, Clock3, FileSpreadsheet, Pencil, Plus, Save, Search, Send, Trash2
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { Shell } from "../../components/AdminShell";
 import { StatePanel } from "../../components/StatePanel";
-import { apiFetch } from "../../lib/api";
+import { ADMIN_LIST_LIMIT, apiFetch, pathWithQuery } from "../../lib/api";
 import { canManageOperations, getStoredAdminRole } from "../../lib/adminPermissions";
 import { exportRowsToExcel } from "../../lib/excelExport";
 
@@ -88,13 +88,22 @@ export function AdminNotifications() {
     } else {
       setLoading(false);
     }
-  }, [canManageNotifications]);
+  }, [canManageNotifications, statusFilter]);
 
   async function loadJobs() {
     setLoading(true);
     setLoadError("");
     try {
-      setJobs(await apiFetch<NotificationJob[]>("/api/admin/notification-jobs", {}, true));
+      setJobs(
+        await apiFetch<NotificationJob[]>(
+          pathWithQuery("/api/admin/notification-jobs", {
+            limit: ADMIN_LIST_LIMIT,
+            status: statusFilter === "all" ? undefined : statusFilter
+          }),
+          {},
+          true
+        )
+      );
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : "讀取推播任務失敗");
     } finally {
@@ -169,6 +178,7 @@ export function AdminNotifications() {
           : [...current, saved].sort((a, b) => a.job_id.localeCompare(b.job_id));
       });
       editJob(saved);
+      await loadJobs();
       setMessage("已儲存");
     } catch (err) {
       setError(err instanceof Error ? err.message : "儲存失敗");

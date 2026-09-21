@@ -7,6 +7,7 @@ const useSameOriginApi =
 
 const API_BASE_URL =
   useSameOriginApi ? "" : import.meta.env.VITE_API_BASE_URL || (isLocalHost ? LOCAL_API_BASE_URL : DEPLOYED_API_BASE_URL);
+export const ADMIN_LIST_LIMIT = 250;
 
 export type ApiResponse<T> = {
   data: T | null;
@@ -158,6 +159,20 @@ export type AdminAccount = {
   updated_at?: string | null;
   last_login_at?: string | null;
 };
+
+export function pathWithQuery(
+  path: string,
+  params: Record<string, string | number | boolean | null | undefined>
+) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      query.set(key, String(value));
+    }
+  });
+  const queryString = query.toString();
+  return queryString ? `${path}?${queryString}` : path;
+}
 
 function errorMessageFromPayload(payload: unknown, fallback: string) {
   if (!payload || typeof payload !== "object") {
