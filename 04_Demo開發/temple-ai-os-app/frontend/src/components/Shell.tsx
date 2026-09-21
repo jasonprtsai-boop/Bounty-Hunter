@@ -19,7 +19,7 @@ type NavItem = {
 const liffLinks: NavItem[] = [
   { path: "/", icon: Home, label: "首頁", hint: "官網", bottom: true },
   { path: "/events", icon: CalendarDays, label: "活動", hint: "報名", bottom: true },
-  { path: "/tour/main-hall", icon: Map, label: "導覽", hint: "現場" },
+  { path: "/tour/main-hall", icon: Map, label: "導覽", hint: "現場", bottom: true },
   { path: "/fortune", icon: ScrollText, label: "抽籤", hint: "文化", bottom: true },
   { path: "/jiao", icon: Sparkles, label: "擲筊", hint: "問事", bottom: true },
   { path: "/support", icon: Headphones, label: "客服", hint: "提問", bottom: true }
